@@ -1,4 +1,4 @@
-package dev.wycor.pirates;
+package dev.wycor.pirates.game;
 
 import java.util.Random;
 

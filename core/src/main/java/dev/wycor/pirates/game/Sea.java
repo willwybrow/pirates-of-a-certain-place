@@ -1,10 +1,9 @@
-package dev.wycor.pirates;
+package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 
 import java.util.*;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Sea {
