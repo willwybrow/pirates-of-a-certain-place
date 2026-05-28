@@ -39,15 +39,10 @@ jobs:
     - name: Build for web
       run: ./gradlew html:dist
 
-  upload-gh-pages:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./html/build/dist
+    - name: Upload web artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./html/build/dist
 
   # Deployment job
   deploy-gh-pages:
@@ -55,7 +50,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: upload-gh-pages
+    needs: build
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
