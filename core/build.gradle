@@ -1,9 +1,26 @@
+plugins {
+  id 'java'
+}
+
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 eclipse.project.name = appName + '-core'
+
+java.sourceCompatibility = JavaVersion.VERSION_11
+java.targetCompatibility = JavaVersion.VERSION_11
+
+java.toolchain {
+  languageVersion = JavaLanguageVersion.of(11)
+}
 
 dependencies {
   api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
+
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
+  testImplementation 'org.assertj:assertj-core:3.27.7'
+
+  testImplementation platform('org.junit:junit-bom:5.14.4')
+  testImplementation 'org.junit.platform:junit-platform-launcher:1.14.4'
 
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
@@ -12,4 +29,8 @@ dependencies {
 
 jar {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+test {
+  useJUnitPlatform()
 }

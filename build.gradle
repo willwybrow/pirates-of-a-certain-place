@@ -5,11 +5,19 @@ buildscript {
     mavenLocal()
     google()
     maven { url = 'https://central.sonatype.com/repository/maven-snapshots/' }
+    // maven { url = 'https://jitpack.io' }
   }
   dependencies {
 
-
   }
+}
+plugins {
+  id 'java'
+}
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
 }
 
 allprojects {
@@ -27,7 +35,6 @@ allprojects {
 
 configure(subprojects) {
   apply plugin: 'java-library'
-  java.sourceCompatibility = 11
 
   // From https://lyze.dev/2021/04/29/libGDX-Internal-Assets-List/
   // The article can be helpful when using assets.txt in your project.
@@ -57,6 +64,11 @@ configure(subprojects) {
 subprojects {
   version = "$projectVersion"
   ext.appName = 'CertainPlace'
+  java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+  }
+
   repositories {
     mavenCentral()
     // You may want to remove the following line if you have errors downloading dependencies.
@@ -64,6 +76,7 @@ subprojects {
     maven { url = 'https://central.sonatype.com/repository/maven-snapshots/' }
     maven { url = 'https://jitpack.io' }
   }
+
 }
 
 eclipse.project.name = 'CertainPlace' + '-parent'
