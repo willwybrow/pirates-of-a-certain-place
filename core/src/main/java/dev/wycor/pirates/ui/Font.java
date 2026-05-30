@@ -9,8 +9,8 @@ import java.util.HashMap;
 import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
 
 public class Font {
-    private static final int HEIGHT = 9;
-    private static final int WIDTH = 9;
+
+    private final float size;
     private static final char[] KEYS = {
         '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.',        '/',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -25,9 +25,13 @@ public class Font {
     Texture space;
     private final HashMap<Character, TextureRegion> codePage = new HashMap<>();
 
+    public Font(float size) {
+        this.size = size;
+    }
+
     public void create() {
         fontSheet = new Texture("font/Cursive_transparent_sheet.png");
-        space = createSolidTexture(WIDTH, HEIGHT, 1f, 1f, 1f, 0f);
+        space = createSolidTexture(1f, 1f, 1f, 0f);
         TextureRegion[][] textureRegions = TextureRegion.split(fontSheet, 9, 9);
         for (int i = 0; i < KEYS.length; i++) {
            codePage.put(KEYS[i], textureRegions[0][i]);
@@ -39,7 +43,7 @@ public class Font {
         var letters = words.toCharArray();
 
         for (int i = 0; i < letters.length; i++) {
-            batch.draw(codePage.get(letters[i]), x + i * WIDTH, y);
+            batch.draw(codePage.get(letters[i]), x + ((float)i) * size, y, size, size);
         }
     }
 }

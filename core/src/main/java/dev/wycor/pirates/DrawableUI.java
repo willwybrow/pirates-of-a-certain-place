@@ -11,14 +11,25 @@ import dev.wycor.pirates.ui.Font;
 import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
 
 public class DrawableUI {
-    private static final float GRID_SQUARE = 9f;
+    private final float gridSquare;
 
     private Texture uiPanelBackgroundTexture;
 
-    private Font cursive = new Font();
+    private final Font cursive;
 
     private Viewport uiViewport;
     private SpriteBatch uiBatch;
+
+    private final float width;
+    private final float height;
+
+    public DrawableUI(float width, float height) {
+        this.width = width;
+        this.height = height;
+
+        this.gridSquare = width / 100f;
+        this.cursive = new Font(gridSquare);
+    }
 
     public void create() {
 
@@ -26,7 +37,7 @@ public class DrawableUI {
 
         cursive.create();
 
-        uiViewport = new FitViewport(320f, 200f);
+        uiViewport = new FitViewport(width, height);
         uiBatch = new SpriteBatch();
 
     }
@@ -39,8 +50,8 @@ public class DrawableUI {
         uiBatch.setProjectionMatrix(uiViewport.getCamera().combined);
 
         uiBatch.begin();
-        uiBatch.draw(uiPanelBackgroundTexture, 10 * GRID_SQUARE, 0, 3 * GRID_SQUARE, 10 * GRID_SQUARE);
-        cursive.write(uiBatch, 11 * GRID_SQUARE, 1 * GRID_SQUARE, " Pirates! @ ^_^");
+        uiBatch.draw(uiPanelBackgroundTexture, 75 * gridSquare, 0, 25 * gridSquare, 100 * gridSquare);
+        cursive.write(uiBatch, 80 * gridSquare, 50 * gridSquare, " Pirates! @ ^_^");
         uiBatch.end();
     }
 

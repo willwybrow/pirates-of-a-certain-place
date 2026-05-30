@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -19,15 +20,15 @@ import dev.wycor.pirates.geometry.Hex;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    private static final int SCREEN_WIDTH = 320;
-    private static final int SCREEN_HEIGHT = 200;
-    private static final float HEX_WIDTH = 16f;
-    private static final float HEX_HEIGHT = 16f;
+    private static final float SCREEN_WIDTH = 1.6f;
+    private static final float SCREEN_HEIGHT = 1.0f;
+    private static final float HEX_WIDTH = 0.08f;
+    private static final float HEX_HEIGHT = 0.08f;
 
     private SpriteBatch batch;
     private Viewport viewport;
 
-    private final DrawableUI ui = new DrawableUI();
+    private final DrawableUI ui = new DrawableUI(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     private Texture seaHexture;
     private Texture krakenTexture;
@@ -39,8 +40,8 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         viewport = new FitViewport((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
-//        viewport = new ScreenViewport();
-//        viewport.setUnitsPerPixel(1/(((float)Gdx.graphics.getWidth())/((float)SCREEN_WIDTH)));
+        viewport.getCamera().position.set(0f, 0f, 0f);
+
         batch = new SpriteBatch();
 
         ui.create();
@@ -55,20 +56,28 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
+        float dt = Gdx.graphics.getDeltaTime();
         ScreenUtils.clear(0.08f, 0.25f, 0.3625f, 1f);
 
         input();
 
-        draw(batch);
+        repointCamera(dt);
+
+        draw(dt);
         drawUi();
     }
 
-    private void draw(SpriteBatch batch) {
+    private void repointCamera(float dt) {
+        Vector3 cameraTarget = new Vector3(boundingBoxX(sea.currentPosition()) + 3 * HEX_WIDTH, boundingBoxY(sea.currentPosition()), 0f);
+        viewport.getCamera().position.lerp(cameraTarget, 1.0f - (float)Math.exp(-5.0f * dt));
+    }
+
+    private void draw(float dt) {
         viewport.apply(); // Locks OpenGL to your game coordinates
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
         batch.begin();
-        sea.walkTheSpiral((int)Math.max(SCREEN_HEIGHT, SCREEN_WIDTH)).forEach(exploredHex -> {
+        sea.walkTheSpiral(13).forEach(exploredHex -> {
             batch.draw(seaHexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
             SeaTile whatsHere = sea.whatsAt(exploredHex);
             if (!whatsHere.isExplored()) {
