@@ -6,13 +6,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import dev.wycor.pirates.ui.Font;
 
 import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
 
 public class DrawableUI {
-    private static final float GRID_SQUARE = 1f;
+    private static final float GRID_SQUARE = 9f;
 
     private Texture uiPanelBackgroundTexture;
+
+    private Font cursive = new Font();
 
     private Viewport uiViewport;
     private SpriteBatch uiBatch;
@@ -21,7 +24,9 @@ public class DrawableUI {
 
         uiPanelBackgroundTexture = createSolidTexture(0f, 0f, 0f, 1f);
 
-        uiViewport = new FitViewport(16f, 10f);
+        cursive.create();
+
+        uiViewport = new FitViewport(320f, 200f);
         uiBatch = new SpriteBatch();
 
     }
@@ -35,6 +40,7 @@ public class DrawableUI {
 
         uiBatch.begin();
         uiBatch.draw(uiPanelBackgroundTexture, 10 * GRID_SQUARE, 0, 3 * GRID_SQUARE, 10 * GRID_SQUARE);
+        cursive.write(uiBatch, 11 * GRID_SQUARE, 1 * GRID_SQUARE, " Pirates! @ ^_^");
         uiBatch.end();
     }
 

@@ -10,6 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.Sea;
 import dev.wycor.pirates.game.SeaTile;
 import dev.wycor.pirates.geometry.Direction;
@@ -17,26 +19,28 @@ import dev.wycor.pirates.geometry.Hex;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    private static final float SCREEN_WIDTH = 16f;
-    private static final float SCREEN_HEIGHT = 10f;
-    private static final float HEX_WIDTH = 1f;
-    private static final float HEX_HEIGHT = 1f;
+    private static final int SCREEN_WIDTH = 320;
+    private static final int SCREEN_HEIGHT = 200;
+    private static final float HEX_WIDTH = 16f;
+    private static final float HEX_HEIGHT = 16f;
 
     private SpriteBatch batch;
-    private FitViewport viewport;
+    private Viewport viewport;
 
-    private DrawableUI ui = new DrawableUI();
+    private final DrawableUI ui = new DrawableUI();
 
     private Texture seaHexture;
     private Texture krakenTexture;
     private Texture islandTexture;
     private Texture fogOfWarTexture;
     private Texture shipTexture;
-    private Sea sea = new Sea();
+    private final Sea sea = new Sea();
 
     @Override
     public void create() {
-        viewport = new FitViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
+        viewport = new FitViewport((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
+//        viewport = new ScreenViewport();
+//        viewport.setUnitsPerPixel(1/(((float)Gdx.graphics.getWidth())/((float)SCREEN_WIDTH)));
         batch = new SpriteBatch();
 
         ui.create();
@@ -142,10 +146,10 @@ public class Main extends ApplicationAdapter {
     }
 
     public float boundingBoxX(Hex hex) {
-        return (SCREEN_WIDTH /2f - HEX_WIDTH) + hex.q() + 1/2f * hex.r();
+        return (hex.q() + 1/2f * hex.r()) * HEX_WIDTH;
     }
 
     public float boundingBoxY(Hex hex) {
-        return ((SCREEN_HEIGHT /2f - HEX_HEIGHT)) + 3/4f * -hex.r();
+        return (3/4f * -hex.r()) * HEX_HEIGHT;
     }
 }

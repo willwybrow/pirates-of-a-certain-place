@@ -5,7 +5,11 @@ import com.badlogic.gdx.graphics.Texture;
 
 public class DynamicDrawing {
     public static Texture createSolidTexture(float red, float green, float blue, float alpha) {
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        return createSolidTexture(1, 1, red, green, blue, alpha);
+    }
+
+    public static Texture createSolidTexture(int width, int height, float red, float green, float blue, float alpha) {
+        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
         pixmap.setColor(red, green, blue, alpha);
         pixmap.fill();
         Texture texture = new Texture(pixmap);
