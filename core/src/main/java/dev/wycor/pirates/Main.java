@@ -11,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.Sea;
 import dev.wycor.pirates.game.SeaTile;
@@ -20,15 +19,16 @@ import dev.wycor.pirates.geometry.Hex;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
+    public static final float SIXTEEN_PIXELS = 0.08f;
     private static final float SCREEN_WIDTH = 1.6f;
     private static final float SCREEN_HEIGHT = 1.0f;
-    private static final float HEX_WIDTH = 0.08f;
-    private static final float HEX_HEIGHT = 0.08f;
+    private static final float HEX_WIDTH = SIXTEEN_PIXELS;
+    private static final float HEX_HEIGHT = SIXTEEN_PIXELS;
 
     private SpriteBatch batch;
     private Viewport viewport;
 
-    private final DrawableUI ui = new DrawableUI(SCREEN_WIDTH, SCREEN_HEIGHT);
+    private final DrawableUI ui = new DrawableUI(SCREEN_WIDTH, SCREEN_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
 
     private Texture seaHexture;
     private Texture krakenTexture;
@@ -44,14 +44,13 @@ public class Main extends ApplicationAdapter {
 
         batch = new SpriteBatch();
 
-        ui.create();
+        ui.create(sea);
 
         seaHexture = new Texture("sea_hex_16.png");
         krakenTexture = new Texture("sea_monster_kraken_16.png");
         islandTexture = new Texture("desert_island_16.png");
         fogOfWarTexture = new Texture("unexplored_hex_16.png");
         shipTexture = new Texture("basic_ship.png");
-
     }
 
     @Override
@@ -101,17 +100,6 @@ public class Main extends ApplicationAdapter {
         ui.draw();
     }
 
-    private TextButton createControlButton(String text, Runnable action, Skin skin) {
-        TextButton button = new TextButton(text, skin);
-        button.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                action.run();
-            }
-        });
-        return button;
-    }
-
     private void input() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             sea.go(Direction.NORTHEAST);
@@ -139,7 +127,7 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, true); // true centers the camera
+        viewport.update(width, height, false); // true centers the camera
         ui.resize(width, height);
     }
 
