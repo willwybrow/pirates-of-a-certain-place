@@ -32,7 +32,6 @@ public class Cursive {
     private final HashMap<Character, TextureRegion> codePage = new HashMap<>();
 
     public Cursive() {
-        float displayWidth = Main.SIXTEEN_PIXELS / 16f * 8f;
     }
 
     public void create() {
@@ -49,7 +48,7 @@ public class Cursive {
         var letters = words.toCharArray();
 
         for (int i = 0; i < letters.length; i++) {
-            batch.draw(codePage.get(letters[i]), x + ((float)i) * EIGHT_PIXELS, y, EIGHT_PIXELS, NINE_PIXELS);
+            batch.draw(codePage.get(letters[i]), x + ((float)i) * EIGHT_PIXELS / 2f, y, EIGHT_PIXELS / 2f, NINE_PIXELS / 2f);
         }
     }
 }

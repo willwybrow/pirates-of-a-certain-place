@@ -6,9 +6,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -20,6 +17,7 @@ import dev.wycor.pirates.geometry.Hex;
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
     public static final float SIXTEEN_PIXELS = 0.08f;
+    public static final float THIRTY_TWO_PIXELS = 0.16f;
     private static final float SCREEN_WIDTH = 1.6f;
     private static final float SCREEN_HEIGHT = 1.0f;
     private static final float HEX_WIDTH = SIXTEEN_PIXELS;
@@ -39,7 +37,7 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void create() {
-        viewport = new FitViewport((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
+        viewport = new FitViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
         viewport.getCamera().position.set(0f, 0f, 0f);
 
         batch = new SpriteBatch();
