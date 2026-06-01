@@ -23,6 +23,10 @@ public class SeaTile {
         return completed ? SeaEvent.EMPTY : this.seaEvent;
     }
 
+    public SeaEvent completedEvent() {
+        return completed ? this.seaEvent : SeaEvent.EMPTY;
+    }
+
     public boolean isCompleted() {
         return completed;
     }

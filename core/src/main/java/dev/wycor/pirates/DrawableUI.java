@@ -71,7 +71,7 @@ public class DrawableUI {
 
         // the seven movement buttons
 
-        var topMiddleX = 84 * gridSquare;
+        var topMiddleX = 78 * gridSquare;
         var topMiddleY = 50 * gridSquare;
 
         this.directionButtons = List.of(
@@ -95,7 +95,7 @@ public class DrawableUI {
         uiBatch.setProjectionMatrix(uiViewport.getCamera().combined);
 
         uiBatch.begin();
-        uiBatch.draw(uiPanelBackgroundTexture, 75 * gridSquare, 0, 25 * gridSquare, 100 * gridSquare);
+        uiBatch.draw(uiPanelBackgroundTexture, 65 * gridSquare, 0, 35 * gridSquare, 100 * gridSquare);
         cursive.write(uiBatch, 80 * gridSquare, screenHeight - 2 * gridSquare, " Pirates! @ ^_^");
 
         directionButtons.forEach(db -> db.draw(uiBatch));

@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.Sea;
+import dev.wycor.pirates.game.SeaEvent;
 import dev.wycor.pirates.game.SeaTile;
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
@@ -20,8 +21,8 @@ public class Main extends ApplicationAdapter {
     public static final float THIRTY_TWO_PIXELS = 0.16f;
     private static final float SCREEN_WIDTH = 1.6f;
     private static final float SCREEN_HEIGHT = 1.0f;
-    private static final float HEX_WIDTH = SIXTEEN_PIXELS;
-    private static final float HEX_HEIGHT = SIXTEEN_PIXELS;
+    private static final float HEX_WIDTH = THIRTY_TWO_PIXELS;
+    private static final float HEX_HEIGHT = THIRTY_TWO_PIXELS;
 
     private SpriteBatch batch;
     private Viewport viewport;
@@ -30,7 +31,10 @@ public class Main extends ApplicationAdapter {
 
     private Texture seaHexture;
     private Texture krakenTexture;
+    private Texture squidTexture;
+    private Texture ghostTexture;
     private Texture islandTexture;
+    private Texture stockedIslandTexture;
     private Texture fogOfWarTexture;
     private Texture shipTexture;
     private final Sea sea = new Sea();
@@ -44,11 +48,14 @@ public class Main extends ApplicationAdapter {
 
         ui.create(sea);
 
-        seaHexture = new Texture("sea_hex_16.png");
-        krakenTexture = new Texture("sea_monster_kraken_16.png");
-        islandTexture = new Texture("desert_island_16.png");
-        fogOfWarTexture = new Texture("unexplored_hex_16.png");
-        shipTexture = new Texture("basic_ship.png");
+        seaHexture = new Texture("sea_hex_32.png");
+        krakenTexture = new Texture("seaweed_monster_1x_32.png");
+        ghostTexture = new Texture("ghost_ship_1x_32.png");
+        squidTexture = new Texture("giant_squid_1x_32.png");
+        islandTexture = new Texture("island_empty_1x_32.png");
+        stockedIslandTexture = new Texture("island_stocked_1x_32.png");
+        fogOfWarTexture = new Texture("unexplored_hex_32.png");
+        shipTexture = new Texture("hero_ship_1x_32.png");
     }
 
     @Override
@@ -79,14 +86,24 @@ public class Main extends ApplicationAdapter {
             SeaTile whatsHere = sea.whatsAt(exploredHex);
             if (!whatsHere.isExplored()) {
                 batch.draw(fogOfWarTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
-            } else {
+            } else if (!whatsHere.isCompleted()) {
                 switch (whatsHere.pendingEvent()) {
                     case ISLAND:
-                        batch.draw(islandTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
+                        batch.draw(stockedIslandTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
                         break;
                     case KRAKEN:
                         batch.draw(krakenTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
                         break;
+                    case SQUID:
+                        batch.draw(squidTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
+                        break;
+                    case GHOST:
+                        batch.draw(ghostTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
+                        break;
+                }
+            } else {
+                if (whatsHere.completedEvent() == SeaEvent.ISLAND) {
+                    batch.draw(islandTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
                 }
             }
         });
