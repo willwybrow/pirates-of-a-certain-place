@@ -36,6 +36,10 @@ public class Hex {
         );
     }
 
+    public Hex neighbour(Direction direction) {
+        return direction.move(this);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

@@ -24,6 +24,8 @@ public class Main extends ApplicationAdapter {
     private static final float SCREEN_HEIGHT = 1.0f;
     private static final float HEX_WIDTH = THIRTY_TWO_PIXELS;
     private static final float HEX_HEIGHT = THIRTY_TWO_PIXELS;
+    private static final float MAP_UNIT_WIDTH = SIXTEEN_PIXELS;
+    private static final float MAP_UNIT_HEIGHT = SIXTEEN_PIXELS;
 
     private SpriteBatch batch;
     private Viewport viewport;
@@ -56,15 +58,13 @@ public class Main extends ApplicationAdapter {
         islandTexture = new Texture("island_empty_1x_32.png");
         stockedIslandTexture = new Texture("island_stocked_1x_32.png");
         fogOfWarTexture = new Texture("unexplored_hex_32.png");
-        shipTexture = new Texture("heroic_pirate_ship_16.png");
+        shipTexture = new Texture("hero_ship_1x_32.png");
     }
 
     @Override
     public void render() {
         float dt = Gdx.graphics.getDeltaTime();
         ScreenUtils.clear(0.08f, 0.25f, 0.3625f, 1f);
-
-        input();
 
         repointCamera(dt);
 
@@ -73,7 +73,7 @@ public class Main extends ApplicationAdapter {
     }
 
     private void repointCamera(float dt) {
-        Vector3 cameraTarget = new Vector3(boundingBoxX(sea.currentPosition()) + 3 * HEX_WIDTH, boundingBoxY(sea.currentPosition()), 0f);
+        Vector3 cameraTarget = centreOfHex(sea.currentPosition().neighbour(Direction.EAST).neighbour(Direction.EAST));
         viewport.getCamera().position.lerp(cameraTarget, 1.0f - (float)Math.exp(-5.0f * dt));
     }
 
@@ -83,69 +83,37 @@ public class Main extends ApplicationAdapter {
 
         batch.begin();
         sea.walkTheSpiral(13).forEach(exploredHex -> {
-            // batch.draw(seaHexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
             drawAtHex(seaHexture, exploredHex);
             SeaTile whatsHere = sea.whatsAt(exploredHex);
             if (!whatsHere.isExplored()) {
-                // batch.draw(fogOfWarTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
                 drawAtHex(fogOfWarTexture, exploredHex);
             } else if (!whatsHere.isCompleted()) {
                 switch (whatsHere.pendingEvent()) {
                     case ISLAND:
-                        // batch.draw(stockedIslandTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
                         drawAtHex(stockedIslandTexture, exploredHex);
                         break;
                     case KRAKEN:
-                        // batch.draw(krakenTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
                         drawAtHex(krakenTexture, exploredHex);
                         break;
                     case SQUID:
-                        // batch.draw(squidTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
                         drawAtHex(squidTexture, exploredHex);
                         break;
                     case GHOST:
-                        // batch.draw(ghostTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
                         drawAtHex(ghostTexture, exploredHex);
                         break;
                 }
             } else {
                 if (whatsHere.completedEvent() == SeaEvent.ISLAND) {
-                    // batch.draw(islandTexture, boundingBoxX(exploredHex), boundingBoxY(exploredHex), HEX_WIDTH, HEX_HEIGHT);
                     drawAtHex(islandTexture, exploredHex);
                 }
             }
         });
-        // batch.draw(shipTexture, boundingBoxX(sea.currentPosition()), boundingBoxY(sea.currentPosition()), HEX_WIDTH, HEX_HEIGHT);
         drawAtHex(shipTexture, sea.currentPosition());
         batch.end();
     }
 
     private void drawUi() {
         ui.draw();
-    }
-
-    private void input() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-            sea.go(Direction.NORTHEAST);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.D)) {
-            sea.go(Direction.EAST);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.X)) {
-            sea.go(Direction.SOUTHEAST);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
-            sea.go(Direction.SOUTHWEST);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
-            sea.go(Direction.WEST);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.W)) {
-            sea.go(Direction.NORTHWEST);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.S)) {
-            sea.whatsAt(sea.currentPosition()).complete();
-        }
     }
 
 
@@ -174,15 +142,22 @@ public class Main extends ApplicationAdapter {
         return (3/4f * -hex.r()) * HEX_HEIGHT;
     }
 
+    private Vector3 centreOfHex(Hex position) {
+        return new Vector3(
+            ((position.q() + 1/2f * position.r()) * HEX_WIDTH) + (HEX_WIDTH / 2),
+            ((3/4f * -position.r()) * HEX_HEIGHT) + (HEX_HEIGHT / 2),
+            0f
+        );
+    }
+
     private void drawAtHex(Texture texture, Hex drawAt) {
         float width = texture.getWidth() * FLOATS_PER_PIXEL;
         float height = texture.getHeight() * FLOATS_PER_PIXEL;
 
-        float centreX = ((drawAt.q() + 1/2f * drawAt.r()) * HEX_WIDTH) + (HEX_WIDTH / 2);
-        float centreY = ((3/4f * -drawAt.r()) * HEX_HEIGHT) + (HEX_HEIGHT / 2);
+        Vector3 hexCentre = centreOfHex(drawAt);
 
-        float bottomX = centreX - (width / 2f);
-        float bottomY = centreY - (height / 2f);
+        float bottomX = hexCentre.x - (width / 2f);
+        float bottomY = hexCentre.y - (height / 2f);
 
         batch.draw(texture, bottomX, bottomY, width, height);
     }

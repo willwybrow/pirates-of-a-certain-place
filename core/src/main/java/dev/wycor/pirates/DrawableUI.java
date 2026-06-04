@@ -157,6 +157,29 @@ public class DrawableUI {
 
         @Override
         public boolean keyUp(int keycode) {
+            switch(keycode) {
+                case Input.Keys.E:
+                    sea.go(Direction.NORTHEAST);
+                    return true;
+                case Input.Keys.D:
+                    sea.go(Direction.EAST);
+                    return true;
+                case Input.Keys.X:
+                    sea.go(Direction.SOUTHEAST);
+                    return true;
+                case Input.Keys.Z:
+                    sea.go(Direction.SOUTHWEST);
+                    return true;
+                case Input.Keys.A:
+                    sea.go(Direction.WEST);
+                    return true;
+                case Input.Keys.W:
+                    sea.go(Direction.NORTHWEST);
+                    return true;
+                case Input.Keys.S:
+                    sea.whatsAt(sea.currentPosition()).complete();
+                    return true;
+            }
             return false;
         }
 
