@@ -4,6 +4,7 @@ import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 
 import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Stream;
 
 public class Sea {
@@ -11,6 +12,7 @@ public class Sea {
     private Hex position;
 
     private final Map<Hex, SeaTile> generatedHexagons = new HashMap<>(500);
+    private final ArrayDeque<String> log = new ArrayDeque<>();
 
     public Sea() {
         this.position = Hex.ORIGIN;
@@ -38,11 +40,13 @@ public class Sea {
     }
 
     public void go(Direction direction) {
+        log.addFirst("Travelled " + direction);
         goToAndExplore(direction.move(this.position));
     }
 
     public void goToAndExplore(Hex destination) {
-        whatsAt(destination).explore();
+        SeaEvent whatsHere = whatsAt(destination).explore();
+        log.addFirst("Encountered " + whatsHere + "!");
         this.position = destination;
         destination.neighbours().stream().map(this::whatsAt).forEach(SeaTile::explore);
     }
@@ -62,5 +66,9 @@ public class Sea {
         }
 
         return hexes.stream();
+    }
+
+    public List<String> recentLog() {
+        return new ArrayList<>(this.log);
     }
 }

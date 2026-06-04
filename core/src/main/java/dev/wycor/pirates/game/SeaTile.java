@@ -20,11 +20,11 @@ public class SeaTile {
     }
 
     public SeaEvent pendingEvent() {
-        return completed ? SeaEvent.EMPTY : this.seaEvent;
+        return completed ? SeaEvent.NOTHING : this.seaEvent;
     }
 
     public SeaEvent completedEvent() {
-        return completed ? this.seaEvent : SeaEvent.EMPTY;
+        return completed ? this.seaEvent : SeaEvent.NOTHING;
     }
 
     public boolean isCompleted() {
@@ -36,7 +36,7 @@ public class SeaTile {
     }
 
     public static SeaTile startingSquare() {
-        return new SeaTile(SeaEvent.EMPTY, true);
+        return new SeaTile(SeaEvent.NOTHING, true);
     }
 
     public static SeaTile generate() {

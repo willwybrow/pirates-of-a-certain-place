@@ -20,6 +20,8 @@ import java.util.function.Consumer;
 import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
 
 public class DrawableUI {
+    private final float worldWidth;
+    private final float worldHeight;
     private final float gridSquare;
     private final float unitWidth;
     private final float unitHeight;
@@ -38,23 +40,21 @@ public class DrawableUI {
     private Viewport uiViewport;
     private SpriteBatch uiBatch;
 
-    private final float screenWidth;
-    private final float screenHeight;
     private List<DirectionButton> directionButtons;
-    private Sea sea;
+    private final Sea sea;
 
-    public DrawableUI(float screenWidth, float screenHeight, float unitWidth, float unitHeight) {
-        this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
+    public DrawableUI(Sea sea, float worldWidth, float worldHeight, float unitWidth, float unitHeight) {
+        this.sea = sea;
+        this.worldWidth = worldWidth;
+        this.worldHeight = worldHeight;
 
-        this.gridSquare = screenWidth / 100f;
+        this.gridSquare = worldWidth / 100f;
         this.unitWidth = unitWidth;
         this.unitHeight = unitHeight;
         this.cursive = new Cursive();
     }
 
-    public void create(Sea forSea) {
-        this.sea = forSea;
+    public void create() {
         uiPanelBackgroundTexture = createSolidTexture(0f, 0f, 0f, 1f);
         button = new Texture("button_up_16.png");
         arrowNorthEast = new Texture("arrow_upright_16.png");
@@ -66,22 +66,25 @@ public class DrawableUI {
 
         cursive.create();
 
-        uiViewport = new FitViewport(screenWidth, screenHeight);
+        uiViewport = new FitViewport(worldWidth, worldHeight);
         uiBatch = new SpriteBatch();
 
         // the seven movement buttons
 
-        var topMiddleX = 78 * gridSquare;
-        var topMiddleY = 50 * gridSquare;
+        float uiCentreX = worldWidth / 2f;
+        float uiCentreY = worldHeight / 2f;
+
+        float verticalSpacing = 0.85f;
+        float horizontalSpacing = 0.53f;
 
         this.directionButtons = List.of(
-            new DirectionButton(button, arrowNorthWest, topMiddleX - 0.67f * unitWidth, topMiddleY - unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.NORTHWEST)),
-            new DirectionButton(button, arrowNorthEast, topMiddleX + 0.67f * unitWidth, topMiddleY - unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.NORTHEAST)),
-            new DirectionButton(button, arrowWest, topMiddleX - 1.2f * unitWidth, topMiddleY - 2 * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.WEST)),
-            new DirectionButton(button, button, topMiddleX, topMiddleY - 2 * unitHeight, unitWidth, unitHeight, sea -> sea.whatsAt(sea.currentPosition()).complete()), // TODO -- middle button??
-            new DirectionButton(button, arrowEast, topMiddleX + 1.2f * unitWidth, topMiddleY - 2  * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.EAST)),
-            new DirectionButton(button, arrowSouthWest, topMiddleX - 0.67f * unitWidth, topMiddleY - 3 * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.SOUTHWEST)),
-            new DirectionButton(button, arrowSouthEast, topMiddleX + 0.67f * unitWidth, topMiddleY - 3 * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.SOUTHEAST))
+            new DirectionButton(button, arrowNorthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.NORTHWEST)),
+            new DirectionButton(button, arrowNorthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.NORTHEAST)),
+            new DirectionButton(button, arrowWest, uiCentreX - 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.go(Direction.WEST)),
+            /* new DirectionButton(button, button, uiCentreX, uiCentreY - 2 * unitHeight, unitWidth, unitHeight, sea -> sea.whatsAt(sea.currentPosition()).complete()), // TODO -- middle button?? */
+            new DirectionButton(button, arrowEast, uiCentreX + 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.go(Direction.EAST)),
+            new DirectionButton(button, arrowSouthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.SOUTHWEST)),
+            new DirectionButton(button, arrowSouthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.SOUTHEAST))
         );
 
         Gdx.input.setInputProcessor(new InputHandler());
@@ -95,8 +98,8 @@ public class DrawableUI {
         uiBatch.setProjectionMatrix(uiViewport.getCamera().combined);
 
         uiBatch.begin();
-        uiBatch.draw(uiPanelBackgroundTexture, 65 * gridSquare, 0, 35 * gridSquare, 100 * gridSquare);
-        cursive.write(uiBatch, 80 * gridSquare, screenHeight - 2 * gridSquare, " Pirates! @ ^_^");
+        uiBatch.draw(uiPanelBackgroundTexture, 0f, 0f, worldWidth, worldHeight);
+        cursive.write(uiBatch, 4 * gridSquare, worldHeight - 3 * gridSquare, " Pirates! @ ^_^");
 
         directionButtons.forEach(db -> db.draw(uiBatch));
 
@@ -104,39 +107,42 @@ public class DrawableUI {
     }
 
     public void resize(int width, int height) {
-        uiViewport.update(width, height, true);
+        int leftWidth = Math.round(width * (2f / 3f));
+        int rightWidth = width - leftWidth;
+
+        uiViewport.update(rightWidth, height, true);
+        uiViewport.setScreenBounds(leftWidth, 0, rightWidth, height);
     }
 
     public void dispose() {
         uiPanelBackgroundTexture.dispose();
+        button.dispose();
+        arrowNorthEast.dispose();
+        arrowEast.dispose();
+        arrowSouthEast.dispose();
+        arrowNorthWest.dispose();
+        arrowWest.dispose();
+        arrowSouthWest.dispose();
         uiBatch.dispose();
     }
 
     static class DirectionButton {
         private final Texture button;
         private final Texture arrow;
-        private final float worldX;
-        private final float worldY;
-        private final float widthInWorld;
-        private final float heightInWorld;
         private final Consumer<Sea> action;
         private final Rectangle rectangle;
 
         DirectionButton(Texture button, Texture arrow, float worldX, float worldY, float widthInWorld, float heightInWorld, Consumer<Sea> action) {
             this.button = button;
             this.arrow = arrow;
-            this.worldX = worldX;
-            this.worldY = worldY;
-            this.widthInWorld = widthInWorld;
-            this.heightInWorld = heightInWorld;
             this.action = action;
 
-            this.rectangle = new Rectangle(worldX, worldY, widthInWorld, heightInWorld);
+            this.rectangle = new Rectangle(worldX - widthInWorld / 2f, worldY + heightInWorld / 2f, widthInWorld, heightInWorld);
         }
 
         void draw(SpriteBatch batch) {
-            batch.draw(button, worldX, worldY, widthInWorld, heightInWorld);
-            batch.draw(arrow, worldX, worldY, widthInWorld, heightInWorld);
+            batch.draw(button, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+            batch.draw(arrow, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         }
 
         boolean pointInside(Vector2 screenPoint) {

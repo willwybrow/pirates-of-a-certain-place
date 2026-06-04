@@ -3,7 +3,7 @@ package dev.wycor.pirates.game;
 import java.util.Random;
 
 public enum SeaEvent {
-    EMPTY,
+    NOTHING,
     ISLAND,
     KRAKEN,
     SQUID,
@@ -23,6 +23,6 @@ public enum SeaEvent {
         if (random < 25) {
             return GHOST;
         }
-        return EMPTY;
+        return NOTHING;
     }
 }
