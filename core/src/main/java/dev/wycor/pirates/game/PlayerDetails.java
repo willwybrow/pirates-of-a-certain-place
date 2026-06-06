@@ -31,4 +31,8 @@ public class PlayerDetails extends Combatant {
     public void heal(int amount) {
         this.health = Math.min(INITIAL_HEALTH, this.health + amount);
     }
+
+    public int maxHealth() {
+        return INITIAL_HEALTH;
+    }
 }

@@ -9,6 +9,9 @@ import dev.wycor.pirates.game.Sea;
 import dev.wycor.pirates.game.SeaEvent;
 import dev.wycor.pirates.game.SeaTile;
 import dev.wycor.pirates.geometry.Hex;
+import dev.wycor.pirates.ui.Cursive;
+
+import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
 
 public class DrawableWorld {
     private static final float FLOATS_PER_PIXEL = 0.005f;
@@ -30,6 +33,8 @@ public class DrawableWorld {
     private Texture stockedIslandTexture;
     private Texture fogOfWarTexture;
     private Texture shipTexture;
+    private Texture gameOverOverlayTexture;
+    private Cursive cursive;
 
     public DrawableWorld(Sea sea, float worldWidth, float worldHeight, float hexWidth, float hexHeight) {
         this.sea = sea;
@@ -51,6 +56,9 @@ public class DrawableWorld {
         stockedIslandTexture = new Texture("island_stocked_1x_32.png");
         fogOfWarTexture = new Texture("unexplored_hex_32.png");
         shipTexture = new Texture("hero_ship_1x_32.png");
+        gameOverOverlayTexture = createSolidTexture(0.5f, 0.5f, 0.5f, 0.5f);
+        cursive = new Cursive();
+        cursive.create();
 
         viewport.getCamera().position.set(centreOfHex(cameraFocusHex()));
         viewport.getCamera().update();
@@ -90,6 +98,20 @@ public class DrawableWorld {
             }
         });
         drawAtHex(shipTexture, sea.playerPosition());
+
+        if (sea.isGameOver()) {
+            Vector3 cameraPosition = viewport.getCamera().position;
+            float overlayX = cameraPosition.x - worldWidth / 2f;
+            float overlayY = cameraPosition.y - worldHeight / 2f;
+            batch.draw(gameOverOverlayTexture, overlayX, overlayY, worldWidth, worldHeight);
+
+            String gameOverLabel = "GAME OVER";
+            float letterWidth = Main.SIXTEEN_PIXELS / 4f;
+            float textX = cameraPosition.x - (gameOverLabel.length() * letterWidth) / 2f;
+            float textY = cameraPosition.y;
+            cursive.write(batch, textX, textY, gameOverLabel);
+        }
+
         batch.end();
     }
 
@@ -112,6 +134,7 @@ public class DrawableWorld {
         stockedIslandTexture.dispose();
         fogOfWarTexture.dispose();
         shipTexture.dispose();
+        gameOverOverlayTexture.dispose();
     }
 
     private void repointCamera(float dt) {

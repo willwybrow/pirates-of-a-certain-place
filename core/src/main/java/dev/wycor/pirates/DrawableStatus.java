@@ -1,6 +1,7 @@
 package dev.wycor.pirates;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -50,9 +51,14 @@ public class DrawableStatus {
         batch.begin();
         batch.draw(backgroundTexture, 0f, 0f, worldWidth, worldHeight);
 
-        String[] logLines = sea.recentLog().toArray(new String[]{});
+        batch.setColor(0.95f, 0.2f, 0.2f, 1f);
+        cursive.write(batch, 0f, worldHeight - LINE_HEIGHT, "Health: " + sea.playerHealth() + "/" + sea.playerMaxHealth());
+        batch.setColor(Color.WHITE);
 
-        for (int i = 0; i < Math.min(logLines.length, numberOfLines); i++) {
+        String[] logLines = sea.recentLog().toArray(new String[]{});
+        int visibleLogLines = Math.max(0, numberOfLines - 1);
+
+        for (int i = 0; i < Math.min(logLines.length, visibleLogLines); i++) {
             cursive.write(batch, 0f, LINE_HEIGHT * i, logLines[i]);
         }
 

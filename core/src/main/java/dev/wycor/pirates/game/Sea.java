@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 public class Sea {
     private static final int MAX_LOG_LINES = 60;
 
-    final PlayerDetails playerDetails;
+    private PlayerDetails playerDetails;
     private final TileFactory tileFactory;
 
     private Hex headingTo; // null when still
@@ -25,14 +25,23 @@ public class Sea {
 
     public Sea(TileFactory tileFactory) {
         this.tileFactory = Objects.requireNonNull(tileFactory, "tileFactory");
-        this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
-        this.playerDetails = new PlayerDetails(Hex.ORIGIN);
-        revealAround(Hex.ORIGIN);
-        addLog("Set sail from home waters.");
+        startNewGame();
     }
 
     public Hex playerPosition() {
         return this.playerDetails.position();
+    }
+
+    public int playerHealth() {
+        return this.playerDetails.health();
+    }
+
+    public int playerMaxHealth() {
+        return this.playerDetails.maxHealth();
+    }
+
+    public boolean isGameOver() {
+        return this.playerDetails.isDead();
     }
 
     public Optional<Hex> getPlayerDestination() {
@@ -57,6 +66,11 @@ public class Sea {
         5. once combat is null or over, rewards are granted
         6. the player's position is set to the new tile and the intended movement is wiped
          */
+
+        if (isGameOver()) {
+            clearActionRequests();
+            return this;
+        }
 
         Optional<Hex> destination = getPlayerDestination();
         if (destination.isEmpty()) {
@@ -85,6 +99,13 @@ public class Sea {
 
             combatInProgress.resolveRound().forEach(this::addAttackLog);
 
+            if (isGameOver()) {
+                headingTo = null;
+                addGameOverLog();
+                clearActionRequests();
+                return this;
+            }
+
             if (combatInProgress.inProgress()) {
                 clearActionRequests();
                 return this;
@@ -111,6 +132,10 @@ public class Sea {
     }
 
     public void attemptToTravel(Direction direction) {
+        if (isGameOver()) {
+            return;
+        }
+
         if (getPlayerDestination().isEmpty()) {
             Hex headingFrom = playerDetails.position();
             this.headingTo = direction.move(headingFrom);
@@ -123,13 +148,33 @@ public class Sea {
     }
 
     public void attemptToAttack() {
+        if (isGameOver()) {
+            return;
+        }
+
         this.attackRequested = true;
         getGameState();
     }
 
     public void attemptToFlee() {
+        if (isGameOver()) {
+            return;
+        }
+
         this.fleeRequested = true;
         getGameState();
+    }
+
+    public void startNewGame() {
+        this.generatedHexagons.clear();
+        this.log.clear();
+        this.headingTo = null;
+        clearActionRequests();
+
+        this.playerDetails = new PlayerDetails(Hex.ORIGIN);
+        this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
+        revealAround(Hex.ORIGIN);
+        addLog("Set sail from home waters.");
     }
 
     public Set<Hex> explored() {
@@ -172,6 +217,12 @@ public class Sea {
         log.addFirst(line);
         while (log.size() > MAX_LOG_LINES) {
             log.removeLast();
+        }
+    }
+
+    private void addGameOverLog() {
+        if (log.isEmpty() || !"GAME OVER.".equals(log.peekFirst())) {
+            addLog("GAME OVER.");
         }
     }
 }

@@ -50,6 +50,7 @@ public class DrawableUI {
 
     private List<DirectionButton> directionButtons;
     private List<ActionButton> combatButtons;
+    private List<ActionButton> gameOverButtons;
     private final Sea sea;
 
     public DrawableUI(Sea sea, float worldWidth, float worldHeight, float unitWidth, float unitHeight) {
@@ -106,6 +107,11 @@ public class DrawableUI {
                 ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Flee", Sea::attemptToFlee)
         );
 
+        this.gameOverButtons = List.of(
+            new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, worldHeight * 0.45f,
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "New Game", Sea::startNewGame)
+        );
+
         Gdx.input.setInputProcessor(new InputHandler());
     }
 
@@ -120,7 +126,9 @@ public class DrawableUI {
         uiBatch.draw(uiPanelBackgroundTexture, 0f, 0f, worldWidth, worldHeight);
         cursive.write(uiBatch, 4 * gridSquare, worldHeight - 3 * gridSquare, " Pirates! @ ^_^");
 
-        if (sea.hasActiveCombat()) {
+        if (sea.isGameOver()) {
+            gameOverButtons.forEach(button -> button.draw(uiBatch, cursive));
+        } else if (sea.hasActiveCombat()) {
             cursive.write(uiBatch, 4 * gridSquare, worldHeight - 8 * gridSquare, "COMBAT!");
             combatButtons.forEach(button -> button.draw(uiBatch, cursive));
         } else {
@@ -232,6 +240,17 @@ public class DrawableUI {
 
         @Override
         public boolean keyUp(int keycode) {
+            if (sea.isGameOver()) {
+                switch (keycode) {
+                    case Input.Keys.ENTER:
+                    case Input.Keys.N:
+                        sea.startNewGame();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
             if (sea.hasActiveCombat()) {
                 switch (keycode) {
                     case Input.Keys.SPACE:
@@ -275,6 +294,17 @@ public class DrawableUI {
 
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+            if (button == Input.Buttons.LEFT && sea.isGameOver()) {
+                Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
+                boolean anyPressed = false;
+                for (ActionButton gameOverButton : gameOverButtons) {
+                    boolean inside = gameOverButton.pointInside(clickPoint);
+                    gameOverButton.setPressed(inside);
+                    anyPressed = anyPressed || inside;
+                }
+                return anyPressed;
+            }
+
             if (button == Input.Buttons.LEFT && sea.hasActiveCombat()) {
                 Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
                 boolean anyPressed = false;
@@ -285,6 +315,7 @@ public class DrawableUI {
                 }
                 return anyPressed;
             }
+
             return false;
         }
 
@@ -292,6 +323,19 @@ public class DrawableUI {
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             if (button == Input.Buttons.LEFT) {
                 Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
+
+                if (sea.isGameOver()) {
+                    boolean acted = gameOverButtons.stream()
+                        .filter(b -> b.pointInside(clickPoint))
+                        .findFirst()
+                        .map(b -> {
+                            b.actOn(sea);
+                            return true;
+                        })
+                        .orElse(false);
+                    gameOverButtons.forEach(b -> b.setPressed(false));
+                    return acted;
+                }
 
                 if (sea.hasActiveCombat()) {
                     boolean acted = combatButtons.stream()

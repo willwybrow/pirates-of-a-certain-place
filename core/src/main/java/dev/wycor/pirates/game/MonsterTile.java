@@ -40,7 +40,7 @@ public class MonsterTile extends SeaTile {
 
     @Override
     protected PlayerDetails completionRewards(PlayerDetails playerDetails) {
-        playerDetails.heal(2);
+        // playerDetails.heal(2);
         return playerDetails;
     }
 
