@@ -59,13 +59,13 @@ public class DrawableStatus {
         batch.end();
     }
 
-    public void resize(int width, int height) {
-        int leftWidth = Math.round(width * (2f / 3f));
-        int topHeight = Math.round(height * (2f / 3f));
-        int bottomHeight = height - topHeight;
+    public void resize(int screenX, int screenY, int screenWidth, int screenHeight) {
+        int leftWidth = Math.round(screenWidth * (2f / 3f));
+        int topHeight = Math.round(screenHeight * (2f / 3f));
+        int bottomHeight = screenHeight - topHeight;
 
         viewport.update(leftWidth, bottomHeight, true);
-        viewport.setScreenBounds(0, 0, leftWidth, bottomHeight);
+        viewport.setScreenBounds(screenX, screenY, leftWidth, bottomHeight);
     }
 
     public void dispose() {

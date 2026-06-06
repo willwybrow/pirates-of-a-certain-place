@@ -26,13 +26,13 @@ class SeaCombatFleeTest {
         sea.attemptToTravel(Direction.EAST);
         sea.attemptToAttack();
 
-        int healthAfterCombatRound = sea.playerHealth();
+        int healthAfterCombatRound = sea.playerDetails.health;
         assertThat(healthAfterCombatRound).isLessThan(20);
 
         sea.attemptToFlee();
 
         assertThat(sea.playerPosition()).isEqualTo(start);
-        assertThat(sea.playerHealth()).isEqualTo(healthAfterCombatRound);
+        assertThat(sea.playerDetails.health).isEqualTo(healthAfterCombatRound);
     }
 
     @Test

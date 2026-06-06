@@ -35,16 +35,12 @@ public class Sea {
         return this.playerDetails.position();
     }
 
-    public int playerHealth() {
-        return this.playerDetails.health();
-    }
-
-    public Optional<Hex> getDestination() {
+    public Optional<Hex> getPlayerDestination() {
         return Optional.ofNullable(headingTo).filter(playerPosition().neighbours()::contains);
     }
 
     public boolean hasActiveCombat() {
-        return getDestination()
+        return getPlayerDestination()
             .map(destination -> {
                 Combat combat = whatsAt(destination).getCombatEvent(playerDetails);
                 return combat != null && combat.inProgress();
@@ -62,7 +58,7 @@ public class Sea {
         6. the player's position is set to the new tile and the intended movement is wiped
          */
 
-        Optional<Hex> destination = getDestination();
+        Optional<Hex> destination = getPlayerDestination();
         if (destination.isEmpty()) {
             clearActionRequests();
             return this;
@@ -104,7 +100,6 @@ public class Sea {
 
         playerDetails.moveTo(destinationHex);
         headingTo = null;
-        revealAround(destinationHex);
         addLog("Arrived at " + destinationHex + ".");
 
         clearActionRequests();
@@ -116,7 +111,7 @@ public class Sea {
     }
 
     public void attemptToTravel(Direction direction) {
-        if (getDestination().isEmpty()) {
+        if (getPlayerDestination().isEmpty()) {
             Hex headingFrom = playerDetails.position();
             this.headingTo = direction.move(headingFrom);
 
@@ -142,7 +137,7 @@ public class Sea {
     }
 
     public Stream<Hex> walkTheSpiral(int layers) {
-        Hex start = getDestination().orElseGet(this::playerPosition);
+        Hex start = getPlayerDestination().orElseGet(this::playerPosition);
         HashSet<Hex> hexes = new HashSet<>();
         var n = Math.abs(layers);
 

@@ -101,9 +101,9 @@ public class DrawableUI {
         float combatButtonsY = worldHeight * 0.45f;
         this.combatButtons = List.of(
             new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY + ACTION_BUTTON_HEIGHT * 1.2f,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "ATTACK", Sea::attemptToAttack),
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Attack", Sea::attemptToAttack),
             new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY - ACTION_BUTTON_HEIGHT * 1.2f,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "FLEE", Sea::attemptToFlee)
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Flee", Sea::attemptToFlee)
         );
 
         Gdx.input.setInputProcessor(new InputHandler());
@@ -130,12 +130,12 @@ public class DrawableUI {
         uiBatch.end();
     }
 
-    public void resize(int width, int height) {
-        int leftWidth = Math.round(width * (2f / 3f));
-        int rightWidth = width - leftWidth;
+    public void resize(int screenX, int screenY, int screenWidth, int screenHeight) {
+        int leftWidth = Math.round(screenWidth * (2f / 3f));
+        int rightWidth = screenWidth - leftWidth;
 
-        uiViewport.update(rightWidth, height, true);
-        uiViewport.setScreenBounds(leftWidth, 0, rightWidth, height);
+        uiViewport.update(rightWidth, screenHeight, true);
+        uiViewport.setScreenBounds(screenX + leftWidth, screenY, rightWidth, screenHeight);
     }
 
     public void dispose() {

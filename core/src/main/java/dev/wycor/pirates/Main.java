@@ -17,6 +17,7 @@ public class Main extends ApplicationAdapter {
     private static final float BOTTOM_LEFT_HEIGHT = SCREEN_HEIGHT - TOP_LEFT_HEIGHT;
     private static final float HEX_WIDTH = THIRTY_TWO_PIXELS;
     private static final float HEX_HEIGHT = THIRTY_TWO_PIXELS;
+    private static final float TARGET_ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT;
 
     private final Sea sea = new Sea();
     private final DrawableWorld world = new DrawableWorld(sea, LEFT_WIDTH, TOP_LEFT_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
@@ -43,9 +44,20 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        world.resize(width, height);
-        status.resize(width, height);
-        ui.resize(width, height);
+        int fittedWidth = width;
+        int fittedHeight = Math.round(width / TARGET_ASPECT);
+
+        if (fittedHeight > height) {
+            fittedHeight = height;
+            fittedWidth = Math.round(height * TARGET_ASPECT);
+        }
+
+        int fittedX = (width - fittedWidth) / 2;
+        int fittedY = (height - fittedHeight) / 2;
+
+        world.resize(fittedX, fittedY, fittedWidth, fittedHeight);
+        status.resize(fittedX, fittedY, fittedWidth, fittedHeight);
+        ui.resize(fittedX, fittedY, fittedWidth, fittedHeight);
     }
 
     @Override

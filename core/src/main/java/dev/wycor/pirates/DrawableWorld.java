@@ -52,7 +52,7 @@ public class DrawableWorld {
         fogOfWarTexture = new Texture("unexplored_hex_32.png");
         shipTexture = new Texture("hero_ship_1x_32.png");
 
-        viewport.getCamera().position.set(centreOfHex(sea.playerPosition()));
+        viewport.getCamera().position.set(centreOfHex(cameraFocusHex()));
         viewport.getCamera().update();
     }
 
@@ -93,13 +93,13 @@ public class DrawableWorld {
         batch.end();
     }
 
-    public void resize(int width, int height) {
-        int leftWidth = Math.round(width * (2f / 3f));
-        int topHeight = Math.round(height * (2f / 3f));
-        int topY = height - topHeight;
+    public void resize(int screenX, int screenY, int screenWidth, int screenHeight) {
+        int leftWidth = Math.round(screenWidth * (2f / 3f));
+        int topHeight = Math.round(screenHeight * (2f / 3f));
+        int topY = screenY + (screenHeight - topHeight);
 
         viewport.update(leftWidth, topHeight, false);
-        viewport.setScreenBounds(0, topY, leftWidth, topHeight);
+        viewport.setScreenBounds(screenX, topY, leftWidth, topHeight);
     }
 
     public void dispose() {
@@ -115,8 +115,12 @@ public class DrawableWorld {
     }
 
     private void repointCamera(float dt) {
-        Vector3 cameraTarget = centreOfHex(sea.playerPosition());
+        Vector3 cameraTarget = centreOfHex(cameraFocusHex());
         viewport.getCamera().position.lerp(cameraTarget, 1.0f - (float) Math.exp(-5.0f * dt));
+    }
+
+    private Hex cameraFocusHex() {
+        return sea.getPlayerDestination().orElseGet(sea::playerPosition);
     }
 
     private Vector3 centreOfHex(Hex position) {
