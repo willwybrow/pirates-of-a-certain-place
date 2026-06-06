@@ -57,7 +57,14 @@ public abstract class SeaTile {
         return this.combatEvent(playerDetails);
     }
 
+    public final void onPlayerFled() {
+        this.handlePlayerFled();
+    }
+
     protected abstract Combat combatEvent(PlayerDetails playerDetails);
 
     protected abstract PlayerDetails completionRewards(PlayerDetails playerDetails);
+
+    protected void handlePlayerFled() {
+    }
 }

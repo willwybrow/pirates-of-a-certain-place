@@ -9,7 +9,8 @@ import java.util.stream.Stream;
 public class Sea {
     private static final int MAX_LOG_LINES = 60;
 
-    private final PlayerDetails playerDetails;
+    final PlayerDetails playerDetails;
+    private final TileFactory tileFactory;
 
     private Hex headingTo; // null when still
     private boolean attackRequested;
@@ -19,6 +20,11 @@ public class Sea {
     private final ArrayDeque<String> log = new ArrayDeque<>();
 
     public Sea() {
+        this(new TileFactory());
+    }
+
+    public Sea(TileFactory tileFactory) {
+        this.tileFactory = Objects.requireNonNull(tileFactory, "tileFactory");
         this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
         this.playerDetails = new PlayerDetails(Hex.ORIGIN);
         revealAround(Hex.ORIGIN);
@@ -27,6 +33,10 @@ public class Sea {
 
     public Hex playerPosition() {
         return this.playerDetails.position();
+    }
+
+    public int playerHealth() {
+        return this.playerDetails.health();
     }
 
     public Optional<Hex> getDestination() {
@@ -65,21 +75,26 @@ public class Sea {
 
         if (combatInProgress != null && combatInProgress.inProgress()) {
             if (fleeRequested) {
+                destinationTile.onPlayerFled();
                 headingTo = null;
                 addLog("You broke off and stayed at " + playerPosition() + ".");
                 clearActionRequests();
                 return this;
             }
 
-            if (attackRequested) {
-                combatInProgress.resolveRound().forEach(this::addAttackLog);
-                if (combatInProgress.isOver()) {
-                    addLog("Combat ended at " + destinationHex + ".");
-                }
+            if (!attackRequested) {
+                clearActionRequests();
+                return this;
             }
 
-            clearActionRequests();
-            return this;
+            combatInProgress.resolveRound().forEach(this::addAttackLog);
+
+            if (combatInProgress.inProgress()) {
+                clearActionRequests();
+                return this;
+            }
+
+            addLog("Combat ended at " + destinationHex + ".");
         }
 
         if (!destinationTile.isPlayerRewarded()) {
@@ -97,7 +112,7 @@ public class Sea {
     }
 
     public SeaTile whatsAt(Hex location) {
-        return generatedHexagons.computeIfAbsent(location, hex -> SeaTile.random());
+        return generatedHexagons.computeIfAbsent(location, tileFactory::create);
     }
 
     public void attemptToTravel(Direction direction) {
