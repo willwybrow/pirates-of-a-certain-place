@@ -1,7 +1,10 @@
 package dev.wycor.pirates.game;
 
 public class IslandTile extends SeaTile {
-    private int suppliesAvailable = 10;
+    private static final int FOOD_AVAILABLE = 10;
+    private static final int HEALTH_AVAILABLE = 10;
+
+    private boolean suppliesAvailable = true;
 
     IslandTile() {
         super(SeaEvent.ISLAND, true); // always show islands
@@ -13,21 +16,21 @@ public class IslandTile extends SeaTile {
 
     @Override
     public boolean isCompleted() {
-        return this.suppliesAvailable == 0;
+        return !this.suppliesAvailable;
     }
 
     @Override
-    protected Combat combatEvent(PlayerDetails playerDetails) {
+    protected Combat combatEvent(Player player) {
         return null;
     }
 
     @Override
-    protected PlayerDetails completionRewards(PlayerDetails playerDetails) {
-        if (suppliesAvailable > 0) {
-            playerDetails.addFood(suppliesAvailable);
-            suppliesAvailable = 0;
+    protected void completionRewards(Player player) {
+        if (suppliesAvailable) {
+            player.addFood(FOOD_AVAILABLE);
+            player.heal(HEALTH_AVAILABLE);
+            suppliesAvailable = false;
         }
-        return playerDetails;
     }
 
 }

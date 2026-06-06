@@ -29,8 +29,8 @@ public abstract class SeaTile {
         return this;
     }
 
-    public final boolean combatComplete(PlayerDetails playerDetails) {
-        return Optional.ofNullable(this.getCombatEvent(playerDetails)).map(Combat::isOver).orElse(true);
+    public final boolean combatComplete(Player player) {
+        return Optional.ofNullable(this.getCombatEvent(player)).map(Combat::isOver).orElse(true);
     }
 
     public SeaEvent pendingEvent() {
@@ -47,23 +47,22 @@ public abstract class SeaTile {
         return rewarded;
     }
 
-    public final PlayerDetails applyRewards(PlayerDetails playerDetails) {
-        PlayerDetails rewardedPlayer = this.completionRewards(playerDetails);
+    public final void applyRewards(Player player) {
+        this.completionRewards(player);
         this.rewarded = true;
-        return rewardedPlayer;
     }
 
-    public final Combat getCombatEvent(PlayerDetails playerDetails) {
-        return this.combatEvent(playerDetails);
+    public final Combat getCombatEvent(Player player) {
+        return this.combatEvent(player);
     }
 
     public final void onPlayerFled() {
         this.handlePlayerFled();
     }
 
-    protected abstract Combat combatEvent(PlayerDetails playerDetails);
+    protected abstract Combat combatEvent(Player player);
 
-    protected abstract PlayerDetails completionRewards(PlayerDetails playerDetails);
+    protected abstract void completionRewards(Player player);
 
     protected void handlePlayerFled() {
     }

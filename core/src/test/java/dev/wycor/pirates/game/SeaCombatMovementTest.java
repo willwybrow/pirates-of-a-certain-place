@@ -25,11 +25,11 @@ class SeaCombatMovementTest {
         });
 
         sea.attemptToTravel(direction);
-        assertThat(sea.playerPosition()).isEqualTo(start);
+        assertThat(sea.playerDetails().position()).isEqualTo(start);
 
         sea.attemptToAttack();
 
-        assertThat(sea.playerPosition())
+        assertThat(sea.playerDetails().position())
             .as("player should enter destination as soon as killing blow ends combat")
             .isEqualTo(destination);
     }

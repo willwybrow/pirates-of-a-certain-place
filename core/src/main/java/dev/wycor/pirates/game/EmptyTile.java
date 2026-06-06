@@ -18,12 +18,11 @@ public class EmptyTile extends SeaTile {
     }
 
     @Override
-    protected Combat combatEvent(PlayerDetails playerDetails) {
+    protected Combat combatEvent(Player player) {
         return null;
     }
 
     @Override
-    protected PlayerDetails completionRewards(PlayerDetails playerDetails) {
-        return playerDetails;
+    protected void completionRewards(Player player) {
     }
 }

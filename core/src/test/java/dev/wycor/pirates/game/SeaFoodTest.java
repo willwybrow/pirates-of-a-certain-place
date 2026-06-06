@@ -12,7 +12,7 @@ class SeaFoodTest {
     void playerStartsWithTwentyFood() {
         Sea sea = new Sea();
 
-        assertThat(sea.playerFood()).isEqualTo(20);
+        assertThat(sea.playerDetails().food()).isEqualTo(20);
     }
 
     @Test
@@ -26,8 +26,8 @@ class SeaFoodTest {
 
         sea.attemptToTravel(Direction.EAST);
 
-        assertThat(sea.playerFood()).isEqualTo(19);
-        assertThat(sea.playerHealth()).isEqualTo(20);
+        assertThat(sea.playerDetails().food()).isEqualTo(19);
+        assertThat(sea.playerDetails().health()).isEqualTo(20);
     }
 
     @Test
@@ -43,13 +43,13 @@ class SeaFoodTest {
             sea.attemptToTravel(i % 2 == 0 ? Direction.EAST : Direction.WEST);
         }
 
-        assertThat(sea.playerFood()).isEqualTo(0);
-        assertThat(sea.playerHealth()).isEqualTo(20);
+        assertThat(sea.playerDetails().food()).isEqualTo(0);
+        assertThat(sea.playerDetails().health()).isEqualTo(20);
 
         sea.attemptToTravel(Direction.EAST);
 
-        assertThat(sea.playerFood()).isEqualTo(0);
-        assertThat(sea.playerHealth()).isEqualTo(15);
+        assertThat(sea.playerDetails().food()).isEqualTo(0);
+        assertThat(sea.playerDetails().health()).isEqualTo(15);
     }
 
     @Test
@@ -68,6 +68,6 @@ class SeaFoodTest {
 
         sea.attemptToTravel(Direction.EAST);
 
-        assertThat(sea.playerFood()).isEqualTo(29);
+        assertThat(sea.playerDetails().food()).isEqualTo(29);
     }
 }

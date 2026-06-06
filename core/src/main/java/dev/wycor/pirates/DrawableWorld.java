@@ -97,7 +97,7 @@ public class DrawableWorld {
                 drawAtHex(islandTexture, exploredHex);
             }
         });
-        drawAtHex(shipTexture, sea.playerPosition());
+        drawAtHex(shipTexture, sea.playerDetails().position());
 
         if (sea.isGameOver()) {
             Vector3 cameraPosition = viewport.getCamera().position;
@@ -143,7 +143,7 @@ public class DrawableWorld {
     }
 
     private Hex cameraFocusHex() {
-        return sea.getPlayerDestination().orElseGet(sea::playerPosition);
+        return sea.getPlayerDestination().orElseGet(() -> sea.playerDetails().position());
     }
 
     private Vector3 centreOfHex(Hex position) {

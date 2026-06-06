@@ -31,17 +31,15 @@ public class MonsterTile extends SeaTile {
     }
 
     @Override
-    protected Combat combatEvent(PlayerDetails playerDetails) {
+    protected Combat combatEvent(Player player) {
         if (fightWithPlayer == null) {
-            fightWithPlayer = new Combat(playerDetails, monsterHere);
+            fightWithPlayer = new Combat(player, monsterHere);
         }
         return fightWithPlayer;
     }
 
     @Override
-    protected PlayerDetails completionRewards(PlayerDetails playerDetails) {
-        // playerDetails.heal(2);
-        return playerDetails;
+    protected void completionRewards(Player player) {
     }
 
     @Override

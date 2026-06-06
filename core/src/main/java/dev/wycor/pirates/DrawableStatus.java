@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import dev.wycor.pirates.game.PlayerDetails;
 import dev.wycor.pirates.game.Sea;
 import dev.wycor.pirates.ui.Cursive;
 
@@ -52,11 +53,13 @@ public class DrawableStatus {
         batch.begin();
         batch.draw(backgroundTexture, 0f, 0f, worldWidth, worldHeight);
 
-        String healthLabel = "Health: " + sea.playerHealth() + "/" + sea.playerMaxHealth();
+        PlayerDetails player = sea.playerDetails();
+
+        String healthLabel = "Health: " + player.health() + "/" + player.maxHealth();
         batch.setColor(0.95f, 0.2f, 0.2f, 1f);
         cursive.write(batch, 0f, worldHeight - LINE_HEIGHT, healthLabel);
 
-        String foodLabel = "Food: " + sea.playerFood();
+        String foodLabel = "Food: " + player.food();
         float foodX = worldWidth - (foodLabel.length() * CURSIVE_LETTER_WIDTH);
         batch.setColor(0.95f, 0.72f, 0.22f, 1f);
         cursive.write(batch, Math.max(0f, foodX), worldHeight - LINE_HEIGHT, foodLabel);

@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 public class Sea {
     private static final int MAX_LOG_LINES = 60;
 
-    private PlayerDetails playerDetails;
+    private Player player;
     private final TileFactory tileFactory;
 
     private Hex headingTo; // null when still
@@ -28,34 +28,22 @@ public class Sea {
         startNewGame();
     }
 
-    public Hex playerPosition() {
-        return this.playerDetails.position();
-    }
-
-    public int playerHealth() {
-        return this.playerDetails.health();
-    }
-
-    public int playerMaxHealth() {
-        return this.playerDetails.maxHealth();
-    }
-
-    public int playerFood() {
-        return this.playerDetails.food();
+    public PlayerDetails playerDetails() {
+        return new PlayerDetails(player.position(), player.health(), player.maxHealth(), player.food());
     }
 
     public boolean isGameOver() {
-        return this.playerDetails.isDead();
+        return this.player.isDead();
     }
 
     public Optional<Hex> getPlayerDestination() {
-        return Optional.ofNullable(headingTo).filter(playerPosition().neighbours()::contains);
+        return Optional.ofNullable(headingTo).filter(player.position().neighbours()::contains);
     }
 
     public boolean hasActiveCombat() {
         return getPlayerDestination()
             .map(destination -> {
-                Combat combat = whatsAt(destination).getCombatEvent(playerDetails);
+                Combat combat = whatsAt(destination).getCombatEvent(player);
                 return combat != null && combat.inProgress();
             })
             .orElse(false);
@@ -85,13 +73,13 @@ public class Sea {
         Hex destinationHex = destination.get();
         SeaTile destinationTile = whatsAt(destinationHex).spy(); // 2. and 3. -- generate and reveal
 
-        Combat combatInProgress = destinationTile.getCombatEvent(playerDetails);
+        Combat combatInProgress = destinationTile.getCombatEvent(player);
 
         if (combatInProgress != null && combatInProgress.inProgress()) {
             if (fleeRequested) {
                 destinationTile.onPlayerFled();
                 headingTo = null;
-                addLog("You broke off and stayed at " + playerPosition() + ".");
+                addLog("You broke off and stayed at " + player.position() + ".");
                 clearActionRequests();
                 return this;
             }
@@ -119,12 +107,12 @@ public class Sea {
         }
 
         if (!destinationTile.isPlayerRewarded()) {
-            destinationTile.applyRewards(playerDetails);
+            destinationTile.applyRewards(player);
             addLog("Claimed rewards at " + destinationHex + ".");
         }
 
-        playerDetails.moveTo(destinationHex);
-        playerDetails.consumeTravelSupplies();
+        player.moveTo(destinationHex);
+        player.consumeTravelSupplies();
         headingTo = null;
         addLog("Arrived at " + destinationHex + ".");
 
@@ -146,7 +134,7 @@ public class Sea {
         }
 
         if (getPlayerDestination().isEmpty()) {
-            Hex headingFrom = playerDetails.position();
+            Hex headingFrom = player.position();
             this.headingTo = direction.move(headingFrom);
 
             SeaTile upcomingThing = whatsAt(headingTo).spy();
@@ -180,7 +168,7 @@ public class Sea {
         this.headingTo = null;
         clearActionRequests();
 
-        this.playerDetails = new PlayerDetails(Hex.ORIGIN);
+        this.player = new Player(Hex.ORIGIN);
         this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
         revealAround(Hex.ORIGIN);
         addLog("Set sail from home waters.");
@@ -191,7 +179,7 @@ public class Sea {
     }
 
     public Stream<Hex> walkTheSpiral(int layers) {
-        Hex start = getPlayerDestination().orElseGet(this::playerPosition);
+        Hex start = getPlayerDestination().orElseGet(player::position);
         HashSet<Hex> hexes = new HashSet<>();
         var n = Math.abs(layers);
 
