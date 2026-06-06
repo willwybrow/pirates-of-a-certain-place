@@ -12,13 +12,11 @@ public class Sea {
     private Player player;
     private final TileFactory tileFactory;
 
-    private Hex headingTo; // null when still
-    private boolean attackRequested;
-    private boolean fleeRequested;
-    private Weapon requestedWeapon;
+    private long nextInputSequence;
 
     private final Map<Hex, SeaTile> generatedHexagons = new HashMap<>(500);
     private final ArrayDeque<String> log = new ArrayDeque<>();
+    private final ArrayList<InputEvent> inputEvents = new ArrayList<>();
 
     public Sea() {
         this(new TileFactory());
@@ -44,7 +42,7 @@ public class Sea {
     }
 
     public Optional<Hex> getPlayerDestination() {
-        return Optional.ofNullable(headingTo).filter(player.position().neighbours()::contains);
+        return nextUnprocessedTravelEvent().map(inputEvent -> inputEvent.resolveDestination(player.position()));
     }
 
     public boolean hasActiveCombat() {
@@ -65,46 +63,60 @@ public class Sea {
          */
 
         if (isGameOver()) {
-            clearActionRequests();
+            markAllUnprocessedInputsProcessed();
+            pruneProcessedInputs();
             return this;
         }
 
-        Optional<Hex> destination = getPlayerDestination();
-        if (destination.isEmpty()) {
-            clearActionRequests();
+        Optional<InputEvent> nextTravelInput = nextUnprocessedTravelEvent();
+        if (nextTravelInput.isEmpty()) {
+            markUnprocessedActionInputsProcessed();
+            pruneProcessedInputs();
             return this;
         }
 
-        Hex destinationHex = destination.get();
+        InputEvent travelInput = nextTravelInput.get();
+        markActionInputsBefore(travelInput.sequence);
+        markTravelInputsAfter(travelInput.sequence);
+
+        Hex destinationHex = travelInput.resolveDestination(player.position());
         SeaTile destinationTile = whatsAt(destinationHex).spy(); // 2. and 3. -- generate and reveal
+        if (!travelInput.destinationRevealed) {
+            addLog("Set course " + travelInput.direction + " and spied " + destinationTile.pendingEvent().name() + ".");
+            travelInput.destinationRevealed = true;
+        }
 
         Combatant opponent = destinationTile.getCombatant();
 
         if (opponent != null && !opponent.isDead()) {
-            if (fleeRequested) {
+            Optional<InputEvent> nextActionInput = nextUnprocessedActionInputAfter(travelInput.sequence);
+            if (nextActionInput.isEmpty()) {
+                pruneProcessedInputs();
+                return this;
+            }
+
+            InputEvent actionInput = nextActionInput.get();
+            actionInput.processed = true;
+
+            if (actionInput.type == InputType.FLEE) {
                 destinationTile.onPlayerFled();
-                headingTo = null;
+                travelInput.processed = true;
                 addLog("You broke off and stayed at " + player.position() + ".");
-                clearActionRequests();
+                pruneProcessedInputs();
                 return this;
             }
 
-            if (!attackRequested) {
-                clearActionRequests();
-                return this;
-            }
-
-            resolveCombatRound(opponent, requestedWeapon).forEach(this::addAttackLog);
+            resolveCombatRound(opponent, actionInput.weapon).forEach(this::addAttackLog);
 
             if (isGameOver()) {
-                headingTo = null;
+                travelInput.processed = true;
                 addGameOverLog();
-                clearActionRequests();
+                pruneProcessedInputs();
                 return this;
             }
 
             if (!opponent.isDead()) {
-                clearActionRequests();
+                pruneProcessedInputs();
                 return this;
             }
         }
@@ -116,13 +128,13 @@ public class Sea {
 
         player.moveTo(destinationHex);
         player.consumeTravelSupplies();
-        headingTo = null;
+        travelInput.processed = true;
 
         if (isGameOver()) {
             addGameOverLog();
         }
 
-        clearActionRequests();
+        pruneProcessedInputs();
         return this;
     }
 
@@ -135,13 +147,7 @@ public class Sea {
             return;
         }
 
-        if (getPlayerDestination().isEmpty()) {
-            Hex headingFrom = player.position();
-            this.headingTo = direction.move(headingFrom);
-
-            SeaTile upcomingThing = whatsAt(headingTo).spy();
-            addLog("Set course " + direction + " and spied " + upcomingThing.pendingEvent().name() + ".");
-        }
+        inputEvents.add(InputEvent.travel(nextInputSequence++, System.currentTimeMillis(), direction));
 
         recalculateGameState();
     }
@@ -155,8 +161,7 @@ public class Sea {
             return;
         }
 
-        this.requestedWeapon = Objects.requireNonNull(weapon, "weapon");
-        this.attackRequested = true;
+        inputEvents.add(InputEvent.attack(nextInputSequence++, System.currentTimeMillis(), Objects.requireNonNull(weapon, "weapon")));
         recalculateGameState();
     }
 
@@ -165,15 +170,15 @@ public class Sea {
             return;
         }
 
-        this.fleeRequested = true;
+        inputEvents.add(InputEvent.flee(nextInputSequence++, System.currentTimeMillis()));
         recalculateGameState();
     }
 
     public void startNewGame() {
         this.generatedHexagons.clear();
         this.log.clear();
-        this.headingTo = null;
-        clearActionRequests();
+        this.inputEvents.clear();
+        this.nextInputSequence = 1L;
 
         this.player = new Player(Hex.ORIGIN);
         this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
@@ -232,10 +237,58 @@ public class Sea {
         }
     }
 
-    private void clearActionRequests() {
-        this.attackRequested = false;
-        this.fleeRequested = false;
-        this.requestedWeapon = null;
+    private Optional<InputEvent> nextUnprocessedTravelEvent() {
+        for (InputEvent inputEvent : inputEvents) {
+            if (!inputEvent.processed && inputEvent.type == InputType.TRAVEL) {
+                return Optional.of(inputEvent);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<InputEvent> nextUnprocessedActionInputAfter(long sequence) {
+        for (InputEvent inputEvent : inputEvents) {
+            if (!inputEvent.processed && inputEvent.sequence > sequence && inputEvent.type != InputType.TRAVEL) {
+                return Optional.of(inputEvent);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private void markActionInputsBefore(long sequence) {
+        for (InputEvent inputEvent : inputEvents) {
+            if (!inputEvent.processed && inputEvent.sequence < sequence && inputEvent.type != InputType.TRAVEL) {
+                inputEvent.processed = true;
+            }
+        }
+    }
+
+    private void markTravelInputsAfter(long sequence) {
+        for (InputEvent inputEvent : inputEvents) {
+            if (!inputEvent.processed && inputEvent.sequence > sequence && inputEvent.type == InputType.TRAVEL) {
+                inputEvent.processed = true;
+            }
+        }
+    }
+
+    private void markUnprocessedActionInputsProcessed() {
+        for (InputEvent inputEvent : inputEvents) {
+            if (!inputEvent.processed && inputEvent.type != InputType.TRAVEL) {
+                inputEvent.processed = true;
+            }
+        }
+    }
+
+    private void markAllUnprocessedInputsProcessed() {
+        for (InputEvent inputEvent : inputEvents) {
+            if (!inputEvent.processed) {
+                inputEvent.processed = true;
+            }
+        }
+    }
+
+    private void pruneProcessedInputs() {
+        inputEvents.removeIf(inputEvent -> inputEvent.processed);
     }
 
     private void addLog(String line) {
@@ -248,6 +301,50 @@ public class Sea {
     private void addGameOverLog() {
         if (log.isEmpty() || !"GAME OVER.".equals(log.peekFirst())) {
             addLog("GAME OVER.");
+        }
+    }
+
+    private enum InputType {
+        TRAVEL,
+        ATTACK,
+        FLEE
+    }
+
+    private static final class InputEvent {
+        private final InputType type;
+        private final long sequence;
+        private final long timestampMillis;
+        private final Direction direction;
+        private final Weapon weapon;
+        private boolean processed;
+        private Hex resolvedDestination;
+        private boolean destinationRevealed;
+
+        private InputEvent(InputType type, long sequence, long timestampMillis, Direction direction, Weapon weapon) {
+            this.type = type;
+            this.sequence = sequence;
+            this.timestampMillis = timestampMillis;
+            this.direction = direction;
+            this.weapon = weapon;
+        }
+
+        private static InputEvent travel(long sequence, long timestampMillis, Direction direction) {
+            return new InputEvent(InputType.TRAVEL, sequence, timestampMillis, direction, null);
+        }
+
+        private static InputEvent attack(long sequence, long timestampMillis, Weapon weapon) {
+            return new InputEvent(InputType.ATTACK, sequence, timestampMillis, null, weapon);
+        }
+
+        private static InputEvent flee(long sequence, long timestampMillis) {
+            return new InputEvent(InputType.FLEE, sequence, timestampMillis, null, null);
+        }
+
+        private Hex resolveDestination(Hex from) {
+            if (this.resolvedDestination == null) {
+                this.resolvedDestination = this.direction.move(from);
+            }
+            return this.resolvedDestination;
         }
     }
 }
