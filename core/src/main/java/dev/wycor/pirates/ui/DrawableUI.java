@@ -1,4 +1,4 @@
-package dev.wycor.pirates;
+package dev.wycor.pirates.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -12,19 +12,16 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.Sea;
 import dev.wycor.pirates.geometry.Direction;
-import dev.wycor.pirates.ui.Cursive;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
+import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
 public class DrawableUI {
     private static final float PIXELS_TO_WORLD = 0.005f;
     private static final float ACTION_BUTTON_WIDTH = 72f * PIXELS_TO_WORLD;
     private static final float ACTION_BUTTON_HEIGHT = 15f * PIXELS_TO_WORLD;
-    private static final float CURSIVE_LETTER_WIDTH = Main.SIXTEEN_PIXELS / 4f;
-    private static final float CURSIVE_LETTER_HEIGHT = Main.SIXTEEN_PIXELS * 9f / 32f;
 
     private final float worldWidth;
     private final float worldHeight;
@@ -213,8 +210,8 @@ public class DrawableUI {
         void draw(SpriteBatch batch, Cursive cursive) {
             batch.draw(pressed ? downTexture : upTexture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 
-            float textX = rectangle.x + (rectangle.width - (label.length() * CURSIVE_LETTER_WIDTH)) / 2f;
-            float textY = rectangle.y + (rectangle.height - CURSIVE_LETTER_HEIGHT) / 2f;
+            float textX = rectangle.x + (rectangle.width - (label.length() * BaseUI.CURSIVE_LETTER_WIDTH)) / 2f;
+            float textY = rectangle.y + (rectangle.height - BaseUI.CURSIVE_LETTER_HEIGHT) / 2f;
             cursive.write(batch, textX, textY, label);
         }
 

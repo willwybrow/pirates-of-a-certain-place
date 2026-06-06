@@ -3,20 +3,18 @@ package dev.wycor.pirates;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.ScreenUtils;
-import dev.wycor.pirates.game.Sea;
+import dev.wycor.pirates.game.Sea;import dev.wycor.pirates.ui.BaseUI;import dev.wycor.pirates.ui.DrawableStatus;import dev.wycor.pirates.ui.DrawableUI;import dev.wycor.pirates.ui.DrawableWorld;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    public static final float SIXTEEN_PIXELS = 0.08f;
-    public static final float THIRTY_TWO_PIXELS = 0.16f;
     private static final float SCREEN_WIDTH = 1.6f;
     private static final float SCREEN_HEIGHT = 1.0f;
     private static final float LEFT_WIDTH = SCREEN_WIDTH * (2f / 3f);
     private static final float RIGHT_WIDTH = SCREEN_WIDTH - LEFT_WIDTH;
     private static final float TOP_LEFT_HEIGHT = SCREEN_HEIGHT * (2f / 3f);
     private static final float BOTTOM_LEFT_HEIGHT = SCREEN_HEIGHT - TOP_LEFT_HEIGHT;
-    private static final float HEX_WIDTH = THIRTY_TWO_PIXELS;
-    private static final float HEX_HEIGHT = THIRTY_TWO_PIXELS;
+    private static final float HEX_WIDTH = BaseUI.THIRTY_TWO_PIXELS;
+    private static final float HEX_HEIGHT = BaseUI.THIRTY_TWO_PIXELS;
     private static final float TARGET_ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT;
 
     private final Sea sea = new Sea();

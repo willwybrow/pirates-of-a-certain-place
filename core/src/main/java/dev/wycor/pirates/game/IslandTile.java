@@ -2,7 +2,6 @@ package dev.wycor.pirates.game;
 
 public class IslandTile extends SeaTile {
     private static final int FOOD_AVAILABLE = 10;
-    private static final int HEALTH_AVAILABLE = 10;
 
     private boolean suppliesAvailable = true;
 
@@ -25,12 +24,13 @@ public class IslandTile extends SeaTile {
     }
 
     @Override
-    protected void completionRewards(Player player) {
+    protected Reward completionRewards() {
         if (suppliesAvailable) {
-            player.addFood(FOOD_AVAILABLE);
-            player.heal(HEALTH_AVAILABLE);
             suppliesAvailable = false;
+            return Reward.food(FOOD_AVAILABLE);
         }
+
+        return Reward.none();
     }
 
 }

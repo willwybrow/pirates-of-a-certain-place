@@ -44,7 +44,7 @@ class Player extends Combatant {
         return this.food;
     }
 
-    void addFood(int amount) {
+    void restock(int amount) {
         if (amount > 0) {
             this.food += amount;
         }

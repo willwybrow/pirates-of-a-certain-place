@@ -1,4 +1,4 @@
-package dev.wycor.pirates;
+package dev.wycor.pirates.ui;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -9,9 +9,8 @@ import dev.wycor.pirates.game.Sea;
 import dev.wycor.pirates.game.SeaEvent;
 import dev.wycor.pirates.game.SeaTile;
 import dev.wycor.pirates.geometry.Hex;
-import dev.wycor.pirates.ui.Cursive;
 
-import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
+import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
 public class DrawableWorld {
     private static final float FLOATS_PER_PIXEL = 0.005f;
@@ -106,7 +105,7 @@ public class DrawableWorld {
             batch.draw(gameOverOverlayTexture, overlayX, overlayY, worldWidth, worldHeight);
 
             String gameOverLabel = "GAME OVER";
-            float letterWidth = Main.SIXTEEN_PIXELS / 4f;
+            float letterWidth = BaseUI.CURSIVE_LETTER_WIDTH;
             float textX = cameraPosition.x - (gameOverLabel.length() * letterWidth) / 2f;
             float textY = cameraPosition.y;
             cursive.write(batch, textX, textY, gameOverLabel);

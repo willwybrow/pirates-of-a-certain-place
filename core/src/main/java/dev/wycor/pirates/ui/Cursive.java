@@ -3,19 +3,18 @@ package dev.wycor.pirates.ui;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import dev.wycor.pirates.Main;
 
 import java.util.HashMap;
 
-import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
+import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
 public class Cursive {
 
     private static final int SPRITE_WIDTH = 8;
     private static final int SPRITE_HEIGHT = 9;
 
-    private final static float NINE_PIXELS = Main.SIXTEEN_PIXELS / 16f * 9f;
-    private final static float EIGHT_PIXELS = Main.SIXTEEN_PIXELS / 2f;
+    private final static float NINE_PIXELS = BaseUI.SIXTEEN_PIXELS / 16f * 9f;
+    private final static float EIGHT_PIXELS = BaseUI.SIXTEEN_PIXELS / 2f;
 
     private static final char[] KEYS = {
         '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',

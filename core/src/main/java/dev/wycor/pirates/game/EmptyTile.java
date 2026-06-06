@@ -23,6 +23,7 @@ public class EmptyTile extends SeaTile {
     }
 
     @Override
-    protected void completionRewards(Player player) {
+    protected Reward completionRewards() {
+        return Reward.none();
     }
 }

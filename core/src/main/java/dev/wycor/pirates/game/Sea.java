@@ -49,7 +49,7 @@ public class Sea {
             .orElse(false);
     }
 
-    public Sea getGameState() {
+    public Sea recalculateGameState() {
         /*
         1. the player has already input the command to go to a tile (by clicking the direction button to sail there), setting headingTo
         2. the tile is generated (if it's not generated already)
@@ -102,19 +102,19 @@ public class Sea {
                 clearActionRequests();
                 return this;
             }
-
-            addLog("Combat ended at " + destinationHex + ".");
         }
 
         if (!destinationTile.isPlayerRewarded()) {
-            destinationTile.applyRewards(player);
-            addLog("Claimed rewards at " + destinationHex + ".");
+            Reward reward = destinationTile.applyRewards();
+            applyReward(reward);
+            if (reward.hasAny()) {
+                addLog("Claimed rewards at " + destinationHex + ".");
+            }
         }
 
         player.moveTo(destinationHex);
         player.consumeTravelSupplies();
         headingTo = null;
-        addLog("Arrived at " + destinationHex + ".");
 
         if (isGameOver()) {
             addGameOverLog();
@@ -141,7 +141,7 @@ public class Sea {
             addLog("Set course " + direction + " and spied " + upcomingThing.pendingEvent().name() + ".");
         }
 
-        getGameState();
+        recalculateGameState();
     }
 
     public void attemptToAttack() {
@@ -150,7 +150,7 @@ public class Sea {
         }
 
         this.attackRequested = true;
-        getGameState();
+        recalculateGameState();
     }
 
     public void attemptToFlee() {
@@ -159,7 +159,7 @@ public class Sea {
         }
 
         this.fleeRequested = true;
-        getGameState();
+        recalculateGameState();
     }
 
     public void startNewGame() {
@@ -203,6 +203,15 @@ public class Sea {
 
     private void addAttackLog(Attack attack) {
         addLog(attack.initiator().name() + " hit " + attack.defender().name() + " for " + attack.actualDamage() + ".");
+    }
+
+    private void applyReward(Reward reward) {
+        if (reward.health() != 0) {
+            player.heal(reward.health());
+        }
+        if (reward.food() != 0) {
+            player.restock(reward.food());
+        }
     }
 
     private void clearActionRequests() {

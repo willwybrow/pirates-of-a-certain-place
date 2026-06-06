@@ -70,4 +70,25 @@ class SeaFoodTest {
 
         assertThat(sea.playerDetails().food()).isEqualTo(29);
     }
+
+    @Test
+    void islandRewardsAreGrantedOnlyOncePerTile() {
+        Hex islandHex = Direction.EAST.move(Hex.ORIGIN);
+
+        Sea sea = new Sea(new TileFactory() {
+            @Override
+            public SeaTile create(Hex hex) {
+                if (islandHex.equals(hex)) {
+                    return IslandTile.generate();
+                }
+                return EmptyTile.generate();
+            }
+        });
+
+        sea.attemptToTravel(Direction.EAST);
+        sea.attemptToTravel(Direction.WEST);
+        sea.attemptToTravel(Direction.EAST);
+
+        assertThat(sea.playerDetails().food()).isEqualTo(27);
+    }
 }

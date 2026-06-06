@@ -39,7 +39,8 @@ public class MonsterTile extends SeaTile {
     }
 
     @Override
-    protected void completionRewards(Player player) {
+    protected Reward completionRewards() {
+        return Reward.none();
     }
 
     @Override

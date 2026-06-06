@@ -1,4 +1,4 @@
-package dev.wycor.pirates;
+package dev.wycor.pirates.ui;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;

@@ -1,4 +1,4 @@
-package dev.wycor.pirates;
+package dev.wycor.pirates.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -9,9 +9,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.PlayerDetails;
 import dev.wycor.pirates.game.Sea;
-import dev.wycor.pirates.ui.Cursive;
 
-import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
+import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
 public class DrawableStatus {
     private final Sea sea;
@@ -20,8 +19,8 @@ public class DrawableStatus {
 
     private final int numberOfLines;
 
-    private static final float LINE_HEIGHT = Main.SIXTEEN_PIXELS / 2;
-    private static final float CURSIVE_LETTER_WIDTH = Main.SIXTEEN_PIXELS / 4f;
+    private static final float LINE_HEIGHT = BaseUI.SIXTEEN_PIXELS / 2;
+    private static final float CURSIVE_LETTER_WIDTH = BaseUI.SIXTEEN_PIXELS / 4f;
 
     private Viewport viewport;
     private SpriteBatch batch;

@@ -33,4 +33,62 @@ class SeaCombatMovementTest {
             .as("player should enter destination as soon as killing blow ends combat")
             .isEqualTo(destination);
     }
+
+    @Test
+    void activeCombatKeepsOriginalCourseUntilCombatResolves() {
+        Hex start = Hex.ORIGIN;
+        Hex east = Direction.EAST.move(start);
+
+        Sea sea = new Sea(new TileFactory() {
+            @Override
+            public SeaTile create(Hex hex) {
+                if (east.equals(hex)) {
+                    return new MonsterTile(SeaEvent.KRAKEN, false, () -> new Monster("Test Kraken", 9, 0, 0));
+                }
+                return EmptyTile.generate();
+            }
+        });
+
+        sea.attemptToTravel(Direction.EAST);
+
+        assertThat(sea.hasActiveCombat()).isTrue();
+        assertThat(sea.getPlayerDestination()).contains(east);
+
+        sea.attemptToTravel(Direction.WEST);
+        sea.attemptToAttack();
+
+        assertThat(sea.playerDetails().position()).isEqualTo(start);
+        assertThat(sea.getPlayerDestination()).contains(east);
+
+        sea.attemptToAttack();
+
+        assertThat(sea.playerDetails().position()).isEqualTo(east);
+        assertThat(sea.getPlayerDestination()).isEmpty();
+    }
+
+    @Test
+    void dyingInCombatEndsGameAndPreventsFurtherMovement() {
+        Hex start = Hex.ORIGIN;
+        Hex destination = Direction.EAST.move(start);
+
+        Sea sea = new Sea(new TileFactory() {
+            @Override
+            public SeaTile create(Hex hex) {
+                if (destination.equals(hex)) {
+                    return new MonsterTile(SeaEvent.KRAKEN, false, () -> new Monster("Fatal Kraken", 100, 30, 0));
+                }
+                return EmptyTile.generate();
+            }
+        });
+
+        sea.attemptToTravel(Direction.EAST);
+        sea.attemptToAttack();
+
+        assertThat(sea.isGameOver()).isTrue();
+        assertThat(sea.playerDetails().position()).isEqualTo(start);
+
+        sea.attemptToTravel(Direction.EAST);
+
+        assertThat(sea.playerDetails().position()).isEqualTo(start);
+    }
 }

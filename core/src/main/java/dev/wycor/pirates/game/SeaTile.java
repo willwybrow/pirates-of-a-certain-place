@@ -47,9 +47,10 @@ public abstract class SeaTile {
         return rewarded;
     }
 
-    public final void applyRewards(Player player) {
-        this.completionRewards(player);
+    public final Reward applyRewards() {
+        Reward reward = this.completionRewards();
         this.rewarded = true;
+        return reward;
     }
 
     public final Combat getCombatEvent(Player player) {
@@ -62,7 +63,7 @@ public abstract class SeaTile {
 
     protected abstract Combat combatEvent(Player player);
 
-    protected abstract void completionRewards(Player player);
+    protected abstract Reward completionRewards();
 
     protected void handlePlayerFled() {
     }

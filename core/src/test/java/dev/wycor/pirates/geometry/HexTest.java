@@ -50,4 +50,44 @@ class HexTest {
 
         assertThat(instanceOne).isEqualTo(instanceTwo);
     }
+
+    @Test
+    void sCoordinateMatchesCubeInvariant() {
+        Hex hex = new Hex(7, -3);
+
+        assertThat(hex.s()).isEqualTo(-4);
+        assertThat(hex.q() + hex.r() + hex.s()).isZero();
+    }
+
+    @Test
+    void neighbourMatchesDirectionMove() {
+        Hex hex = new Hex(-4, 11);
+
+        for (Direction direction : Direction.values()) {
+            assertThat(hex.neighbour(direction)).isEqualTo(direction.move(hex));
+        }
+    }
+
+    @Test
+    void neighboursAreCachedPerHex() {
+        Hex hex = new Hex(2, 3);
+
+        assertThat(hex.neighbours()).isSameAs(hex.neighbours());
+    }
+
+    @Test
+    void equalsReturnsFalseForNullOrDifferentType() {
+        Hex hex = new Hex(0, 0);
+
+        assertThat(hex.equals(null)).isFalse();
+        assertThat(hex.equals("not a hex")).isFalse();
+    }
+
+    @Test
+    void equalHexesHaveEqualHashCodes() {
+        Hex one = new Hex(9, -4);
+        Hex two = new Hex(9, -4);
+
+        assertThat(one.hashCode()).isEqualTo(two.hashCode());
+    }
 }
