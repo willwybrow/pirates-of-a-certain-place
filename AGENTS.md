@@ -26,3 +26,7 @@
 
 ## External Reference
 - libGDX wiki is available at `https://libgdx.com/wiki/`; use it for framework-specific behavior when repo sources are unclear.
+
+## Game Design Principles
+- High-level gameplay principles and balancing intent live in `GAME_DESIGN.md`.
+- Keep mechanical changes aligned with those principles, especially around risk/reward and resource pressure.

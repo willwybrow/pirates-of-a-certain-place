@@ -40,6 +40,10 @@ public class Sea {
         return this.playerDetails.maxHealth();
     }
 
+    public int playerFood() {
+        return this.playerDetails.food();
+    }
+
     public boolean isGameOver() {
         return this.playerDetails.isDead();
     }
@@ -120,8 +124,13 @@ public class Sea {
         }
 
         playerDetails.moveTo(destinationHex);
+        playerDetails.consumeTravelSupplies();
         headingTo = null;
         addLog("Arrived at " + destinationHex + ".");
+
+        if (isGameOver()) {
+            addGameOverLog();
+        }
 
         clearActionRequests();
         return this;

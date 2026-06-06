@@ -20,6 +20,7 @@ public class DrawableStatus {
     private final int numberOfLines;
 
     private static final float LINE_HEIGHT = Main.SIXTEEN_PIXELS / 2;
+    private static final float CURSIVE_LETTER_WIDTH = Main.SIXTEEN_PIXELS / 4f;
 
     private Viewport viewport;
     private SpriteBatch batch;
@@ -51,8 +52,15 @@ public class DrawableStatus {
         batch.begin();
         batch.draw(backgroundTexture, 0f, 0f, worldWidth, worldHeight);
 
+        String healthLabel = "Health: " + sea.playerHealth() + "/" + sea.playerMaxHealth();
         batch.setColor(0.95f, 0.2f, 0.2f, 1f);
-        cursive.write(batch, 0f, worldHeight - LINE_HEIGHT, "Health: " + sea.playerHealth() + "/" + sea.playerMaxHealth());
+        cursive.write(batch, 0f, worldHeight - LINE_HEIGHT, healthLabel);
+
+        String foodLabel = "Food: " + sea.playerFood();
+        float foodX = worldWidth - (foodLabel.length() * CURSIVE_LETTER_WIDTH);
+        batch.setColor(0.95f, 0.72f, 0.22f, 1f);
+        cursive.write(batch, Math.max(0f, foodX), worldHeight - LINE_HEIGHT, foodLabel);
+
         batch.setColor(Color.WHITE);
 
         String[] logLines = sea.recentLog().toArray(new String[]{});

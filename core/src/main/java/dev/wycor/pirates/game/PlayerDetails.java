@@ -5,12 +5,16 @@ import dev.wycor.pirates.geometry.Hex;
 public class PlayerDetails extends Combatant {
 
     private final static int INITIAL_HEALTH = 20;
+    private static final int INITIAL_FOOD = 20;
+    private static final int STARVATION_DAMAGE_PER_MOVE = 5;
 
     private Hex position;
+    private int food;
 
     PlayerDetails(Hex initialPosition) {
         super("You", INITIAL_HEALTH, 5, 0);
         this.position = initialPosition;
+        this.food = INITIAL_FOOD;
     }
 
     Hex position() {
@@ -34,5 +38,24 @@ public class PlayerDetails extends Combatant {
 
     public int maxHealth() {
         return INITIAL_HEALTH;
+    }
+
+    public int food() {
+        return this.food;
+    }
+
+    public void addFood(int amount) {
+        if (amount > 0) {
+            this.food += amount;
+        }
+    }
+
+    public void consumeTravelSupplies() {
+        if (this.food > 0) {
+            this.food -= 1;
+            return;
+        }
+
+        this.health = Math.max(0, this.health - STARVATION_DAMAGE_PER_MOVE);
     }
 }

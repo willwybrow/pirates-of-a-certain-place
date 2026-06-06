@@ -1,7 +1,7 @@
 package dev.wycor.pirates.game;
 
 public class IslandTile extends SeaTile {
-    private int suppliesAvailable = 20;
+    private int suppliesAvailable = 10;
 
     IslandTile() {
         super(SeaEvent.ISLAND, true); // always show islands
@@ -24,7 +24,7 @@ public class IslandTile extends SeaTile {
     @Override
     protected PlayerDetails completionRewards(PlayerDetails playerDetails) {
         if (suppliesAvailable > 0) {
-            playerDetails.heal(suppliesAvailable);
+            playerDetails.addFood(suppliesAvailable);
             suppliesAvailable = 0;
         }
         return playerDetails;
