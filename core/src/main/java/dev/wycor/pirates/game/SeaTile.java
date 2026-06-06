@@ -29,8 +29,8 @@ public abstract class SeaTile {
         return this;
     }
 
-    public final boolean combatComplete() {
-        return Optional.ofNullable(this.getCombatEvent()).map(Combat::isOver).orElse(true);
+    public final boolean combatComplete(PlayerDetails playerDetails) {
+        return Optional.ofNullable(this.getCombatEvent(playerDetails)).map(Combat::isOver).orElse(true);
     }
 
     public SeaEvent pendingEvent() {

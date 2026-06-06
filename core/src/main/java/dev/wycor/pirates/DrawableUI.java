@@ -20,6 +20,12 @@ import java.util.function.Consumer;
 import static dev.wycor.pirates.DynamicDrawing.createSolidTexture;
 
 public class DrawableUI {
+    private static final float PIXELS_TO_WORLD = 0.005f;
+    private static final float ACTION_BUTTON_WIDTH = 72f * PIXELS_TO_WORLD;
+    private static final float ACTION_BUTTON_HEIGHT = 15f * PIXELS_TO_WORLD;
+    private static final float CURSIVE_LETTER_WIDTH = Main.SIXTEEN_PIXELS / 4f;
+    private static final float CURSIVE_LETTER_HEIGHT = Main.SIXTEEN_PIXELS * 9f / 32f;
+
     private final float worldWidth;
     private final float worldHeight;
     private final float gridSquare;
@@ -34,6 +40,8 @@ public class DrawableUI {
     private Texture arrowNorthWest;
     private Texture arrowWest;
     private Texture arrowSouthWest;
+    private Texture buttonRectUp;
+    private Texture buttonRectDown;
 
     private final Cursive cursive;
 
@@ -41,6 +49,7 @@ public class DrawableUI {
     private SpriteBatch uiBatch;
 
     private List<DirectionButton> directionButtons;
+    private List<ActionButton> combatButtons;
     private final Sea sea;
 
     public DrawableUI(Sea sea, float worldWidth, float worldHeight, float unitWidth, float unitHeight) {
@@ -63,6 +72,8 @@ public class DrawableUI {
         arrowNorthWest = new Texture("arrow_upleft_16.png");
         arrowWest = new Texture("arrow_left_16.png");
         arrowSouthWest = new Texture("arrow_downleft_16.png");
+        buttonRectUp = new Texture("button_rect_up_72x15.png");
+        buttonRectDown = new Texture("button_rect_down_72x15.png");
 
         cursive.create();
 
@@ -87,6 +98,14 @@ public class DrawableUI {
             new DirectionButton(button, arrowSouthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHEAST))
         );
 
+        float combatButtonsY = worldHeight * 0.45f;
+        this.combatButtons = List.of(
+            new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY + ACTION_BUTTON_HEIGHT * 1.2f,
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "ATTACK", Sea::attemptToAttack),
+            new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY - ACTION_BUTTON_HEIGHT * 1.2f,
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "FLEE", Sea::attemptToFlee)
+        );
+
         Gdx.input.setInputProcessor(new InputHandler());
     }
 
@@ -101,7 +120,12 @@ public class DrawableUI {
         uiBatch.draw(uiPanelBackgroundTexture, 0f, 0f, worldWidth, worldHeight);
         cursive.write(uiBatch, 4 * gridSquare, worldHeight - 3 * gridSquare, " Pirates! @ ^_^");
 
-        directionButtons.forEach(db -> db.draw(uiBatch));
+        if (sea.hasActiveCombat()) {
+            cursive.write(uiBatch, 4 * gridSquare, worldHeight - 8 * gridSquare, "COMBAT!");
+            combatButtons.forEach(button -> button.draw(uiBatch, cursive));
+        } else {
+            directionButtons.forEach(db -> db.draw(uiBatch));
+        }
 
         uiBatch.end();
     }
@@ -123,6 +147,8 @@ public class DrawableUI {
         arrowNorthWest.dispose();
         arrowWest.dispose();
         arrowSouthWest.dispose();
+        buttonRectUp.dispose();
+        buttonRectDown.dispose();
         uiBatch.dispose();
     }
 
@@ -154,6 +180,49 @@ public class DrawableUI {
         }
     }
 
+    static class ActionButton {
+        private final Texture upTexture;
+        private final Texture downTexture;
+        private final Consumer<Sea> action;
+        private final Rectangle rectangle;
+        private final String label;
+        private boolean pressed;
+
+        ActionButton(Texture upTexture, Texture downTexture, float worldCenterX, float worldCenterY, float widthInWorld,
+                     float heightInWorld, String label, Consumer<Sea> action) {
+            this.upTexture = upTexture;
+            this.downTexture = downTexture;
+            this.action = action;
+            this.label = label;
+            this.rectangle = new Rectangle(
+                worldCenterX - widthInWorld / 2f,
+                worldCenterY - heightInWorld / 2f,
+                widthInWorld,
+                heightInWorld
+            );
+        }
+
+        void draw(SpriteBatch batch, Cursive cursive) {
+            batch.draw(pressed ? downTexture : upTexture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+
+            float textX = rectangle.x + (rectangle.width - (label.length() * CURSIVE_LETTER_WIDTH)) / 2f;
+            float textY = rectangle.y + (rectangle.height - CURSIVE_LETTER_HEIGHT) / 2f;
+            cursive.write(batch, textX, textY, label);
+        }
+
+        boolean pointInside(Vector2 screenPoint) {
+            return this.rectangle.contains(screenPoint);
+        }
+
+        void setPressed(boolean pressed) {
+            this.pressed = pressed;
+        }
+
+        void actOn(Sea sea) {
+            this.action.accept(sea);
+        }
+    }
+
     class InputHandler implements InputProcessor {
 
         @Override
@@ -163,6 +232,19 @@ public class DrawableUI {
 
         @Override
         public boolean keyUp(int keycode) {
+            if (sea.hasActiveCombat()) {
+                switch (keycode) {
+                    case Input.Keys.SPACE:
+                        sea.attemptToAttack();
+                        return true;
+                    case Input.Keys.F:
+                        sea.attemptToFlee();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
             switch(keycode) {
                 case Input.Keys.E:
                     sea.attemptToTravel(Direction.NORTHEAST);
@@ -193,14 +275,39 @@ public class DrawableUI {
 
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+            if (button == Input.Buttons.LEFT && sea.hasActiveCombat()) {
+                Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
+                boolean anyPressed = false;
+                for (ActionButton combatButton : combatButtons) {
+                    boolean inside = combatButton.pointInside(clickPoint);
+                    combatButton.setPressed(inside);
+                    anyPressed = anyPressed || inside;
+                }
+                return anyPressed;
+            }
             return false;
         }
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             if (button == Input.Buttons.LEFT) {
+                Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
+
+                if (sea.hasActiveCombat()) {
+                    boolean acted = combatButtons.stream()
+                        .filter(b -> b.pointInside(clickPoint))
+                        .findFirst()
+                        .map(b -> {
+                            b.actOn(sea);
+                            return true;
+                        })
+                        .orElse(false);
+                    combatButtons.forEach(b -> b.setPressed(false));
+                    return acted;
+                }
+
                 return directionButtons.stream()
-                    .filter(db -> db.pointInside(uiViewport.unproject(new Vector2(screenX, screenY))))
+                    .filter(db -> db.pointInside(clickPoint))
                     .findFirst()
                     .map(db -> {
                         db.actOn(sea);

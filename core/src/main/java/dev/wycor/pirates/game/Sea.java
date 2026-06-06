@@ -7,10 +7,13 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class Sea {
+    private static final int MAX_LOG_LINES = 60;
 
     private final PlayerDetails playerDetails;
 
     private Hex headingTo; // null when still
+    private boolean attackRequested;
+    private boolean fleeRequested;
 
     private final Map<Hex, SeaTile> generatedHexagons = new HashMap<>(500);
     private final ArrayDeque<String> log = new ArrayDeque<>();
@@ -18,6 +21,8 @@ public class Sea {
     public Sea() {
         this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
         this.playerDetails = new PlayerDetails(Hex.ORIGIN);
+        revealAround(Hex.ORIGIN);
+        addLog("Set sail from home waters.");
     }
 
     public Hex playerPosition() {
@@ -26,6 +31,15 @@ public class Sea {
 
     public Optional<Hex> getDestination() {
         return Optional.ofNullable(headingTo).filter(playerPosition().neighbours()::contains);
+    }
+
+    public boolean hasActiveCombat() {
+        return getDestination()
+            .map(destination -> {
+                Combat combat = whatsAt(destination).getCombatEvent(playerDetails);
+                return combat != null && combat.inProgress();
+            })
+            .orElse(false);
     }
 
     public Sea getGameState() {
@@ -38,21 +52,47 @@ public class Sea {
         6. the player's position is set to the new tile and the intended movement is wiped
          */
 
-        getDestination().ifPresent(headingTo -> {
-            SeaTile destination = whatsAt(headingTo).spy(); // 2. and 3. -- generate and reveal
+        Optional<Hex> destination = getDestination();
+        if (destination.isEmpty()) {
+            clearActionRequests();
+            return this;
+        }
 
-            Optional<Combat> combatInProgress = Optional.ofNullable(destination.getCombatEvent(playerDetails));
+        Hex destinationHex = destination.get();
+        SeaTile destinationTile = whatsAt(destinationHex).spy(); // 2. and 3. -- generate and reveal
 
-            if (combatInProgress.isPresent()) {
-                return; // nothing to do until the combat is resolved
+        Combat combatInProgress = destinationTile.getCombatEvent(playerDetails);
+
+        if (combatInProgress != null && combatInProgress.inProgress()) {
+            if (fleeRequested) {
+                headingTo = null;
+                addLog("You broke off and stayed at " + playerPosition() + ".");
+                clearActionRequests();
+                return this;
             }
 
-            if (!destination.isPlayerRewarded()) {
-                destination.applyRewards(playerDetails);
+            if (attackRequested) {
+                combatInProgress.resolveRound().forEach(this::addAttackLog);
+                if (combatInProgress.isOver()) {
+                    addLog("Combat ended at " + destinationHex + ".");
+                }
             }
 
-        });
+            clearActionRequests();
+            return this;
+        }
 
+        if (!destinationTile.isPlayerRewarded()) {
+            destinationTile.applyRewards(playerDetails);
+            addLog("Claimed rewards at " + destinationHex + ".");
+        }
+
+        playerDetails.moveTo(destinationHex);
+        headingTo = null;
+        revealAround(destinationHex);
+        addLog("Arrived at " + destinationHex + ".");
+
+        clearActionRequests();
         return this;
     }
 
@@ -66,14 +106,20 @@ public class Sea {
             this.headingTo = direction.move(headingFrom);
 
             SeaTile upcomingThing = whatsAt(headingTo).spy();
-            log.addFirst("Travelled " + direction + " and spied " + upcomingThing.pendingEvent().name());
+            addLog("Set course " + direction + " and spied " + upcomingThing.pendingEvent().name() + ".");
         }
 
         getGameState();
     }
 
     public void attemptToAttack() {
+        this.attackRequested = true;
+        getGameState();
+    }
 
+    public void attemptToFlee() {
+        this.fleeRequested = true;
+        getGameState();
     }
 
     public Set<Hex> explored() {
@@ -96,5 +142,26 @@ public class Sea {
 
     public List<String> recentLog() {
         return new ArrayList<>(this.log);
+    }
+
+    private void revealAround(Hex position) {
+        whatsAt(position).spy();
+        position.neighbours().forEach(neighbour -> whatsAt(neighbour).spy());
+    }
+
+    private void addAttackLog(Attack attack) {
+        addLog(attack.initiator().name() + " hit " + attack.defender().name() + " for " + attack.actualDamage() + ".");
+    }
+
+    private void clearActionRequests() {
+        this.attackRequested = false;
+        this.fleeRequested = false;
+    }
+
+    private void addLog(String line) {
+        log.addFirst(line);
+        while (log.size() > MAX_LOG_LINES) {
+            log.removeLast();
+        }
     }
 }

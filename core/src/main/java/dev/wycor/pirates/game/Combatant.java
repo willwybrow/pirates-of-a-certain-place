@@ -15,6 +15,14 @@ public abstract class Combatant {
 
     abstract Attack receiveAttackFrom(Combatant combatant);
 
+    String name() {
+        return this.name;
+    }
+
+    int health() {
+        return this.health;
+    }
+
     boolean isDead() {
         return this.health <= 0;
     }

@@ -16,4 +16,18 @@ public class IslandTile extends SeaTile {
         return this.suppliesAvailable == 0;
     }
 
+    @Override
+    protected Combat combatEvent(PlayerDetails playerDetails) {
+        return null;
     }
+
+    @Override
+    protected PlayerDetails completionRewards(PlayerDetails playerDetails) {
+        if (suppliesAvailable > 0) {
+            playerDetails.heal(suppliesAvailable);
+            suppliesAvailable = 0;
+        }
+        return playerDetails;
+    }
+
+}

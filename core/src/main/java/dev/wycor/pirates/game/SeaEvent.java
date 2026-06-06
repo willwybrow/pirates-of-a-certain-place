@@ -1,15 +1,14 @@
 package dev.wycor.pirates.game;
 
 import java.util.Random;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public enum SeaEvent {
     NOTHING(EmptyTile::generate),
     ISLAND(IslandTile::generate),
-    KRAKEN(MonsterTile::generate),
-    SQUID(MonsterTile::generate),
-    GHOST(MonsterTile::generate);
+    KRAKEN(MonsterTile::kraken),
+    SQUID(MonsterTile::squid),
+    GHOST(MonsterTile::ghost);
 
     private final Supplier<? extends SeaTile> tileGenerator;
 

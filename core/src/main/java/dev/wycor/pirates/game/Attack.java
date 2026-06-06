@@ -16,4 +16,12 @@ public class Attack{
     public int actualDamage() {
         return Math.max(0, unmitigatedAttackDamage - defenderMitigation);
     }
+
+    public Combatant initiator() {
+        return initiator;
+    }
+
+    public Combatant defender() {
+        return defender;
+    }
 }

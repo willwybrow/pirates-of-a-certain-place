@@ -1,6 +1,7 @@
 package dev.wycor.pirates.game;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Combat {
     private final Combatant firstCombatant;
@@ -19,5 +20,29 @@ public class Combat {
 
     public boolean inProgress() {
         return !isOver();
+    }
+
+    public List<Attack> resolveRound() {
+        if (isOver()) {
+            return List.of();
+        }
+
+        ArrayList<Attack> attacksThisRound = new ArrayList<>(2);
+
+        Attack firstAttack = this.secondCombatant.receiveAttackFrom(this.firstCombatant);
+        combatLog.add(firstAttack);
+        attacksThisRound.add(firstAttack);
+
+        if (!this.secondCombatant.isDead()) {
+            Attack secondAttack = this.firstCombatant.receiveAttackFrom(this.secondCombatant);
+            combatLog.add(secondAttack);
+            attacksThisRound.add(secondAttack);
+        }
+
+        return List.copyOf(attacksThisRound);
+    }
+
+    public List<Attack> combatLog() {
+        return List.copyOf(combatLog);
     }
 }

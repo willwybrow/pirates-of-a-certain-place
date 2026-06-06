@@ -23,7 +23,9 @@ public class PlayerDetails extends Combatant {
 
     @Override
     Attack receiveAttackFrom(Combatant combatant) {
-        return null;
+        Attack attackReceived = new Attack(combatant, this, combatant.attack, this.defence);
+        this.health = Math.max(0, this.health - attackReceived.actualDamage());
+        return attackReceived;
     }
 
     public void heal(int amount) {
