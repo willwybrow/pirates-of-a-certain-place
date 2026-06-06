@@ -121,7 +121,6 @@ public class DrawableUI {
 
         uiBatch.begin();
         uiBatch.draw(uiPanelBackgroundTexture, 0f, 0f, worldWidth, worldHeight);
-        cursive.write(uiBatch, 4 * gridSquare, worldHeight - 3 * gridSquare, " Pirates! @ ^_^");
 
         if (sea.isGameOver()) {
             gameOverButtons.forEach(button -> button.draw(uiBatch, cursive));

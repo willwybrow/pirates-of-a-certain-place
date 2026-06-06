@@ -1,7 +1,5 @@
 package dev.wycor.pirates.game;
 
-import java.util.Optional;
-
 public abstract class SeaTile {
     private final SeaEvent seaEvent;
     private boolean spied = false;
@@ -29,10 +27,6 @@ public abstract class SeaTile {
         return this;
     }
 
-    public final boolean combatComplete(Player player) {
-        return Optional.ofNullable(this.getCombatEvent(player)).map(Combat::isOver).orElse(true);
-    }
-
     public SeaEvent pendingEvent() {
         return this.isCompleted() ? SeaEvent.NOTHING : this.seaEvent;
     }
@@ -53,15 +47,15 @@ public abstract class SeaTile {
         return reward;
     }
 
-    public final Combat getCombatEvent(Player player) {
-        return this.combatEvent(player);
+    public final Combatant getCombatant() {
+        return this.combatant();
     }
 
     public final void onPlayerFled() {
         this.handlePlayerFled();
     }
 
-    protected abstract Combat combatEvent(Player player);
+    protected abstract Combatant combatant();
 
     protected abstract Reward completionRewards();
 

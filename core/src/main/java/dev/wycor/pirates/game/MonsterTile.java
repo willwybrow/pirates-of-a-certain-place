@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 public class MonsterTile extends SeaTile {
     private final Supplier<Monster> monsterSupplier;
     private Monster monsterHere;
-    private Combat fightWithPlayer;
 
     MonsterTile(SeaEvent seaEvent, boolean explored, Supplier<Monster> monsterSupplier) {
         super(seaEvent, explored);
@@ -31,11 +30,8 @@ public class MonsterTile extends SeaTile {
     }
 
     @Override
-    protected Combat combatEvent(Player player) {
-        if (fightWithPlayer == null) {
-            fightWithPlayer = new Combat(player, monsterHere);
-        }
-        return fightWithPlayer;
+    protected Combatant combatant() {
+        return this.monsterHere;
     }
 
     @Override
@@ -46,6 +42,5 @@ public class MonsterTile extends SeaTile {
     @Override
     protected void handlePlayerFled() {
         this.monsterHere = monsterSupplier.get();
-        this.fightWithPlayer = null;
     }
 }

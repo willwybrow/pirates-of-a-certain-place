@@ -18,7 +18,7 @@ public class EmptyTile extends SeaTile {
     }
 
     @Override
-    protected Combat combatEvent(Player player) {
+    protected Combatant combatant() {
         return null;
     }
 

@@ -42,10 +42,8 @@ public class Sea {
 
     public boolean hasActiveCombat() {
         return getPlayerDestination()
-            .map(destination -> {
-                Combat combat = whatsAt(destination).getCombatEvent(player);
-                return combat != null && combat.inProgress();
-            })
+            .map(destination -> whatsAt(destination).getCombatant())
+            .map(opponent -> !opponent.isDead())
             .orElse(false);
     }
 
@@ -73,9 +71,9 @@ public class Sea {
         Hex destinationHex = destination.get();
         SeaTile destinationTile = whatsAt(destinationHex).spy(); // 2. and 3. -- generate and reveal
 
-        Combat combatInProgress = destinationTile.getCombatEvent(player);
+        Combatant opponent = destinationTile.getCombatant();
 
-        if (combatInProgress != null && combatInProgress.inProgress()) {
+        if (opponent != null && !opponent.isDead()) {
             if (fleeRequested) {
                 destinationTile.onPlayerFled();
                 headingTo = null;
@@ -89,7 +87,7 @@ public class Sea {
                 return this;
             }
 
-            combatInProgress.resolveRound().forEach(this::addAttackLog);
+            resolveCombatRound(opponent).forEach(this::addAttackLog);
 
             if (isGameOver()) {
                 headingTo = null;
@@ -98,7 +96,7 @@ public class Sea {
                 return this;
             }
 
-            if (combatInProgress.inProgress()) {
+            if (!opponent.isDead()) {
                 clearActionRequests();
                 return this;
             }
@@ -170,12 +168,7 @@ public class Sea {
 
         this.player = new Player(Hex.ORIGIN);
         this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
-        revealAround(Hex.ORIGIN);
         addLog("Set sail from home waters.");
-    }
-
-    public Set<Hex> explored() {
-        return generatedHexagons.keySet();
     }
 
     public Stream<Hex> walkTheSpiral(int layers) {
@@ -196,13 +189,22 @@ public class Sea {
         return new ArrayList<>(this.log);
     }
 
-    private void revealAround(Hex position) {
-        whatsAt(position).spy();
-        position.neighbours().forEach(neighbour -> whatsAt(neighbour).spy());
-    }
-
     private void addAttackLog(Attack attack) {
         addLog(attack.initiator().name() + " hit " + attack.defender().name() + " for " + attack.actualDamage() + ".");
+    }
+
+    private List<Attack> resolveCombatRound(Combatant opponent) {
+        ArrayList<Attack> attacksThisRound = new ArrayList<>(2);
+
+        Attack playerAttack = opponent.receiveAttackFrom(player);
+        attacksThisRound.add(playerAttack);
+
+        if (!opponent.isDead()) {
+            Attack opponentAttack = player.receiveAttackFrom(opponent);
+            attacksThisRound.add(opponentAttack);
+        }
+
+        return List.copyOf(attacksThisRound);
     }
 
     private void applyReward(Reward reward) {
