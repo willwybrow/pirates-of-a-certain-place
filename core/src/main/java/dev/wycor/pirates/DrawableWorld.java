@@ -52,7 +52,7 @@ public class DrawableWorld {
         fogOfWarTexture = new Texture("unexplored_hex_32.png");
         shipTexture = new Texture("hero_ship_1x_32.png");
 
-        viewport.getCamera().position.set(centreOfHex(sea.currentPosition()));
+        viewport.getCamera().position.set(centreOfHex(sea.playerPosition()));
         viewport.getCamera().update();
     }
 
@@ -66,7 +66,7 @@ public class DrawableWorld {
         sea.walkTheSpiral(13).forEach(exploredHex -> {
             drawAtHex(seaTexture, exploredHex);
             SeaTile whatsHere = sea.whatsAt(exploredHex);
-            if (!whatsHere.isExplored()) {
+            if (!whatsHere.isSpied()) {
                 drawAtHex(fogOfWarTexture, exploredHex);
             } else if (!whatsHere.isCompleted()) {
                 switch (whatsHere.pendingEvent()) {
@@ -89,7 +89,7 @@ public class DrawableWorld {
                 drawAtHex(islandTexture, exploredHex);
             }
         });
-        drawAtHex(shipTexture, sea.currentPosition());
+        drawAtHex(shipTexture, sea.playerPosition());
         batch.end();
     }
 
@@ -115,7 +115,7 @@ public class DrawableWorld {
     }
 
     private void repointCamera(float dt) {
-        Vector3 cameraTarget = centreOfHex(sea.currentPosition());
+        Vector3 cameraTarget = centreOfHex(sea.playerPosition());
         viewport.getCamera().position.lerp(cameraTarget, 1.0f - (float) Math.exp(-5.0f * dt));
     }
 

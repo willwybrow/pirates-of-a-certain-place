@@ -78,13 +78,13 @@ public class DrawableUI {
         float horizontalSpacing = 0.53f;
 
         this.directionButtons = List.of(
-            new DirectionButton(button, arrowNorthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.NORTHWEST)),
-            new DirectionButton(button, arrowNorthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.NORTHEAST)),
-            new DirectionButton(button, arrowWest, uiCentreX - 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.go(Direction.WEST)),
+            new DirectionButton(button, arrowNorthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHWEST)),
+            new DirectionButton(button, arrowNorthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHEAST)),
+            new DirectionButton(button, arrowWest, uiCentreX - 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.WEST)),
             /* new DirectionButton(button, button, uiCentreX, uiCentreY - 2 * unitHeight, unitWidth, unitHeight, sea -> sea.whatsAt(sea.currentPosition()).complete()), // TODO -- middle button?? */
-            new DirectionButton(button, arrowEast, uiCentreX + 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.go(Direction.EAST)),
-            new DirectionButton(button, arrowSouthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.SOUTHWEST)),
-            new DirectionButton(button, arrowSouthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.go(Direction.SOUTHEAST))
+            new DirectionButton(button, arrowEast, uiCentreX + 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.EAST)),
+            new DirectionButton(button, arrowSouthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHWEST)),
+            new DirectionButton(button, arrowSouthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHEAST))
         );
 
         Gdx.input.setInputProcessor(new InputHandler());
@@ -165,25 +165,22 @@ public class DrawableUI {
         public boolean keyUp(int keycode) {
             switch(keycode) {
                 case Input.Keys.E:
-                    sea.go(Direction.NORTHEAST);
+                    sea.attemptToTravel(Direction.NORTHEAST);
                     return true;
                 case Input.Keys.D:
-                    sea.go(Direction.EAST);
+                    sea.attemptToTravel(Direction.EAST);
                     return true;
                 case Input.Keys.X:
-                    sea.go(Direction.SOUTHEAST);
+                    sea.attemptToTravel(Direction.SOUTHEAST);
                     return true;
                 case Input.Keys.Z:
-                    sea.go(Direction.SOUTHWEST);
+                    sea.attemptToTravel(Direction.SOUTHWEST);
                     return true;
                 case Input.Keys.A:
-                    sea.go(Direction.WEST);
+                    sea.attemptToTravel(Direction.WEST);
                     return true;
                 case Input.Keys.W:
-                    sea.go(Direction.NORTHWEST);
-                    return true;
-                case Input.Keys.S:
-                    sea.whatsAt(sea.currentPosition()).complete();
+                    sea.attemptToTravel(Direction.NORTHWEST);
                     return true;
             }
             return false;

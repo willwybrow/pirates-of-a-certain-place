@@ -1,45 +1,63 @@
 package dev.wycor.pirates.game;
 
-public class SeaTile {
+import java.util.Optional;
+
+public abstract class SeaTile {
     private final SeaEvent seaEvent;
-    private boolean explored = false;
-    private boolean completed = false;
+    private boolean spied = false;
+    private boolean rewarded;
 
-    private SeaTile(SeaEvent seaEvent, boolean explored) {
+    protected SeaTile(SeaEvent seaEvent, boolean spied) {
         this.seaEvent = seaEvent;
-        this.explored = explored;
-    }
-
-    public boolean isExplored() {
-        return explored;
-    }
-
-    public SeaEvent explore() {
-        this.explored = true;
-        return seaEvent;
-    }
-
-    public SeaEvent pendingEvent() {
-        return completed ? SeaEvent.NOTHING : this.seaEvent;
-    }
-
-    public SeaEvent completedEvent() {
-        return completed ? this.seaEvent : SeaEvent.NOTHING;
-    }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void complete() {
-        this.completed = true;
+        this.spied = spied;
     }
 
     public static SeaTile startingSquare() {
-        return new SeaTile(SeaEvent.NOTHING, true);
+        return EmptyTile.generate().spy();
     }
 
-    public static SeaTile generate() {
-        return new SeaTile(SeaEvent.random(), false);
+    public static SeaTile random() {
+        return SeaEvent.random().generate();
     }
+
+    public boolean isSpied() {
+        return spied;
+    }
+
+    public SeaTile spy() {
+        this.spied = true;
+        return this;
+    }
+
+    public final boolean combatComplete() {
+        return Optional.ofNullable(this.getCombatEvent()).map(Combat::isOver).orElse(true);
+    }
+
+    public SeaEvent pendingEvent() {
+        return this.isCompleted() ? SeaEvent.NOTHING : this.seaEvent;
+    }
+
+    public SeaEvent completedEvent() {
+        return this.isCompleted() ? this.seaEvent : SeaEvent.NOTHING;
+    }
+
+    public abstract boolean isCompleted();
+
+    public final boolean isPlayerRewarded() {
+        return rewarded;
+    }
+
+    public final PlayerDetails applyRewards(PlayerDetails playerDetails) {
+        PlayerDetails rewardedPlayer = this.completionRewards(playerDetails);
+        this.rewarded = true;
+        return rewardedPlayer;
+    }
+
+    public final Combat getCombatEvent(PlayerDetails playerDetails) {
+        return this.combatEvent(playerDetails);
+    }
+
+    protected abstract Combat combatEvent(PlayerDetails playerDetails);
+
+    protected abstract PlayerDetails completionRewards(PlayerDetails playerDetails);
 }

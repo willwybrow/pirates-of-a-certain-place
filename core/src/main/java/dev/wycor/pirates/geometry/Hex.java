@@ -1,12 +1,16 @@
 package dev.wycor.pirates.geometry;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
 public class Hex {
     public static final Hex ORIGIN = new Hex(0, 0);
+
     private final int q;
     private final int r;
+
+    private LinkedHashSet<Hex> neighbours = null;
 
     public Hex(int q, int r) {
         this.q = q;
@@ -25,15 +29,18 @@ public class Hex {
         return - this.q - this.r;
     }
 
-    public List<Hex> neighbours() {
-        return List.of(
-            new Hex(this.q + 1, this. r - 1),
-            new Hex(this.q + 1, this.r),
-            new Hex(this.q, this.r + 1),
-            new Hex(this.q - 1, this.r + 1),
-            new Hex(this.q - 1, this.r),
-            new Hex(this.q, this.r - 1)
-        );
+    public LinkedHashSet<Hex> neighbours() {
+        if (neighbours == null) {
+            neighbours = new LinkedHashSet<>(List.of(
+                new Hex(this.q + 1, this. r - 1),
+                new Hex(this.q + 1, this.r),
+                new Hex(this.q, this.r + 1),
+                new Hex(this.q - 1, this.r + 1),
+                new Hex(this.q - 1, this.r),
+                new Hex(this.q, this.r - 1)
+            ));
+        }
+        return neighbours;
     }
 
     public Hex neighbour(Direction direction) {

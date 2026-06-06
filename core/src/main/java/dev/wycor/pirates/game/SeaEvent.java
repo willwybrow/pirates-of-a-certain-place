@@ -1,13 +1,27 @@
 package dev.wycor.pirates.game;
 
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public enum SeaEvent {
-    NOTHING,
-    ISLAND,
-    KRAKEN,
-    SQUID,
-    GHOST;
+    NOTHING(EmptyTile::generate),
+    ISLAND(IslandTile::generate),
+    KRAKEN(MonsterTile::generate),
+    SQUID(MonsterTile::generate),
+    GHOST(MonsterTile::generate);
+
+    private final Supplier<? extends SeaTile> tileGenerator;
+
+    SeaEvent(Supplier<? extends SeaTile> tileGenerator) {
+        this.tileGenerator = tileGenerator;
+    }
+
+//    private final Function<PlayerDetails, PlayerDetails> eventResolver;
+//
+//    SeaEvent(Function<PlayerDetails, PlayerDetails> eventResolver) {
+//        this.eventResolver = eventResolver;
+//    }
 
     public static SeaEvent random() {
         int random = new Random().nextInt(100);
@@ -24,5 +38,10 @@ public enum SeaEvent {
             return GHOST;
         }
         return NOTHING;
+    }
+
+
+    public SeaTile generate() {
+        return this.tileGenerator.get();
     }
 }
