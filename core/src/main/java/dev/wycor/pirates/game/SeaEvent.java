@@ -6,9 +6,11 @@ import java.util.function.Supplier;
 public enum SeaEvent {
     NOTHING(EmptyTile::generate),
     ISLAND(IslandTile::generate),
-    KRAKEN(MonsterTile::kraken),
-    SQUID(MonsterTile::squid),
-    GHOST(MonsterTile::ghost);
+    GIANT_SQUID(MonsterTile::giantSquid),
+    SEAWEED_MONSTER(MonsterTile::seaweedMonster),
+    PHOENIX(MonsterTile::phoenix),
+    GHOST_SHIP(MonsterTile::ghostShip),
+    PIRATE_SHIP(MonsterTile::pirateShip);
 
     private final Supplier<? extends SeaTile> tileGenerator;
 
@@ -28,13 +30,19 @@ public enum SeaEvent {
             return ISLAND;
         }
         if (random < 15) {
-            return SQUID;
+            return GIANT_SQUID;
         }
         if (random < 20) {
-            return KRAKEN;
+            return SEAWEED_MONSTER;
         }
         if (random < 25) {
-            return GHOST;
+            return PHOENIX;
+        }
+        if (random < 30) {
+            return GHOST_SHIP;
+        }
+        if (random < 35) {
+            return PIRATE_SHIP;
         }
         return NOTHING;
     }

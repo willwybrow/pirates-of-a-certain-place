@@ -1,5 +1,7 @@
 package dev.wycor.pirates.game;
 
+import dev.wycor.pirates.game.monster.*;
+
 import java.util.function.Supplier;
 
 public class MonsterTile extends SeaTile {
@@ -13,15 +15,35 @@ public class MonsterTile extends SeaTile {
     }
 
     public static MonsterTile kraken() {
-        return new MonsterTile(SeaEvent.KRAKEN, false, () -> new Monster("Kraken", 10, 2, 1));
+        return giantSquid();
     }
 
     public static MonsterTile squid() {
-        return new MonsterTile(SeaEvent.SQUID, false, () -> new Monster("Giant Squid", 8, 3, 1));
+        return giantSquid();
     }
 
     public static MonsterTile ghost() {
-        return new MonsterTile(SeaEvent.GHOST, false, () -> new Monster("Ghost Ship", 9, 2, 2));
+        return ghostShip();
+    }
+
+    public static MonsterTile giantSquid() {
+        return new MonsterTile(SeaEvent.GIANT_SQUID, false, GiantSquid::new);
+    }
+
+    public static MonsterTile seaweedMonster() {
+        return new MonsterTile(SeaEvent.SEAWEED_MONSTER, false, SeaweedMonster::new);
+    }
+
+    public static MonsterTile phoenix() {
+        return new MonsterTile(SeaEvent.PHOENIX, false, Phoenix::new);
+    }
+
+    public static MonsterTile ghostShip() {
+        return new MonsterTile(SeaEvent.GHOST_SHIP, false, GhostShip::new);
+    }
+
+    public static MonsterTile pirateShip() {
+        return new MonsterTile(SeaEvent.PIRATE_SHIP, false, PirateShip::new);
     }
 
     @Override

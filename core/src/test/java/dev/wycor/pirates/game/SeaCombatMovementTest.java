@@ -18,7 +18,7 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.KRAKEN, false, () -> new Monster("Test Kraken", 1, 0, 0));
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 1, 0, 0) { });
                 }
                 return super.create(hex);
             }
@@ -43,7 +43,7 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex) {
                 if (east.equals(hex)) {
-                    return new MonsterTile(SeaEvent.KRAKEN, false, () -> new Monster("Test Kraken", 9, 0, 0));
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 9, 0, 0) { });
                 }
                 return EmptyTile.generate();
             }
@@ -75,7 +75,7 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.KRAKEN, false, () -> new Monster("Fatal Kraken", 100, 30, 0));
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Fatal Squid", 100, 30, 0) { });
                 }
                 return EmptyTile.generate();
             }

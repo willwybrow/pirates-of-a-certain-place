@@ -25,9 +25,11 @@ public class DrawableWorld {
     private SpriteBatch batch;
 
     private Texture seaTexture;
-    private Texture krakenTexture;
-    private Texture squidTexture;
-    private Texture ghostTexture;
+    private Texture giantSquidTexture;
+    private Texture seaweedMonsterTexture;
+    private Texture phoenixTexture;
+    private Texture ghostShipTexture;
+    private Texture pirateShipTexture;
     private Texture islandTexture;
     private Texture stockedIslandTexture;
     private Texture fogOfWarTexture;
@@ -48,9 +50,11 @@ public class DrawableWorld {
         batch = new SpriteBatch();
 
         seaTexture = new Texture("sea_hex_32.png");
-        krakenTexture = new Texture("seaweed_monster_1x_32.png");
-        ghostTexture = new Texture("ghost_ship_1x_32.png");
-        squidTexture = new Texture("giant_squid_1x_32.png");
+        giantSquidTexture = new Texture("giant_squid_1x_32.png");
+        seaweedMonsterTexture = new Texture("seaweed_monster_1x_32.png");
+        phoenixTexture = new Texture("phoenix_1x_32.png");
+        ghostShipTexture = new Texture("ghost_ship_1x_32.png");
+        pirateShipTexture = new Texture("pirate_ship_1x_32.png");
         islandTexture = new Texture("island_empty_1x_32.png");
         stockedIslandTexture = new Texture("island_stocked_1x_32.png");
         fogOfWarTexture = new Texture("unexplored_hex_32.png");
@@ -80,14 +84,20 @@ public class DrawableWorld {
                     case ISLAND:
                         drawAtHex(stockedIslandTexture, exploredHex);
                         break;
-                    case KRAKEN:
-                        drawAtHex(krakenTexture, exploredHex);
+                    case GIANT_SQUID:
+                        drawAtHex(giantSquidTexture, exploredHex);
                         break;
-                    case SQUID:
-                        drawAtHex(squidTexture, exploredHex);
+                    case SEAWEED_MONSTER:
+                        drawAtHex(seaweedMonsterTexture, exploredHex);
                         break;
-                    case GHOST:
-                        drawAtHex(ghostTexture, exploredHex);
+                    case PHOENIX:
+                        drawAtHex(phoenixTexture, exploredHex);
+                        break;
+                    case GHOST_SHIP:
+                        drawAtHex(ghostShipTexture, exploredHex);
+                        break;
+                    case PIRATE_SHIP:
+                        drawAtHex(pirateShipTexture, exploredHex);
                         break;
                     default:
                         break;
@@ -126,9 +136,11 @@ public class DrawableWorld {
     public void dispose() {
         batch.dispose();
         seaTexture.dispose();
-        krakenTexture.dispose();
-        squidTexture.dispose();
-        ghostTexture.dispose();
+        giantSquidTexture.dispose();
+        seaweedMonsterTexture.dispose();
+        phoenixTexture.dispose();
+        ghostShipTexture.dispose();
+        pirateShipTexture.dispose();
         islandTexture.dispose();
         stockedIslandTexture.dispose();
         fogOfWarTexture.dispose();
