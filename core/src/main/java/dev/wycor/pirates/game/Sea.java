@@ -233,7 +233,7 @@ public class Sea {
         reward.ammunitionByWeapon().forEach(player::restockAmmunition);
         if (reward.treasure() != null) {
             player.captureTreasure(reward.treasure());
-            addLog("Recovered " + reward.treasure().name() + ".");
+            addLog("Recovered " + reward.treasure().displayName() + ".");
         }
     }
 
