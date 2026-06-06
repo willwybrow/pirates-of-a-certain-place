@@ -233,7 +233,7 @@ public class Sea {
             attacksThisRound.add(opponentAttack);
         }
 
-        return List.copyOf(attacksThisRound);
+        return Collections.unmodifiableList(new ArrayList<>(attacksThisRound));
     }
 
     private void applyReward(Reward reward) {

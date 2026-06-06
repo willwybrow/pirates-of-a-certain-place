@@ -1,6 +1,7 @@
 package dev.wycor.pirates.game;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Combat {
@@ -24,7 +25,7 @@ public class Combat {
 
     public List<Attack> resolveRound() {
         if (isOver()) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         ArrayList<Attack> attacksThisRound = new ArrayList<>(2);
@@ -41,10 +42,10 @@ public class Combat {
             attacksThisRound.add(secondAttack);
         }
 
-        return List.copyOf(attacksThisRound);
+        return Collections.unmodifiableList(new ArrayList<>(attacksThisRound));
     }
 
     public List<Attack> combatLog() {
-        return List.copyOf(combatLog);
+        return Collections.unmodifiableList(new ArrayList<>(combatLog));
     }
 }
