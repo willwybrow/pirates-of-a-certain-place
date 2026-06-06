@@ -15,6 +15,7 @@ public class Sea {
     private Hex headingTo; // null when still
     private boolean attackRequested;
     private boolean fleeRequested;
+    private Weapon requestedWeapon;
 
     private final Map<Hex, SeaTile> generatedHexagons = new HashMap<>(500);
     private final ArrayDeque<String> log = new ArrayDeque<>();
@@ -87,7 +88,7 @@ public class Sea {
                 return this;
             }
 
-            resolveCombatRound(opponent).forEach(this::addAttackLog);
+            resolveCombatRound(opponent, requestedWeapon).forEach(this::addAttackLog);
 
             if (isGameOver()) {
                 headingTo = null;
@@ -143,10 +144,15 @@ public class Sea {
     }
 
     public void attemptToAttack() {
+        attemptToAttack(Weapon.CUTLASS);
+    }
+
+    public void attemptToAttack(Weapon weapon) {
         if (isGameOver()) {
             return;
         }
 
+        this.requestedWeapon = Objects.requireNonNull(weapon, "weapon");
         this.attackRequested = true;
         recalculateGameState();
     }
@@ -193,14 +199,16 @@ public class Sea {
         addLog(attack.initiator().name() + " hit " + attack.defender().name() + " for " + attack.actualDamage() + ".");
     }
 
-    private List<Attack> resolveCombatRound(Combatant opponent) {
+    private List<Attack> resolveCombatRound(Combatant opponent, Weapon weapon) {
         ArrayList<Attack> attacksThisRound = new ArrayList<>(2);
 
-        Attack playerAttack = opponent.receiveAttackFrom(player);
+        Attack playerAttack = new Attack(player, opponent, weapon, player.attack, opponent.defence);
+        opponent.receiveAttack(playerAttack);
         attacksThisRound.add(playerAttack);
 
         if (!opponent.isDead()) {
-            Attack opponentAttack = player.receiveAttackFrom(opponent);
+            Attack opponentAttack = new Attack(opponent, player, null, opponent.attack, player.defence);
+            player.receiveAttack(opponentAttack);
             attacksThisRound.add(opponentAttack);
         }
 
@@ -214,11 +222,13 @@ public class Sea {
         if (reward.food() != 0) {
             player.restock(reward.food());
         }
+        reward.ammunitionByWeapon().forEach(player::restockAmmunition);
     }
 
     private void clearActionRequests() {
         this.attackRequested = false;
         this.fleeRequested = false;
+        this.requestedWeapon = null;
     }
 
     private void addLog(String line) {

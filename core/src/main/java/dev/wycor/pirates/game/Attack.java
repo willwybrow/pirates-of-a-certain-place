@@ -1,14 +1,16 @@
 package dev.wycor.pirates.game;
 
-public class Attack{
+public class Attack {
     private final Combatant initiator;
     private final Combatant defender;
+    private final Weapon weapon;
     private final int unmitigatedAttackDamage;
     private final int defenderMitigation;
 
-    public Attack(Combatant initiator, Combatant defender, int unmitigatedAttackDamage, int defenderMitigation) {
+    public Attack(Combatant initiator, Combatant defender, Weapon weapon, int unmitigatedAttackDamage, int defenderMitigation) {
         this.initiator = initiator;
         this.defender = defender;
+        this.weapon = weapon;
         this.unmitigatedAttackDamage = unmitigatedAttackDamage;
         this.defenderMitigation = defenderMitigation;
     }
@@ -23,5 +25,9 @@ public class Attack{
 
     public Combatant defender() {
         return defender;
+    }
+
+    public Weapon weapon() {
+        return weapon;
     }
 }

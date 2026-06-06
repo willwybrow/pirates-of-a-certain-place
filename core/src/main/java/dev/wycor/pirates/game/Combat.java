@@ -29,12 +29,14 @@ public class Combat {
 
         ArrayList<Attack> attacksThisRound = new ArrayList<>(2);
 
-        Attack firstAttack = this.secondCombatant.receiveAttackFrom(this.firstCombatant);
+        Attack firstAttack = new Attack(this.firstCombatant, this.secondCombatant, Weapon.CUTLASS, this.firstCombatant.attack, this.secondCombatant.defence);
+        this.secondCombatant.receiveAttack(firstAttack);
         combatLog.add(firstAttack);
         attacksThisRound.add(firstAttack);
 
         if (!this.secondCombatant.isDead()) {
-            Attack secondAttack = this.firstCombatant.receiveAttackFrom(this.secondCombatant);
+            Attack secondAttack = new Attack(this.secondCombatant, this.firstCombatant, null, this.secondCombatant.attack, this.firstCombatant.defence);
+            this.firstCombatant.receiveAttack(secondAttack);
             combatLog.add(secondAttack);
             attacksThisRound.add(secondAttack);
         }

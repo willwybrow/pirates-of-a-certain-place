@@ -2,6 +2,8 @@ package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.geometry.Hex;
 
+import java.util.EnumMap;
+
 class Player extends Combatant {
 
     private static final int INITIAL_HEALTH = 20;
@@ -10,11 +12,19 @@ class Player extends Combatant {
 
     private Hex position;
     private int food;
+    private final EnumMap<Weapon, Integer> ammunitionByWeapon;
 
     Player(Hex initialPosition) {
         super("You", INITIAL_HEALTH, 5, 0);
         this.position = initialPosition;
         this.food = INITIAL_FOOD;
+        this.ammunitionByWeapon = new EnumMap<>(Weapon.class);
+
+        for (Weapon weapon : Weapon.values()) {
+            if (weapon.usesAmmunition()) {
+                this.ammunitionByWeapon.put(weapon, 0);
+            }
+        }
     }
 
     Hex position() {
@@ -26,10 +36,9 @@ class Player extends Combatant {
     }
 
     @Override
-    Attack receiveAttackFrom(Combatant combatant) {
-        Attack attackReceived = new Attack(combatant, this, combatant.attack, this.defence);
-        this.health = Math.max(0, this.health - attackReceived.actualDamage());
-        return attackReceived;
+    Attack receiveAttack(Attack attack) {
+        this.health = Math.max(0, this.health - attack.actualDamage());
+        return attack;
     }
 
     void heal(int amount) {
@@ -48,6 +57,14 @@ class Player extends Combatant {
         if (amount > 0) {
             this.food += amount;
         }
+    }
+
+    void restockAmmunition(Weapon weapon, int amount) {
+        if (amount <= 0 || !weapon.usesAmmunition()) {
+            return;
+        }
+
+        this.ammunitionByWeapon.merge(weapon, amount, Integer::sum);
     }
 
     void consumeTravelSupplies() {

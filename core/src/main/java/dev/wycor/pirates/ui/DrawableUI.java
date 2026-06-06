@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.Sea;
+import dev.wycor.pirates.game.Weapon;
 import dev.wycor.pirates.geometry.Direction;
 
 import java.util.List;
@@ -99,7 +100,7 @@ public class DrawableUI {
         float combatButtonsY = worldHeight * 0.45f;
         this.combatButtons = List.of(
             new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY + ACTION_BUTTON_HEIGHT * 1.2f,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Attack", Sea::attemptToAttack),
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Cutlass", sea -> sea.attemptToAttack(Weapon.CUTLASS)),
             new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY - ACTION_BUTTON_HEIGHT * 1.2f,
                 ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Flee", Sea::attemptToFlee)
         );
@@ -250,7 +251,7 @@ public class DrawableUI {
             if (sea.hasActiveCombat()) {
                 switch (keycode) {
                     case Input.Keys.SPACE:
-                        sea.attemptToAttack();
+                        sea.attemptToAttack(Weapon.CUTLASS);
                         return true;
                     case Input.Keys.F:
                         sea.attemptToFlee();

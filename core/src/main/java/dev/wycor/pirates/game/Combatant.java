@@ -13,7 +13,7 @@ public abstract class Combatant {
         this.defence = defence;
     }
 
-    abstract Attack receiveAttackFrom(Combatant combatant);
+    abstract Attack receiveAttack(Attack attack);
 
     String name() {
         return this.name;
