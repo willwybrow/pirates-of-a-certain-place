@@ -4,6 +4,8 @@ import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SeaCombatMovementTest {
@@ -16,11 +18,11 @@ class SeaCombatMovementTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex) {
+            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
                     return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 1, 0, 0) { });
                 }
-                return super.create(hex);
+                return EmptyTile.generate();
             }
         });
 
@@ -41,7 +43,7 @@ class SeaCombatMovementTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex) {
+            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 if (east.equals(hex)) {
                     return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 9, 0, 0) { });
                 }
@@ -73,7 +75,7 @@ class SeaCombatMovementTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex) {
+            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
                     return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Fatal Squid", 100, 30, 0) { });
                 }

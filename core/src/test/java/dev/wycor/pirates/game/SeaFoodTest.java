@@ -4,6 +4,8 @@ import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SeaFoodTest {
@@ -19,7 +21,7 @@ class SeaFoodTest {
     void eachVisitedTileConsumesOneFoodWhileFoodIsAvailable() {
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex) {
+            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 return EmptyTile.generate();
             }
         });
@@ -34,7 +36,7 @@ class SeaFoodTest {
     void movingAtZeroFoodConsumesFiveHealthInstead() {
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex) {
+            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 return EmptyTile.generate();
             }
         });
@@ -58,7 +60,7 @@ class SeaFoodTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex) {
+            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 if (islandHex.equals(hex)) {
                     return IslandTile.generate();
                 }
@@ -77,7 +79,7 @@ class SeaFoodTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex) {
+            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 if (islandHex.equals(hex)) {
                     return IslandTile.generate();
                 }

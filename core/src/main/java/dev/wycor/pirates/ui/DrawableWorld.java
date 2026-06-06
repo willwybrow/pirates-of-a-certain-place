@@ -70,6 +70,7 @@ public class DrawableWorld {
     }
 
     public void draw(float dt) {
+        sea.recalculateGameState(System.currentTimeMillis());
         repointCamera(dt);
 
         viewport.apply();

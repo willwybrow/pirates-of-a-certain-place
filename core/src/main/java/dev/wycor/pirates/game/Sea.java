@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 public class Sea {
     private static final int MAX_LOG_LINES = 60;
+    private static final long TREASURE_TILE_TRAVEL_DELAY_MILLIS = 1_000;
 
     private Player player;
     private final TileFactory tileFactory;
@@ -53,6 +54,10 @@ public class Sea {
     }
 
     public Sea recalculateGameState() {
+        return recalculateGameState(System.currentTimeMillis());
+    }
+
+    public Sea recalculateGameState(long timestampMillis) {
         /*
         1. the player has already input the command to go to a tile (by clicking the direction button to sail there), setting headingTo
         2. the tile is generated (if it's not generated already)
@@ -121,6 +126,14 @@ public class Sea {
             }
         }
 
+        if (destinationTile instanceof TreasureTile) {
+            long readyAtMillis = travelInput.timestampMillis + TREASURE_TILE_TRAVEL_DELAY_MILLIS;
+            if (timestampMillis < readyAtMillis) {
+                pruneProcessedInputs();
+                return this;
+            }
+        }
+
         if (!destinationTile.isPlayerRewarded()) {
             Reward reward = destinationTile.applyRewards();
             applyReward(reward);
@@ -139,17 +152,17 @@ public class Sea {
     }
 
     public SeaTile whatsAt(Hex location) {
-        return generatedHexagons.computeIfAbsent(location, hex -> tileFactory.create(hex, player.capturedTreasures()));
+        return generatedHexagons.computeIfAbsent(location, hex -> tileFactory.create(hex, playerDetails(), generatedHexagons.values()));
     }
 
     public void attemptToTravel(Direction direction) {
-        if (isGameOver()) {
+        if (isGameOver() || isTreasureMovementDelayActive(System.currentTimeMillis())) {
             return;
         }
 
         inputEvents.add(InputEvent.travel(nextInputSequence++, System.currentTimeMillis(), direction));
 
-        recalculateGameState();
+        recalculateGameState(System.currentTimeMillis());
     }
 
     public void attemptToAttack() {
@@ -157,21 +170,21 @@ public class Sea {
     }
 
     public void attemptToAttack(Weapon weapon) {
-        if (isGameOver()) {
+        if (isGameOver() || isTreasureMovementDelayActive(System.currentTimeMillis())) {
             return;
         }
 
         inputEvents.add(InputEvent.attack(nextInputSequence++, System.currentTimeMillis(), Objects.requireNonNull(weapon, "weapon")));
-        recalculateGameState();
+        recalculateGameState(System.currentTimeMillis());
     }
 
     public void attemptToFlee() {
-        if (isGameOver()) {
+        if (isGameOver() || isTreasureMovementDelayActive(System.currentTimeMillis())) {
             return;
         }
 
         inputEvents.add(InputEvent.flee(nextInputSequence++, System.currentTimeMillis()));
-        recalculateGameState();
+        recalculateGameState(System.currentTimeMillis());
     }
 
     public void startNewGame() {
@@ -289,6 +302,22 @@ public class Sea {
 
     private void pruneProcessedInputs() {
         inputEvents.removeIf(inputEvent -> inputEvent.processed);
+    }
+
+    private boolean isTreasureMovementDelayActive(long timestampMillis) {
+        Optional<InputEvent> nextTravelInput = nextUnprocessedTravelEvent();
+        if (nextTravelInput.isEmpty()) {
+            return false;
+        }
+
+        InputEvent travelInput = nextTravelInput.get();
+        SeaTile destinationTile = whatsAt(travelInput.resolveDestination(player.position()));
+        if (!(destinationTile instanceof TreasureTile)) {
+            return false;
+        }
+
+        long readyAtMillis = travelInput.timestampMillis + TREASURE_TILE_TRAVEL_DELAY_MILLIS;
+        return timestampMillis < readyAtMillis;
     }
 
     private void addLog(String line) {

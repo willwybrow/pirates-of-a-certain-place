@@ -4,6 +4,8 @@ import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SeaCombatFleeTest {
@@ -15,11 +17,11 @@ class SeaCombatFleeTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex) {
+            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
                     return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 10, 3, 0) { });
                 }
-                return super.create(hex);
+                return EmptyTile.generate();
             }
         });
 
@@ -42,11 +44,11 @@ class SeaCombatFleeTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex) {
+            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
                     return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 9, 0, 0) { });
                 }
-                return super.create(hex);
+                return EmptyTile.generate();
             }
         });
 

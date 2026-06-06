@@ -3,6 +3,7 @@ package dev.wycor.pirates.game;
 import java.util.Random;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public enum SeaEvent {
@@ -83,6 +84,33 @@ public enum SeaEvent {
             capturedTreasures.put(treasure, false);
         }
         return generate(capturedTreasures);
+    }
+
+    public static Optional<Treasure> treasureFor(SeaEvent seaEvent) {
+        switch (seaEvent) {
+            case EMERALD_OF_HOPE:
+                return Optional.of(Treasure.EMERALD_OF_HOPE);
+            case GOLDEN_SWORD_OF_YR:
+                return Optional.of(Treasure.GOLDEN_SWORD_OF_YR);
+            case KING_FLYNNS_ROYAL_SCEPTRE:
+                return Optional.of(Treasure.KING_FLYNNS_ROYAL_SCEPTRE);
+            case SACRED_ONYX_CROSS:
+                return Optional.of(Treasure.SACRED_ONYX_CROSS);
+            case LOST_PEARL_OF_JEHVA:
+                return Optional.of(Treasure.LOST_PEARL_OF_JEHVA);
+            case QUEEN_LATHAS_CROWN:
+                return Optional.of(Treasure.QUEEN_LATHAS_CROWN);
+            case RUBY_RING_OF_POWER:
+                return Optional.of(Treasure.RUBY_RING_OF_POWER);
+            case SILVER_CHALICE_OF_AUNGE:
+                return Optional.of(Treasure.SILVER_CHALICE_OF_AUNGE);
+            case MURPHYS_CHEST_OF_GOLD:
+                return Optional.of(Treasure.MURPHYS_CHEST_OF_GOLD);
+            case QUEEN_LATHAS_NECKLACE:
+                return Optional.of(Treasure.QUEEN_LATHAS_NECKLACE);
+            default:
+                return Optional.empty();
+        }
     }
 
     private static SeaEvent randomUncapturedTreasureEvent(EnumMap<Treasure, Boolean> capturedTreasures) {

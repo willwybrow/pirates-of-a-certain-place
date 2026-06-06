@@ -2,19 +2,24 @@ package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.geometry.Hex;
 
+import java.util.Collection;
 import java.util.EnumMap;
-import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class TileFactory {
 
-    public SeaTile create(Hex hex) {
-        return SeaTile.random();
-    }
+    public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
+        Objects.requireNonNull(playerDetails, "playerDetails");
+        EnumMap<Treasure, Boolean> unavailableTreasures = new EnumMap<>(playerDetails.capturedTreasures());
+        for (SeaTile existingTile : existingTiles) {
+            Optional<Treasure> pendingTreasure = SeaEvent.treasureFor(existingTile.pendingEvent());
+            pendingTreasure.ifPresent(treasure -> unavailableTreasures.put(treasure, true));
 
-    public SeaTile create(Hex hex, Map<Treasure, Boolean> capturedTreasures) {
-        if (this.getClass() == TileFactory.class) {
-            return SeaTile.random(new EnumMap<>(capturedTreasures));
+            Optional<Treasure> completedTreasure = SeaEvent.treasureFor(existingTile.completedEvent());
+            completedTreasure.ifPresent(treasure -> unavailableTreasures.put(treasure, true));
         }
-        return create(hex);
+
+        return SeaTile.random(unavailableTreasures);
     }
 }
