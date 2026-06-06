@@ -2,7 +2,9 @@ package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.geometry.Hex;
 
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Map;
 
 class Player extends Combatant {
 
@@ -13,17 +15,23 @@ class Player extends Combatant {
     private Hex position;
     private int food;
     private final EnumMap<Weapon, Integer> ammunitionByWeapon;
+    private final EnumMap<Treasure, Boolean> capturedTreasures;
 
     Player(Hex initialPosition) {
         super("You", INITIAL_HEALTH, 5, 0);
         this.position = initialPosition;
         this.food = INITIAL_FOOD;
         this.ammunitionByWeapon = new EnumMap<>(Weapon.class);
+        this.capturedTreasures = new EnumMap<>(Treasure.class);
 
         for (Weapon weapon : Weapon.values()) {
             if (weapon.usesAmmunition()) {
                 this.ammunitionByWeapon.put(weapon, 0);
             }
+        }
+
+        for (Treasure treasure : Treasure.values()) {
+            this.capturedTreasures.put(treasure, false);
         }
     }
 
@@ -65,6 +73,14 @@ class Player extends Combatant {
         }
 
         this.ammunitionByWeapon.merge(weapon, amount, Integer::sum);
+    }
+
+    void captureTreasure(Treasure treasure) {
+        this.capturedTreasures.put(treasure, true);
+    }
+
+    Map<Treasure, Boolean> capturedTreasures() {
+        return Collections.unmodifiableMap(this.capturedTreasures);
     }
 
     void consumeTravelSupplies() {

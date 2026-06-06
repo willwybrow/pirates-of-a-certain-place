@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.Sea;
 import dev.wycor.pirates.game.SeaEvent;
 import dev.wycor.pirates.game.SeaTile;
+import dev.wycor.pirates.game.Treasure;
 import dev.wycor.pirates.geometry.Hex;
 
 import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
@@ -59,6 +60,7 @@ public class DrawableWorld {
         stockedIslandTexture = new Texture("island_stocked_1x_32.png");
         fogOfWarTexture = new Texture("unexplored_hex_32.png");
         shipTexture = new Texture("hero_ship_1x_32.png");
+        BaseUI.loadTreasureTextures();
         gameOverOverlayTexture = createSolidTexture(0.5f, 0.5f, 0.5f, 0.5f);
         cursive = new Cursive();
         cursive.create();
@@ -98,6 +100,36 @@ public class DrawableWorld {
                         break;
                     case PIRATE_SHIP:
                         drawAtHex(pirateShipTexture, exploredHex);
+                        break;
+                    case EMERALD_OF_HOPE:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.EMERALD_OF_HOPE), exploredHex);
+                        break;
+                    case GOLDEN_SWORD_OF_YR:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.GOLDEN_SWORD_OF_YR), exploredHex);
+                        break;
+                    case KING_FLYNNS_ROYAL_SCEPTRE:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.KING_FLYNNS_ROYAL_SCEPTRE), exploredHex);
+                        break;
+                    case SACRED_ONYX_CROSS:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.SACRED_ONYX_CROSS), exploredHex);
+                        break;
+                    case LOST_PEARL_OF_JEHVA:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.LOST_PEARL_OF_JEHVA), exploredHex);
+                        break;
+                    case QUEEN_LATHAS_CROWN:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.QUEEN_LATHAS_CROWN), exploredHex);
+                        break;
+                    case RUBY_RING_OF_POWER:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.RUBY_RING_OF_POWER), exploredHex);
+                        break;
+                    case SILVER_CHALICE_OF_AUNGE:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.SILVER_CHALICE_OF_AUNGE), exploredHex);
+                        break;
+                    case MURPHYS_CHEST_OF_GOLD:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.MURPHYS_CHEST_OF_GOLD), exploredHex);
+                        break;
+                    case QUEEN_LATHAS_NECKLACE:
+                        drawAtHex(BaseUI.treasureTexture(Treasure.QUEEN_LATHAS_NECKLACE), exploredHex);
                         break;
                     default:
                         break;

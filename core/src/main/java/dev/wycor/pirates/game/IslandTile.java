@@ -27,10 +27,10 @@ public class IslandTile extends SeaTile {
     protected Reward completionRewards() {
         if (suppliesAvailable) {
             suppliesAvailable = false;
-            return Reward.islandSupplies(FOOD_AVAILABLE, 1);
+            return new Reward(10, FOOD_AVAILABLE, 1);
         }
 
-        return Reward.none();
+        return new Reward(0, 0);
     }
 
 }

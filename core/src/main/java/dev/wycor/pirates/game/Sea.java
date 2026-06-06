@@ -30,7 +30,13 @@ public class Sea {
     }
 
     public PlayerDetails playerDetails() {
-        return new PlayerDetails(player.position(), player.health(), player.maxHealth(), player.food());
+        return new PlayerDetails(
+            player.position(),
+            player.health(),
+            player.maxHealth(),
+            player.food(),
+            player.capturedTreasures()
+        );
     }
 
     public boolean isGameOver() {
@@ -106,9 +112,6 @@ public class Sea {
         if (!destinationTile.isPlayerRewarded()) {
             Reward reward = destinationTile.applyRewards();
             applyReward(reward);
-            if (reward.hasAny()) {
-                addLog("Claimed rewards at " + destinationHex + ".");
-            }
         }
 
         player.moveTo(destinationHex);
@@ -124,7 +127,7 @@ public class Sea {
     }
 
     public SeaTile whatsAt(Hex location) {
-        return generatedHexagons.computeIfAbsent(location, tileFactory::create);
+        return generatedHexagons.computeIfAbsent(location, hex -> tileFactory.create(hex, player.capturedTreasures()));
     }
 
     public void attemptToTravel(Direction direction) {
@@ -223,6 +226,10 @@ public class Sea {
             player.restock(reward.food());
         }
         reward.ammunitionByWeapon().forEach(player::restockAmmunition);
+        if (reward.treasure() != null) {
+            player.captureTreasure(reward.treasure());
+            addLog("Recovered " + reward.treasure().name() + ".");
+        }
     }
 
     private void clearActionRequests() {

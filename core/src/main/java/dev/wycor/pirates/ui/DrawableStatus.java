@@ -9,6 +9,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.PlayerDetails;
 import dev.wycor.pirates.game.Sea;
+import dev.wycor.pirates.game.Treasure;
+
+import java.util.Map;
 
 import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
@@ -21,6 +24,8 @@ public class DrawableStatus {
 
     private static final float LINE_HEIGHT = BaseUI.SIXTEEN_PIXELS / 2;
     private static final float CURSIVE_LETTER_WIDTH = BaseUI.SIXTEEN_PIXELS / 4f;
+    private static final float TREASURE_ICON_SIZE = BaseUI.SIXTEEN_PIXELS;
+    private static final float TREASURE_ICON_SPACING = BaseUI.SIXTEEN_PIXELS / 4f;
 
     private Viewport viewport;
     private SpriteBatch batch;
@@ -38,6 +43,7 @@ public class DrawableStatus {
         viewport = new FitViewport(worldWidth, worldHeight);
         batch = new SpriteBatch();
         backgroundTexture = createSolidTexture(0f, 0f, 0f, 0.85f);
+        BaseUI.loadTreasureTextures();
         cursive = new Cursive();
         cursive.create();
     }
@@ -65,8 +71,10 @@ public class DrawableStatus {
 
         batch.setColor(Color.WHITE);
 
+        drawTreasureProgress(player.capturedTreasures());
+
         String[] logLines = sea.recentLog().toArray(new String[]{});
-        int visibleLogLines = Math.max(0, numberOfLines - 1);
+        int visibleLogLines = Math.max(0, numberOfLines - 3);
 
         for (int i = 0; i < Math.min(logLines.length, visibleLogLines); i++) {
             cursive.write(batch, 0f, LINE_HEIGHT * i, logLines[i]);
@@ -86,6 +94,28 @@ public class DrawableStatus {
 
     public void dispose() {
         backgroundTexture.dispose();
+        BaseUI.disposeTreasureTextures();
         batch.dispose();
+    }
+
+    private void drawTreasureProgress(Map<Treasure, Boolean> capturedTreasures) {
+        Treasure[] treasures = Treasure.values();
+        float iconsTotalWidth = (treasures.length * TREASURE_ICON_SIZE) + ((treasures.length - 1) * TREASURE_ICON_SPACING);
+        float drawX = Math.max(0f, (worldWidth - iconsTotalWidth) / 2f);
+        float drawY = worldHeight - LINE_HEIGHT - TREASURE_ICON_SIZE - (LINE_HEIGHT / 4f);
+
+        for (Treasure treasure : treasures) {
+            boolean captured = capturedTreasures.getOrDefault(treasure, false);
+            if (captured) {
+                batch.setColor(1f, 1f, 1f, 1f);
+            } else {
+                batch.setColor(0.4f, 0.4f, 0.4f, 0.6f);
+            }
+
+            batch.draw(BaseUI.treasureTexture(treasure), drawX, drawY, TREASURE_ICON_SIZE, TREASURE_ICON_SIZE);
+            drawX += TREASURE_ICON_SIZE + TREASURE_ICON_SPACING;
+        }
+
+        batch.setColor(Color.WHITE);
     }
 }

@@ -24,6 +24,6 @@ public class EmptyTile extends SeaTile {
 
     @Override
     protected Reward completionRewards() {
-        return Reward.none();
+        return new Reward(0, 0);
     }
 }
