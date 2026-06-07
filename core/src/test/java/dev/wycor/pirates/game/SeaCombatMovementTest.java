@@ -77,7 +77,7 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Fatal Squid", 100, 30, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Fatal Squid", 100, 120, 0) { });
                 }
                 return EmptyTile.generate();
             }

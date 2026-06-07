@@ -29,7 +29,7 @@ class SeaFoodTest {
         sea.attemptToTravel(Direction.EAST);
 
         assertThat(sea.playerDetails().food()).isEqualTo(19);
-        assertThat(sea.playerDetails().health()).isEqualTo(20);
+        assertThat(sea.playerDetails().health()).isEqualTo(100);
     }
 
     @Test
@@ -46,12 +46,12 @@ class SeaFoodTest {
         }
 
         assertThat(sea.playerDetails().food()).isEqualTo(0);
-        assertThat(sea.playerDetails().health()).isEqualTo(20);
+        assertThat(sea.playerDetails().health()).isEqualTo(100);
 
         sea.attemptToTravel(Direction.EAST);
 
         assertThat(sea.playerDetails().food()).isEqualTo(0);
-        assertThat(sea.playerDetails().health()).isEqualTo(15);
+        assertThat(sea.playerDetails().health()).isEqualTo(95);
     }
 
     @Test

@@ -53,6 +53,14 @@ public class Sea {
             .orElse(false);
     }
 
+    public Optional<CombatantDetails> currentOpponentDetails() {
+        return getPlayerDestination()
+            .map(this::whatsAt)
+            .map(SeaTile::getCombatant)
+            .filter(opponent -> opponent != null && !opponent.isDead())
+            .map(opponent -> new CombatantDetails(opponent.name(), opponent.health(), opponent.maxHealth()));
+    }
+
     public Sea recalculateGameState() {
         return recalculateGameState(System.currentTimeMillis());
     }

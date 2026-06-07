@@ -3,12 +3,14 @@ package dev.wycor.pirates.game;
 public abstract class Combatant {
     final String name;
     int health;
+    final int maxHealth;
     final int attack;
     final int defence;
 
     protected Combatant(String name, int health, int attack, int defence) {
         this.name = name;
         this.health = health;
+        this.maxHealth = health;
         this.attack = attack;
         this.defence = defence;
     }
@@ -21,6 +23,10 @@ public abstract class Combatant {
 
     int health() {
         return this.health;
+    }
+
+    int maxHealth() {
+        return this.maxHealth;
     }
 
     boolean isDead() {

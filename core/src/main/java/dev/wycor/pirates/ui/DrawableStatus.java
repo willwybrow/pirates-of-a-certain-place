@@ -65,9 +65,16 @@ public class DrawableStatus {
         cursive.write(batch, 0f, worldHeight - LINE_HEIGHT, healthLabel);
 
         String foodLabel = "Food: " + player.food();
-        float foodX = worldWidth - (foodLabel.length() * CURSIVE_LETTER_WIDTH);
+        float foodX = (worldWidth - (foodLabel.length() * CURSIVE_LETTER_WIDTH)) / 2f;
         batch.setColor(0.95f, 0.72f, 0.22f, 1f);
         cursive.write(batch, Math.max(0f, foodX), worldHeight - LINE_HEIGHT, foodLabel);
+
+        sea.currentOpponentDetails().ifPresent(opponent -> {
+            String opponentLabel = opponent.name() + ": " + opponent.health() + "/" + opponent.maxHealth();
+            float opponentX = worldWidth - (opponentLabel.length() * CURSIVE_LETTER_WIDTH);
+            batch.setColor(0.9f, 0.9f, 0.9f, 1f);
+            cursive.write(batch, Math.max(0f, opponentX), worldHeight - LINE_HEIGHT, opponentLabel);
+        });
 
         batch.setColor(Color.WHITE);
 

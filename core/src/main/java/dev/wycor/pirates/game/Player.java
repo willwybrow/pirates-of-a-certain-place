@@ -8,7 +8,7 @@ import java.util.Map;
 
 class Player extends Combatant {
 
-    private static final int INITIAL_HEALTH = 20;
+    private static final int INITIAL_HEALTH = 100;
     private static final int INITIAL_FOOD = 20;
     private static final int STARVATION_DAMAGE_PER_MOVE = 5;
 

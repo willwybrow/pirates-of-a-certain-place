@@ -29,7 +29,7 @@ class SeaCombatFleeTest {
         sea.attemptToAttack();
 
         int healthAfterCombatRound = sea.playerDetails().health();
-        assertThat(healthAfterCombatRound).isLessThan(20);
+        assertThat(healthAfterCombatRound).isLessThan(100);
 
         sea.attemptToFlee();
 
