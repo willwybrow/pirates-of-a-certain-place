@@ -16,6 +16,10 @@ import java.util.Map;
 import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
 public class DrawableStatus {
+    private static final int HEALTH_FIELD_WIDTH = 3;
+    private static final int FOOD_FIELD_WIDTH = 3;
+    private static final int ENEMY_HEALTH_FIELD_WIDTH = 3;
+
     private final Sea sea;
     private final float worldWidth;
     private final float worldHeight;
@@ -60,17 +64,24 @@ public class DrawableStatus {
 
         PlayerDetails player = sea.playerDetails();
 
-        String healthLabel = "Health: " + player.health() + "/" + player.maxHealth();
+        String healthLabel = "Health: "
+            + leftPad(Integer.toString(player.health()), HEALTH_FIELD_WIDTH)
+            + "/"
+            + leftPad(Integer.toString(player.maxHealth()), HEALTH_FIELD_WIDTH);
         batch.setColor(0.95f, 0.2f, 0.2f, 1f);
         cursive.write(batch, 0f, worldHeight - LINE_HEIGHT, healthLabel);
 
-        String foodLabel = "Food: " + player.food();
+        String foodLabel = "Food: " + leftPad(Integer.toString(player.food()), FOOD_FIELD_WIDTH);
         float foodX = (worldWidth - (foodLabel.length() * CURSIVE_LETTER_WIDTH)) / 2f;
         batch.setColor(0.95f, 0.72f, 0.22f, 1f);
         cursive.write(batch, Math.max(0f, foodX), worldHeight - LINE_HEIGHT, foodLabel);
 
         sea.currentOpponentDetails().ifPresent(opponent -> {
-            String opponentLabel = opponent.name() + ": " + opponent.health() + "/" + opponent.maxHealth();
+            String opponentLabel = opponent.name()
+                + ": "
+                + leftPad(Integer.toString(opponent.health()), ENEMY_HEALTH_FIELD_WIDTH)
+                + "/"
+                + leftPad(Integer.toString(opponent.maxHealth()), ENEMY_HEALTH_FIELD_WIDTH);
             float opponentX = worldWidth - (opponentLabel.length() * CURSIVE_LETTER_WIDTH);
             batch.setColor(0.9f, 0.9f, 0.9f, 1f);
             cursive.write(batch, Math.max(0f, opponentX), worldHeight - LINE_HEIGHT, opponentLabel);
@@ -124,5 +135,18 @@ public class DrawableStatus {
         }
 
         batch.setColor(Color.WHITE);
+    }
+
+    private String leftPad(String value, int width) {
+        if (value.length() >= width) {
+            return value;
+        }
+
+        StringBuilder builder = new StringBuilder(width);
+        for (int i = value.length(); i < width; i++) {
+            builder.append(' ');
+        }
+        builder.append(value);
+        return builder.toString();
     }
 }
