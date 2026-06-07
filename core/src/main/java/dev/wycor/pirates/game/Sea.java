@@ -26,7 +26,7 @@ public class Sea {
         this.tileFactory = Objects.requireNonNull(tileFactory, "tileFactory");
         this.processedInputTimestamp = -1L;
         this.activeTravelInput = null;
-        enqueueStartNewGameInput(0L);
+        startNewGame(0L);
         recalculateGameState(0L);
     }
 
@@ -226,11 +226,6 @@ public class Sea {
         recalculateGameState(timestampMillis);
     }
 
-    public void startNewGame(long timestampMillis) {
-        enqueueStartNewGameInput(timestampMillis);
-        recalculateGameState(timestampMillis);
-    }
-
     public Stream<Hex> walkTheSpiral(int layers) {
         return this.generatedHexagons.keySet().stream();
     }
@@ -342,7 +337,7 @@ public class Sea {
         return true;
     }
 
-    private void enqueueStartNewGameInput(long timestampMillis) {
+    public void startNewGame(long timestampMillis) {
         submitInputEvent(InputEvent.startNewGame(timestampMillis));
     }
 
