@@ -29,7 +29,8 @@ public class Sea {
             player.health(),
             player.maxHealth(),
             player.food(),
-            player.capturedTreasures()
+            player.capturedTreasures(),
+            player.ammunitionByWeapon()
         );
     }
 
@@ -215,6 +216,11 @@ public class Sea {
         }
 
         if (inputEvent.type == InputType.ATTACK) {
+            if (!player.consumeAmmunition(inputEvent.weapon)) {
+                addLog("Out of ammunition for " + inputEvent.weapon.displayName() + ".");
+                return true;
+            }
+
             resolveCombatRound(opponent, inputEvent.weapon).forEach(this::addAttackLog);
             return true;
         }

@@ -74,12 +74,30 @@ class Player extends Combatant {
         this.ammunitionByWeapon.merge(weapon, amount, Integer::sum);
     }
 
+    boolean consumeAmmunition(Weapon weapon) {
+        if (!weapon.usesAmmunition()) {
+            return true;
+        }
+
+        int currentAmmunition = this.ammunitionByWeapon.getOrDefault(weapon, 0);
+        if (currentAmmunition <= 0) {
+            return false;
+        }
+
+        this.ammunitionByWeapon.put(weapon, currentAmmunition - 1);
+        return true;
+    }
+
     void captureTreasure(Treasure treasure) {
         this.capturedTreasures.put(treasure, true);
     }
 
     Map<Treasure, Boolean> capturedTreasures() {
         return Collections.unmodifiableMap(this.capturedTreasures);
+    }
+
+    Map<Weapon, Integer> ammunitionByWeapon() {
+        return Collections.unmodifiableMap(this.ammunitionByWeapon);
     }
 
     boolean hasCapturedAllTreasures() {

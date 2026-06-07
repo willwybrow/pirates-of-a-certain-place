@@ -118,6 +118,6 @@ class TreasureGenerationTest {
     }
 
     private static PlayerDetails playerDetailsWith(EnumMap<Treasure, Boolean> capturedTreasures) {
-        return new PlayerDetails(Hex.ORIGIN, 20, 20, 20, capturedTreasures);
+        return new PlayerDetails(Hex.ORIGIN, 20, 20, 20, capturedTreasures, new EnumMap<>(Weapon.class));
     }
 }

@@ -14,14 +14,16 @@ import dev.wycor.pirates.game.Sea;
 import dev.wycor.pirates.game.Weapon;
 import dev.wycor.pirates.geometry.Direction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
 public class DrawableUI {
     private static final float PIXELS_TO_WORLD = 0.005f;
-    private static final float ACTION_BUTTON_WIDTH = 72f * PIXELS_TO_WORLD;
+    private static final float ACTION_BUTTON_WIDTH = 100f * PIXELS_TO_WORLD;
     private static final float ACTION_BUTTON_HEIGHT = 15f * PIXELS_TO_WORLD;
 
     private final float worldWidth;
@@ -73,6 +75,7 @@ public class DrawableUI {
         arrowSouthWest = new Texture("arrow_downleft_16.png");
         buttonRectUp = new Texture("button_rect_up_72x15.png");
         buttonRectDown = new Texture("button_rect_down_72x15.png");
+        BaseUI.loadWeaponTextures();
 
         cursive.create();
 
@@ -97,13 +100,26 @@ public class DrawableUI {
             new DirectionButton(button, arrowSouthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHEAST, System.currentTimeMillis()))
         );
 
-        float combatButtonsY = worldHeight * 0.45f;
-        this.combatButtons = List.of(
-            new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY + ACTION_BUTTON_HEIGHT * 1.2f,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Cutlass", sea -> sea.attemptToAttack(Weapon.CUTLASS, System.currentTimeMillis())),
-            new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY - ACTION_BUTTON_HEIGHT * 1.2f,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Flee", sea -> sea.attemptToFlee(System.currentTimeMillis()))
-        );
+        float combatButtonsY = worldHeight * 0.5f;
+        float combatButtonSpacing = ACTION_BUTTON_HEIGHT * 1.15f;
+        Weapon[] weapons = Weapon.values();
+        float firstWeaponY = combatButtonsY + combatButtonSpacing * ((weapons.length - 1) / 2f);
+
+        ArrayList<ActionButton> combatButtons = new ArrayList<>(weapons.length + 1);
+        for (int i = 0; i < weapons.length; i++) {
+            Weapon weapon = weapons[i];
+            float buttonY = firstWeaponY - (i * combatButtonSpacing);
+            Texture weaponTexture = BaseUI.weaponTexture(weapon);
+            combatButtons.add(new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, buttonY,
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, weaponTexture, sea -> weaponButtonLabel(sea, weapon),
+                sea -> sea.attemptToAttack(weapon, System.currentTimeMillis())));
+        }
+
+        combatButtons.add(new ActionButton(buttonRectUp, buttonRectDown, uiCentreX,
+            firstWeaponY - (weapons.length * combatButtonSpacing),
+            ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Flee", sea -> sea.attemptToFlee(System.currentTimeMillis())));
+
+        this.combatButtons = combatButtons;
 
         this.gameOverButtons = List.of(
             new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, worldHeight * 0.45f,
@@ -124,10 +140,10 @@ public class DrawableUI {
         uiBatch.draw(uiPanelBackgroundTexture, 0f, 0f, worldWidth, worldHeight);
 
         if (sea.isGameOver()) {
-            gameOverButtons.forEach(button -> button.draw(uiBatch, cursive));
+            gameOverButtons.forEach(button -> button.draw(uiBatch, cursive, sea));
         } else if (sea.hasActiveCombat()) {
             cursive.write(uiBatch, 4 * gridSquare, worldHeight - 8 * gridSquare, "COMBAT!");
-            combatButtons.forEach(button -> button.draw(uiBatch, cursive));
+            combatButtons.forEach(button -> button.draw(uiBatch, cursive, sea));
         } else {
             directionButtons.forEach(db -> db.draw(uiBatch));
         }
@@ -154,7 +170,22 @@ public class DrawableUI {
         arrowSouthWest.dispose();
         buttonRectUp.dispose();
         buttonRectDown.dispose();
+        BaseUI.disposeWeaponTextures();
         uiBatch.dispose();
+    }
+
+    private static String weaponButtonLabel(Sea sea, Weapon weapon) {
+        String label = weaponButtonLabel(weapon);
+        if (!weapon.usesAmmunition()) {
+            return label;
+        }
+
+        int ammunition = sea.playerDetails().ammunitionByWeapon().getOrDefault(weapon, 0);
+        return label + " [" + ammunition + "]";
+    }
+
+    private static String weaponButtonLabel(Weapon weapon) {
+        return weapon.displayName();
     }
 
     static class DirectionButton {
@@ -188,15 +219,22 @@ public class DrawableUI {
     static class ActionButton {
         private final Texture upTexture;
         private final Texture downTexture;
+        private final Texture iconTexture;
+        private final Function<Sea, String> label;
         private final Consumer<Sea> action;
         private final Rectangle rectangle;
-        private final String label;
         private boolean pressed;
 
         ActionButton(Texture upTexture, Texture downTexture, float worldCenterX, float worldCenterY, float widthInWorld,
-                     float heightInWorld, String label, Consumer<Sea> action) {
+                      float heightInWorld, String label, Consumer<Sea> action) {
+            this(upTexture, downTexture, worldCenterX, worldCenterY, widthInWorld, heightInWorld, null, sea -> label, action);
+        }
+
+        ActionButton(Texture upTexture, Texture downTexture, float worldCenterX, float worldCenterY, float widthInWorld,
+                     float heightInWorld, Texture iconTexture, Function<Sea, String> label, Consumer<Sea> action) {
             this.upTexture = upTexture;
             this.downTexture = downTexture;
+            this.iconTexture = iconTexture;
             this.action = action;
             this.label = label;
             this.rectangle = new Rectangle(
@@ -207,12 +245,32 @@ public class DrawableUI {
             );
         }
 
-        void draw(SpriteBatch batch, Cursive cursive) {
+        void draw(SpriteBatch batch, Cursive cursive, Sea sea) {
             batch.draw(pressed ? downTexture : upTexture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 
-            float textX = rectangle.x + (rectangle.width - (label.length() * BaseUI.CURSIVE_LETTER_WIDTH)) / 2f;
+            String text = label.apply(sea);
+            float textWidth = text.length() * BaseUI.CURSIVE_LETTER_WIDTH;
+
+            float iconWidth = 0f;
+            float iconGap = 0f;
+            if (iconTexture != null) {
+                float iconHeight = rectangle.height * 0.8f;
+                iconWidth = iconHeight * ((float) iconTexture.getWidth() / (float) iconTexture.getHeight());
+                iconGap = BaseUI.CURSIVE_LETTER_WIDTH / 2f;
+            }
+
+            float contentWidth = textWidth + iconWidth + iconGap;
+            float contentX = rectangle.x + (rectangle.width - contentWidth) / 2f;
+
+            if (iconTexture != null) {
+                float iconHeight = rectangle.height * 0.8f;
+                float iconY = rectangle.y + (rectangle.height - iconHeight) / 2f;
+                batch.draw(iconTexture, contentX, iconY, iconWidth, iconHeight);
+            }
+
+            float textX = contentX + iconWidth + iconGap;
             float textY = rectangle.y + (rectangle.height - BaseUI.CURSIVE_LETTER_HEIGHT) / 2f;
-            cursive.write(batch, textX, textY, label);
+            cursive.write(batch, textX, textY, text);
         }
 
         boolean pointInside(Vector2 screenPoint) {

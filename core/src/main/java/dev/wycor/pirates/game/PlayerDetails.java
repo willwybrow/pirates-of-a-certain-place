@@ -12,13 +12,16 @@ public class PlayerDetails {
     private final int maxHealth;
     private final int food;
     private final EnumMap<Treasure, Boolean> capturedTreasures;
+    private final EnumMap<Weapon, Integer> ammunitionByWeapon;
 
-    public PlayerDetails(Hex position, int health, int maxHealth, int food, Map<Treasure, Boolean> capturedTreasures) {
+    public PlayerDetails(Hex position, int health, int maxHealth, int food, Map<Treasure, Boolean> capturedTreasures,
+                         Map<Weapon, Integer> ammunitionByWeapon) {
         this.position = position;
         this.health = health;
         this.maxHealth = maxHealth;
         this.food = food;
         this.capturedTreasures = new EnumMap<>(capturedTreasures);
+        this.ammunitionByWeapon = new EnumMap<>(ammunitionByWeapon);
     }
 
     public Hex position() {
@@ -39,6 +42,10 @@ public class PlayerDetails {
 
     public Map<Treasure, Boolean> capturedTreasures() {
         return Collections.unmodifiableMap(this.capturedTreasures);
+    }
+
+    public Map<Weapon, Integer> ammunitionByWeapon() {
+        return Collections.unmodifiableMap(this.ammunitionByWeapon);
     }
 
     public boolean isGameOver() {

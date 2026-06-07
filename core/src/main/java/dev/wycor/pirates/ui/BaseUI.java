@@ -2,6 +2,7 @@ package dev.wycor.pirates.ui;
 
 import com.badlogic.gdx.graphics.Texture;
 import dev.wycor.pirates.game.Treasure;
+import dev.wycor.pirates.game.Weapon;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -14,7 +15,9 @@ public class BaseUI {
     public static final float THIRTY_TWO_PIXELS = 0.16f;
 
     private static final EnumMap<Treasure, Texture> TREASURE_TEXTURES = new EnumMap<>(Treasure.class);
+    private static final EnumMap<Weapon, Texture> WEAPON_TEXTURES = new EnumMap<>(Weapon.class);
     private static boolean treasureTexturesLoaded;
+    private static boolean weaponTexturesLoaded;
 
     public static synchronized void loadTreasureTextures() {
         if (treasureTexturesLoaded) {
@@ -35,6 +38,21 @@ public class BaseUI {
         treasureTexturesLoaded = true;
     }
 
+    public static synchronized void loadWeaponTextures() {
+        if (weaponTexturesLoaded) {
+            return;
+        }
+
+        WEAPON_TEXTURES.put(Weapon.CUTLASS, new Texture("swords_1x_24.png"));
+        WEAPON_TEXTURES.put(Weapon.CANNON, new Texture("cannons_1x_24.png"));
+        WEAPON_TEXTURES.put(Weapon.GIANT_AXE, new Texture("giant_axe_1x_24.png"));
+        WEAPON_TEXTURES.put(Weapon.FLAMING_ARROWS, new Texture("flaming_arrows_1x_24.png"));
+        WEAPON_TEXTURES.put(Weapon.HARPOON, new Texture("harpoon_1x_24.png"));
+        WEAPON_TEXTURES.put(Weapon.ICE_DAGGERS, new Texture("ice_daggers_1x_24.png"));
+
+        weaponTexturesLoaded = true;
+    }
+
     public static Texture treasureTexture(Treasure treasure) {
         loadTreasureTextures();
         return TREASURE_TEXTURES.get(treasure);
@@ -45,6 +63,16 @@ public class BaseUI {
         return Collections.unmodifiableMap(TREASURE_TEXTURES);
     }
 
+    public static Texture weaponTexture(Weapon weapon) {
+        loadWeaponTextures();
+        return WEAPON_TEXTURES.get(weapon);
+    }
+
+    public static Map<Weapon, Texture> weaponTextures() {
+        loadWeaponTextures();
+        return Collections.unmodifiableMap(WEAPON_TEXTURES);
+    }
+
     public static synchronized void disposeTreasureTextures() {
         if (!treasureTexturesLoaded) {
             return;
@@ -53,5 +81,15 @@ public class BaseUI {
         TREASURE_TEXTURES.values().forEach(Texture::dispose);
         TREASURE_TEXTURES.clear();
         treasureTexturesLoaded = false;
+    }
+
+    public static synchronized void disposeWeaponTextures() {
+        if (!weaponTexturesLoaded) {
+            return;
+        }
+
+        WEAPON_TEXTURES.values().forEach(Texture::dispose);
+        WEAPON_TEXTURES.clear();
+        weaponTexturesLoaded = false;
     }
 }
