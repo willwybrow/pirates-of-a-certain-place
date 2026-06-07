@@ -147,7 +147,7 @@ public class DrawableWorld {
             float overlayY = cameraPosition.y - worldHeight / 2f;
             batch.draw(gameOverOverlayTexture, overlayX, overlayY, worldWidth, worldHeight);
 
-            String gameOverLabel = "GAME OVER";
+            String gameOverLabel = sea.gameOverMessage();
             float letterWidth = BaseUI.CURSIVE_LETTER_WIDTH;
             float textX = cameraPosition.x - (gameOverLabel.length() * letterWidth) / 2f;
             float textY = cameraPosition.y;

@@ -10,7 +10,6 @@ class Player extends Combatant {
 
     private static final int INITIAL_HEALTH = 100;
     private static final int INITIAL_FOOD = 20;
-    private static final int STARVATION_DAMAGE_PER_MOVE = 5;
 
     private Hex position;
     private int food;
@@ -83,12 +82,18 @@ class Player extends Combatant {
         return Collections.unmodifiableMap(this.capturedTreasures);
     }
 
+    boolean hasCapturedAllTreasures() {
+        for (Boolean captured : this.capturedTreasures.values()) {
+            if (!captured) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     void consumeTravelSupplies() {
         if (this.food > 0) {
             this.food -= 1;
-            return;
         }
-
-        this.health = Math.max(0, this.health - STARVATION_DAMAGE_PER_MOVE);
     }
 }

@@ -42,6 +42,16 @@ public class PlayerDetails {
     }
 
     public boolean isGameOver() {
-        return health <= 0;
+        if (health <= 0 || food <= 0) {
+            return true;
+        }
+
+        for (Boolean captured : capturedTreasures.values()) {
+            if (!captured) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

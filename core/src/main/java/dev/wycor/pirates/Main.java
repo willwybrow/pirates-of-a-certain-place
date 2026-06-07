@@ -3,7 +3,9 @@ package dev.wycor.pirates;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.ScreenUtils;
-import dev.wycor.pirates.game.Sea;import dev.wycor.pirates.ui.BaseUI;import dev.wycor.pirates.ui.DrawableStatus;import dev.wycor.pirates.ui.DrawableUI;import dev.wycor.pirates.ui.DrawableWorld;
+import dev.wycor.pirates.game.Sea;
+import dev.wycor.pirates.game.TileFactory;
+import dev.wycor.pirates.ui.BaseUI;import dev.wycor.pirates.ui.DrawableStatus;import dev.wycor.pirates.ui.DrawableUI;import dev.wycor.pirates.ui.DrawableWorld;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
@@ -17,7 +19,7 @@ public class Main extends ApplicationAdapter {
     private static final float HEX_HEIGHT = BaseUI.THIRTY_TWO_PIXELS;
     private static final float TARGET_ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT;
 
-    private final Sea sea = new Sea();
+    private final Sea sea = new Sea(new TileFactory());
     private final DrawableWorld world = new DrawableWorld(sea, LEFT_WIDTH, TOP_LEFT_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
     private final DrawableStatus status = new DrawableStatus(sea, LEFT_WIDTH, BOTTOM_LEFT_HEIGHT);
     private final DrawableUI ui = new DrawableUI(sea, RIGHT_WIDTH, SCREEN_HEIGHT, HEX_WIDTH, HEX_HEIGHT);

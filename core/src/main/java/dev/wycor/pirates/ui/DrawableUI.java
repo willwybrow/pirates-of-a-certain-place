@@ -88,26 +88,26 @@ public class DrawableUI {
         float horizontalSpacing = 0.53f;
 
         this.directionButtons = List.of(
-            new DirectionButton(button, arrowNorthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHWEST)),
-            new DirectionButton(button, arrowNorthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHEAST)),
-            new DirectionButton(button, arrowWest, uiCentreX - 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.WEST)),
+            new DirectionButton(button, arrowNorthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHWEST, System.currentTimeMillis())),
+            new DirectionButton(button, arrowNorthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHEAST, System.currentTimeMillis())),
+            new DirectionButton(button, arrowWest, uiCentreX - 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.WEST, System.currentTimeMillis())),
             /* new DirectionButton(button, button, uiCentreX, uiCentreY - 2 * unitHeight, unitWidth, unitHeight, sea -> sea.whatsAt(sea.currentPosition()).complete()), // TODO -- middle button?? */
-            new DirectionButton(button, arrowEast, uiCentreX + 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.EAST)),
-            new DirectionButton(button, arrowSouthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHWEST)),
-            new DirectionButton(button, arrowSouthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHEAST))
+            new DirectionButton(button, arrowEast, uiCentreX + 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.EAST, System.currentTimeMillis())),
+            new DirectionButton(button, arrowSouthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHWEST, System.currentTimeMillis())),
+            new DirectionButton(button, arrowSouthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHEAST, System.currentTimeMillis()))
         );
 
         float combatButtonsY = worldHeight * 0.45f;
         this.combatButtons = List.of(
             new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY + ACTION_BUTTON_HEIGHT * 1.2f,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Cutlass", sea -> sea.attemptToAttack(Weapon.CUTLASS)),
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Cutlass", sea -> sea.attemptToAttack(Weapon.CUTLASS, System.currentTimeMillis())),
             new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, combatButtonsY - ACTION_BUTTON_HEIGHT * 1.2f,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Flee", Sea::attemptToFlee)
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Flee", sea -> sea.attemptToFlee(System.currentTimeMillis()))
         );
 
         this.gameOverButtons = List.of(
             new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, worldHeight * 0.45f,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "New Game", Sea::startNewGame)
+                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "New Game", sea -> sea.startNewGame(System.currentTimeMillis()))
         );
 
         Gdx.input.setInputProcessor(new InputHandler());
@@ -241,7 +241,7 @@ public class DrawableUI {
                 switch (keycode) {
                     case Input.Keys.ENTER:
                     case Input.Keys.N:
-                        sea.startNewGame();
+                        sea.startNewGame(System.currentTimeMillis());
                         return true;
                     default:
                         return false;
@@ -251,10 +251,10 @@ public class DrawableUI {
             if (sea.hasActiveCombat()) {
                 switch (keycode) {
                     case Input.Keys.SPACE:
-                        sea.attemptToAttack(Weapon.CUTLASS);
+                        sea.attemptToAttack(Weapon.CUTLASS, System.currentTimeMillis());
                         return true;
                     case Input.Keys.F:
-                        sea.attemptToFlee();
+                        sea.attemptToFlee(System.currentTimeMillis());
                         return true;
                     default:
                         return false;
@@ -263,22 +263,22 @@ public class DrawableUI {
 
             switch(keycode) {
                 case Input.Keys.E:
-                    sea.attemptToTravel(Direction.NORTHEAST);
+                    sea.attemptToTravel(Direction.NORTHEAST, System.currentTimeMillis());
                     return true;
                 case Input.Keys.D:
-                    sea.attemptToTravel(Direction.EAST);
+                    sea.attemptToTravel(Direction.EAST, System.currentTimeMillis());
                     return true;
                 case Input.Keys.X:
-                    sea.attemptToTravel(Direction.SOUTHEAST);
+                    sea.attemptToTravel(Direction.SOUTHEAST, System.currentTimeMillis());
                     return true;
                 case Input.Keys.Z:
-                    sea.attemptToTravel(Direction.SOUTHWEST);
+                    sea.attemptToTravel(Direction.SOUTHWEST, System.currentTimeMillis());
                     return true;
                 case Input.Keys.A:
-                    sea.attemptToTravel(Direction.WEST);
+                    sea.attemptToTravel(Direction.WEST, System.currentTimeMillis());
                     return true;
                 case Input.Keys.W:
-                    sea.attemptToTravel(Direction.NORTHWEST);
+                    sea.attemptToTravel(Direction.NORTHWEST, System.currentTimeMillis());
                     return true;
             }
             return false;
@@ -291,8 +291,8 @@ public class DrawableUI {
 
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+            Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
             if (button == Input.Buttons.LEFT && sea.isGameOver()) {
-                Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
                 boolean anyPressed = false;
                 for (ActionButton gameOverButton : gameOverButtons) {
                     boolean inside = gameOverButton.pointInside(clickPoint);
@@ -303,7 +303,6 @@ public class DrawableUI {
             }
 
             if (button == Input.Buttons.LEFT && sea.hasActiveCombat()) {
-                Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
                 boolean anyPressed = false;
                 for (ActionButton combatButton : combatButtons) {
                     boolean inside = combatButton.pointInside(clickPoint);

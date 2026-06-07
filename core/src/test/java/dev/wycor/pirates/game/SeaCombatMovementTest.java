@@ -26,10 +26,10 @@ class SeaCombatMovementTest {
             }
         });
 
-        sea.attemptToTravel(direction);
+        sea.attemptToTravel(direction, 1L);
         assertThat(sea.playerDetails().position()).isEqualTo(start);
 
-        sea.attemptToAttack();
+        sea.attemptToAttack(2L);
 
         assertThat(sea.playerDetails().position())
             .as("player should enter destination as soon as killing blow ends combat")
@@ -51,18 +51,18 @@ class SeaCombatMovementTest {
             }
         });
 
-        sea.attemptToTravel(Direction.EAST);
+        sea.attemptToTravel(Direction.EAST, 1L);
 
         assertThat(sea.hasActiveCombat()).isTrue();
         assertThat(sea.getPlayerDestination()).contains(east);
 
-        sea.attemptToTravel(Direction.WEST);
-        sea.attemptToAttack();
+        sea.attemptToTravel(Direction.WEST, 2L);
+        sea.attemptToAttack(3L);
 
         assertThat(sea.playerDetails().position()).isEqualTo(start);
         assertThat(sea.getPlayerDestination()).contains(east);
 
-        sea.attemptToAttack();
+        sea.attemptToAttack(4L);
 
         assertThat(sea.playerDetails().position()).isEqualTo(east);
         assertThat(sea.getPlayerDestination()).isEmpty();
@@ -83,13 +83,14 @@ class SeaCombatMovementTest {
             }
         });
 
-        sea.attemptToTravel(Direction.EAST);
-        sea.attemptToAttack();
+        sea.attemptToTravel(Direction.EAST, 1L);
+        sea.attemptToAttack(2L);
 
         assertThat(sea.isGameOver()).isTrue();
+        assertThat(sea.gameOverMessage()).isEqualTo("You have been defeated!");
         assertThat(sea.playerDetails().position()).isEqualTo(start);
 
-        sea.attemptToTravel(Direction.EAST);
+        sea.attemptToTravel(Direction.EAST, 3L);
 
         assertThat(sea.playerDetails().position()).isEqualTo(start);
     }

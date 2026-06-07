@@ -25,13 +25,13 @@ class SeaCombatFleeTest {
             }
         });
 
-        sea.attemptToTravel(Direction.EAST);
-        sea.attemptToAttack();
+        sea.attemptToTravel(Direction.EAST, 1L);
+        sea.attemptToAttack(2L);
 
         int healthAfterCombatRound = sea.playerDetails().health();
         assertThat(healthAfterCombatRound).isLessThan(100);
 
-        sea.attemptToFlee();
+        sea.attemptToFlee(3L);
 
         assertThat(sea.playerDetails().position()).isEqualTo(start);
         assertThat(sea.playerDetails().health()).isEqualTo(healthAfterCombatRound);
@@ -52,14 +52,14 @@ class SeaCombatFleeTest {
             }
         });
 
-        sea.attemptToTravel(Direction.EAST);
-        sea.attemptToAttack();
+        sea.attemptToTravel(Direction.EAST, 1L);
+        sea.attemptToAttack(2L);
         assertThat(sea.hasActiveCombat()).isTrue();
 
-        sea.attemptToFlee();
+        sea.attemptToFlee(3L);
 
-        sea.attemptToTravel(Direction.EAST);
-        sea.attemptToAttack();
+        sea.attemptToTravel(Direction.EAST, 4L);
+        sea.attemptToAttack(5L);
 
         assertThat(sea.playerDetails().position()).isEqualTo(start);
         assertThat(sea.hasActiveCombat())

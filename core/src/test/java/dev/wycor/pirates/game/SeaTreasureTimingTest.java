@@ -26,9 +26,9 @@ class SeaTreasureTimingTest {
             }
         });
 
-        sea.attemptToTravel(direction);
+        sea.attemptToTravel(direction, 1L);
 
-        long now = System.currentTimeMillis();
+        long now = 0L;
         sea.recalculateGameState(now);
 
         SeaTile destinationTile = sea.whatsAt(destination);

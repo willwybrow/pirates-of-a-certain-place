@@ -12,7 +12,7 @@ class SeaFoodTest {
 
     @Test
     void playerStartsWithTwentyFood() {
-        Sea sea = new Sea();
+        Sea sea = new Sea(new TileFactory());
 
         assertThat(sea.playerDetails().food()).isEqualTo(20);
     }
@@ -26,14 +26,14 @@ class SeaFoodTest {
             }
         });
 
-        sea.attemptToTravel(Direction.EAST);
+        sea.attemptToTravel(Direction.EAST, 1L);
 
         assertThat(sea.playerDetails().food()).isEqualTo(19);
         assertThat(sea.playerDetails().health()).isEqualTo(100);
     }
 
     @Test
-    void movingAtZeroFoodConsumesFiveHealthInstead() {
+    void reachingZeroFoodEndsTheGame() {
         Sea sea = new Sea(new TileFactory() {
             @Override
             public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
@@ -42,16 +42,20 @@ class SeaFoodTest {
         });
 
         for (int i = 0; i < 20; i++) {
-            sea.attemptToTravel(i % 2 == 0 ? Direction.EAST : Direction.WEST);
+            sea.attemptToTravel(i % 2 == 0 ? Direction.EAST : Direction.WEST, i + 1L);
         }
 
         assertThat(sea.playerDetails().food()).isEqualTo(0);
         assertThat(sea.playerDetails().health()).isEqualTo(100);
+        assertThat(sea.isGameOver()).isTrue();
+        assertThat(sea.gameOverMessage()).isEqualTo("Your crew has starved!");
 
-        sea.attemptToTravel(Direction.EAST);
+        Hex positionAtStarvation = sea.playerDetails().position();
+        sea.attemptToTravel(Direction.EAST, 21L);
 
         assertThat(sea.playerDetails().food()).isEqualTo(0);
-        assertThat(sea.playerDetails().health()).isEqualTo(95);
+        assertThat(sea.playerDetails().health()).isEqualTo(100);
+        assertThat(sea.playerDetails().position()).isEqualTo(positionAtStarvation);
     }
 
     @Test
@@ -68,7 +72,7 @@ class SeaFoodTest {
             }
         });
 
-        sea.attemptToTravel(Direction.EAST);
+        sea.attemptToTravel(Direction.EAST, 1L);
 
         assertThat(sea.playerDetails().food()).isEqualTo(29);
     }
@@ -87,9 +91,9 @@ class SeaFoodTest {
             }
         });
 
-        sea.attemptToTravel(Direction.EAST);
-        sea.attemptToTravel(Direction.WEST);
-        sea.attemptToTravel(Direction.EAST);
+        sea.attemptToTravel(Direction.EAST, 1L);
+        sea.attemptToTravel(Direction.WEST, 2L);
+        sea.attemptToTravel(Direction.EAST, 3L);
 
         assertThat(sea.playerDetails().food()).isEqualTo(27);
     }
