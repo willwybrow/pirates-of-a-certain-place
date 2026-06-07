@@ -1,8 +1,10 @@
 package dev.wycor.pirates.geometry;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class Hex {
     public static final Hex ORIGIN = new Hex(0, 0);
@@ -41,6 +43,19 @@ public class Hex {
             ));
         }
         return neighbours;
+    }
+
+    public Stream<Hex> spiral(int layers) {
+        HashSet<Hex> hexes = new HashSet<>();
+        var n = Math.abs(layers);
+
+        for (int q = -n; q<= n; q++) {
+            for (int r = Math.max(-n, -q-n); r <= Math.min(n, -q+n); r++) {
+                hexes.add(new Hex(this.q() + q, this.r() + r));
+            }
+        }
+
+        return hexes.stream();
     }
 
     public Hex neighbour(Direction direction) {

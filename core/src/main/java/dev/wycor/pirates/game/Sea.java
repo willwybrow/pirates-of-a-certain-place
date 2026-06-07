@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 public class Sea {
     private static final int MAX_LOG_LINES = 60;
+    private static final int WORLD_LAYERS = 8;
     private static final long TREASURE_TILE_TRAVEL_DELAY_MILLIS = 1_000;
 
     private Player player;
@@ -43,7 +44,9 @@ public class Sea {
     }
 
     public Optional<Hex> getPlayerDestination() {
-        return nextUnprocessedTravelEvent().map(inputEvent -> inputEvent.resolveDestination(player.position()));
+        return nextUnprocessedTravelEvent()
+            .map(inputEvent -> inputEvent.resolveDestination(player.position()))
+            .filter(this::isWithinWorld);
     }
 
     public boolean hasActiveCombat() {
@@ -93,6 +96,12 @@ public class Sea {
         markTravelInputsAfter(travelInput.sequence);
 
         Hex destinationHex = travelInput.resolveDestination(player.position());
+        if (!isWithinWorld(destinationHex)) {
+            travelInput.processed = true;
+            pruneProcessedInputs();
+            return this;
+        }
+
         SeaTile destinationTile = whatsAt(destinationHex).spy(); // 2. and 3. -- generate and reveal
         if (!travelInput.destinationRevealed) {
             addLog("Set course " + travelInput.direction + " and spied " + destinationTile.pendingEvent().name() + ".");
@@ -160,6 +169,10 @@ public class Sea {
     }
 
     public SeaTile whatsAt(Hex location) {
+        if (!isWithinWorld(location)) {
+            return EmptyTile.generate().spy();
+        }
+
         return generatedHexagons.computeIfAbsent(location, hex -> tileFactory.create(hex, playerDetails(), generatedHexagons.values()));
     }
 
@@ -203,21 +216,12 @@ public class Sea {
 
         this.player = new Player(Hex.ORIGIN);
         this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
+        preGenerateWorld();
         addLog("Set sail from home waters.");
     }
 
     public Stream<Hex> walkTheSpiral(int layers) {
-        Hex start = getPlayerDestination().orElseGet(player::position);
-        HashSet<Hex> hexes = new HashSet<>();
-        var n = Math.abs(layers);
-
-        for (int q = -n; q<= n; q++) {
-            for (int r = Math.max(-n, -q-n); r <= Math.min(n, -q+n); r++) {
-                hexes.add(new Hex(start.q() + q, start.r() + r));
-            }
-        }
-
-        return hexes.stream();
+        return this.generatedHexagons.keySet().stream();
     }
 
     public List<String> recentLog() {
@@ -339,6 +343,61 @@ public class Sea {
         if (log.isEmpty() || !"GAME OVER.".equals(log.peekFirst())) {
             addLog("GAME OVER.");
         }
+    }
+
+    private void preGenerateWorld() {
+        ArrayList<Hex> worldHexes = new ArrayList<>();
+        Hex.ORIGIN.spiral(WORLD_LAYERS)
+            .filter(this::isWithinWorld)
+            .filter(hex -> !Hex.ORIGIN.equals(hex))
+            .forEach(worldHexes::add);
+
+        worldHexes.sort(Comparator.comparingInt(Hex::q).thenComparingInt(Hex::r));
+
+        for (Hex hex : worldHexes) {
+            generatedHexagons.computeIfAbsent(hex, candidate -> tileFactory.create(candidate, playerDetails(), generatedHexagons.values()));
+        }
+
+        ensureAllTreasuresPlaced(worldHexes);
+    }
+
+    private void ensureAllTreasuresPlaced(List<Hex> worldHexes) {
+        EnumSet<Treasure> placedTreasures = EnumSet.noneOf(Treasure.class);
+        for (SeaTile tile : generatedHexagons.values()) {
+            SeaEvent.treasureFor(tile.pendingEvent()).ifPresent(placedTreasures::add);
+            SeaEvent.treasureFor(tile.completedEvent()).ifPresent(placedTreasures::add);
+        }
+
+        ArrayList<Treasure> missingTreasures = new ArrayList<>();
+        for (Treasure treasure : Treasure.values()) {
+            if (!placedTreasures.contains(treasure)) {
+                missingTreasures.add(treasure);
+            }
+        }
+
+        if (missingTreasures.isEmpty()) {
+            return;
+        }
+
+        Iterator<Treasure> missingIterator = missingTreasures.iterator();
+        for (Hex hex : worldHexes) {
+            if (!missingIterator.hasNext()) {
+                break;
+            }
+
+            SeaTile currentTile = generatedHexagons.get(hex);
+            if (currentTile instanceof TreasureTile) {
+                continue;
+            }
+
+            generatedHexagons.put(hex, TreasureTile.forTreasure(missingIterator.next()));
+        }
+    }
+
+    private boolean isWithinWorld(Hex hex) {
+        return Math.abs(hex.q()) <= WORLD_LAYERS
+            && Math.abs(hex.r()) <= WORLD_LAYERS
+            && Math.abs(hex.s()) <= WORLD_LAYERS;
     }
 
     private enum InputType {
