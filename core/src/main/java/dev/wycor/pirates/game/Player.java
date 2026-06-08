@@ -10,6 +10,7 @@ class Player extends Combatant {
 
     private static final int INITIAL_HEALTH = 100;
     private static final int INITIAL_FOOD = 20;
+    private static final int INITIAL_AMMUNITION_PER_WEAPON = 1;
 
     private Hex position;
     private int food;
@@ -25,7 +26,7 @@ class Player extends Combatant {
 
         for (Weapon weapon : Weapon.values()) {
             if (weapon.usesAmmunition()) {
-                this.ammunitionByWeapon.put(weapon, 0);
+                this.ammunitionByWeapon.put(weapon, INITIAL_AMMUNITION_PER_WEAPON);
             }
         }
 

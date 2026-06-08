@@ -19,7 +19,7 @@ class SeaCombatAmmunitionTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 9, 3, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 200, 3, 0) { });
                 }
                 return EmptyTile.generate();
             }
@@ -27,16 +27,34 @@ class SeaCombatAmmunitionTest {
 
         sea.attemptToTravel(Direction.EAST, 1L);
 
+        // Spend the single starting cannon round so the weapon is now empty.
+        sea.attemptToAttack(Weapon.CANNON, 2L);
+        assertThat(sea.playerDetails().ammunitionByWeapon().getOrDefault(Weapon.CANNON, 0)).isEqualTo(0);
+
         int playerHealthBeforeAttack = sea.playerDetails().health();
         int opponentHealthBeforeAttack = opponentHealth(sea);
 
-        sea.attemptToAttack(Weapon.CANNON, 2L);
+        sea.attemptToAttack(Weapon.CANNON, 3L);
 
         assertThat(sea.playerDetails().health()).isEqualTo(playerHealthBeforeAttack);
         assertThat(opponentHealth(sea)).isEqualTo(opponentHealthBeforeAttack);
         assertThat(sea.playerDetails().position()).isEqualTo(start);
         assertThat(sea.hasActiveCombat()).isTrue();
         assertThat(sea.recentLog().get(0)).isEqualTo("Out of ammunition for Cannon.");
+    }
+
+    @Test
+    void playerStartsEachGameWithOneRoundOfEveryAmmunitionWeapon() {
+        Sea sea = new Sea(new TileFactory());
+
+        for (Weapon weapon : Weapon.values()) {
+            int ammunition = sea.playerDetails().ammunitionByWeapon().getOrDefault(weapon, 0);
+            if (weapon.usesAmmunition()) {
+                assertThat(ammunition).as("starting ammunition for %s", weapon).isEqualTo(1);
+            } else {
+                assertThat(ammunition).as("%s does not use ammunition", weapon).isEqualTo(0);
+            }
+        }
     }
 
     @Test
@@ -52,28 +70,32 @@ class SeaCombatAmmunitionTest {
                     return IslandTile.generate();
                 }
                 if (monsterHex.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Ammo Squid", 40, 0, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Ammo Squid", 100, 0, 0) { });
                 }
                 return EmptyTile.generate();
             }
         });
 
+        // Starts with one cannon round; the island cache adds another, for two in total.
         sea.attemptToTravel(Direction.WEST, 1L);
-        assertThat(sea.playerDetails().ammunitionByWeapon().getOrDefault(Weapon.CANNON, 0)).isEqualTo(1);
+        assertThat(sea.playerDetails().ammunitionByWeapon().getOrDefault(Weapon.CANNON, 0)).isEqualTo(2);
 
         sea.attemptToTravel(Direction.EAST, 2L);
         sea.attemptToTravel(Direction.EAST, 3L);
 
-        int opponentHealthBeforeFirstCannonAttack = opponentHealth(sea);
-        sea.attemptToAttack(Weapon.CANNON, 4L);
+        // Spend both rounds; each landed attack damages the opponent and consumes ammunition.
+        long timestamp = 4L;
+        int opponentHealthBeforeBarrage = opponentHealth(sea);
+        sea.attemptToAttack(Weapon.CANNON, timestamp++);
+        sea.attemptToAttack(Weapon.CANNON, timestamp++);
 
-        int opponentHealthAfterFirstCannonAttack = opponentHealth(sea);
-        assertThat(opponentHealthAfterFirstCannonAttack).isLessThan(opponentHealthBeforeFirstCannonAttack);
+        int opponentHealthAfterBarrage = opponentHealth(sea);
+        assertThat(opponentHealthAfterBarrage).isLessThan(opponentHealthBeforeBarrage);
         assertThat(sea.playerDetails().ammunitionByWeapon().getOrDefault(Weapon.CANNON, 0)).isEqualTo(0);
 
-        sea.attemptToAttack(Weapon.CANNON, 5L);
+        sea.attemptToAttack(Weapon.CANNON, timestamp);
 
-        assertThat(opponentHealth(sea)).isEqualTo(opponentHealthAfterFirstCannonAttack);
+        assertThat(opponentHealth(sea)).isEqualTo(opponentHealthAfterBarrage);
         assertThat(sea.recentLog().get(0)).isEqualTo("Out of ammunition for Cannon.");
         assertThat(sea.playerDetails().ammunitionByWeapon().getOrDefault(Weapon.CANNON, 0)).isEqualTo(0);
     }
