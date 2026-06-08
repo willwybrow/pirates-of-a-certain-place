@@ -2,8 +2,6 @@ package dev.wycor.pirates.game;
 
 public class EmptyTile extends SeaTile {
 
-    private boolean visited;
-
     EmptyTile() {
         super(SeaEvent.NOTHING, false);
     }

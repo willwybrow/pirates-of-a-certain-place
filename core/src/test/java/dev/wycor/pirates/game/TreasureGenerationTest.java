@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,15 +15,16 @@ class TreasureGenerationTest {
     private static final int RANDOM_SAMPLES_PER_COMBINATION = 300;
 
     @Test
-    void randomSeaEventsNeverSelectAlreadyAcquiredTreasure() {
-        forEachTreasureCombination(capturedTreasures -> {
+    void randomSeaEventsNeverSelectAnUnavailableTreasure() {
+        Random random = new Random(1L);
+        forEachTreasureCombination(unavailableTreasures -> {
             for (int i = 0; i < RANDOM_SAMPLES_PER_COMBINATION; i++) {
-                SeaEvent event = SeaEvent.random(capturedTreasures);
+                SeaEvent event = SeaEvent.random(unavailableTreasures, random);
                 Optional<Treasure> generatedTreasure = SeaEvent.treasureFor(event);
 
                 if (generatedTreasure.isPresent()) {
-                    assertThat(capturedTreasures.get(generatedTreasure.get()))
-                        .as("event %s must not be selected when treasure is already acquired", event)
+                    assertThat(unavailableTreasures.get(generatedTreasure.get()))
+                        .as("event %s must not be selected when treasure is unavailable", event)
                         .isFalse();
                 }
             }
@@ -30,18 +32,19 @@ class TreasureGenerationTest {
     }
 
     @Test
-    void tileGenerationNeverProducesAlreadyAcquiredTreasureTile() {
+    void tileGenerationNeverProducesAnUnavailableTreasureTile() {
         TileFactory tileFactory = new TileFactory();
+        Random random = new Random(2L);
 
-        forEachTreasureCombination(capturedTreasures -> {
+        forEachTreasureCombination(unavailableTreasures -> {
             for (int i = 0; i < RANDOM_SAMPLES_PER_COMBINATION; i++) {
-                SeaTile generatedTile = tileFactory.create(new Hex(i, -i), playerDetailsWith(capturedTreasures), List.of());
+                SeaTile generatedTile = tileFactory.create(new Hex(i, -i), random, existingTilesFor(unavailableTreasures));
                 SeaEvent pendingEvent = generatedTile.pendingEvent();
                 Optional<Treasure> generatedTreasure = SeaEvent.treasureFor(pendingEvent);
 
                 if (generatedTreasure.isPresent()) {
-                    assertThat(capturedTreasures.get(generatedTreasure.get()))
-                        .as("tile event %s must not generate an already acquired treasure", pendingEvent)
+                    assertThat(unavailableTreasures.get(generatedTreasure.get()))
+                        .as("tile event %s must not generate an unavailable treasure", pendingEvent)
                         .isFalse();
                 }
             }
@@ -51,16 +54,17 @@ class TreasureGenerationTest {
     @Test
     void tileGenerationNeverDuplicatesTreasureAlreadyPresentInExistingTiles() {
         TileFactory tileFactory = new TileFactory();
+        Random random = new Random(3L);
 
-        forEachTreasureCombination(capturedTreasures -> {
+        forEachTreasureCombination(unavailableTreasures -> {
             for (Treasure existingTreasure : Treasure.values()) {
-                if (capturedTreasures.get(existingTreasure)) {
+                if (unavailableTreasures.get(existingTreasure)) {
                     continue;
                 }
 
                 SeaTile existingTile = treasureTileFor(existingTreasure);
                 for (int i = 0; i < RANDOM_SAMPLES_PER_COMBINATION; i++) {
-                    SeaTile generatedTile = tileFactory.create(new Hex(i, i + 1), playerDetailsWith(capturedTreasures), List.of(existingTile));
+                    SeaTile generatedTile = tileFactory.create(new Hex(i, i + 1), random, List.of(existingTile));
                     Optional<Treasure> generatedTreasure = SeaEvent.treasureFor(generatedTile.pendingEvent());
 
                     assertThat(generatedTreasure)
@@ -76,13 +80,23 @@ class TreasureGenerationTest {
         int combinationCount = 1 << treasures.length;
 
         for (int bitmask = 0; bitmask < combinationCount; bitmask++) {
-            EnumMap<Treasure, Boolean> capturedTreasures = new EnumMap<>(Treasure.class);
+            EnumMap<Treasure, Boolean> unavailableTreasures = new EnumMap<>(Treasure.class);
             for (int i = 0; i < treasures.length; i++) {
-                boolean acquired = (bitmask & (1 << i)) != 0;
-                capturedTreasures.put(treasures[i], acquired);
+                boolean unavailable = (bitmask & (1 << i)) != 0;
+                unavailableTreasures.put(treasures[i], unavailable);
             }
-            assertion.assertFor(capturedTreasures);
+            assertion.assertFor(unavailableTreasures);
         }
+    }
+
+    private static List<SeaTile> existingTilesFor(EnumMap<Treasure, Boolean> unavailableTreasures) {
+        java.util.ArrayList<SeaTile> existingTiles = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<Treasure, Boolean> entry : unavailableTreasures.entrySet()) {
+            if (entry.getValue()) {
+                existingTiles.add(treasureTileFor(entry.getKey()));
+            }
+        }
+        return existingTiles;
     }
 
     private static SeaTile treasureTileFor(Treasure treasure) {
@@ -114,10 +128,6 @@ class TreasureGenerationTest {
 
     @FunctionalInterface
     private interface TreasureCombinationAssertion {
-        void assertFor(EnumMap<Treasure, Boolean> capturedTreasures);
-    }
-
-    private static PlayerDetails playerDetailsWith(EnumMap<Treasure, Boolean> capturedTreasures) {
-        return new PlayerDetails(Hex.ORIGIN, 20, 20, 20, capturedTreasures, new EnumMap<>(Weapon.class));
+        void assertFor(EnumMap<Treasure, Boolean> unavailableTreasures);
     }
 }

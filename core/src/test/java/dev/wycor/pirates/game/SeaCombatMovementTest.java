@@ -18,7 +18,7 @@ class SeaCombatMovementTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
                     return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 1, 0, 0) { });
                 }
@@ -43,7 +43,7 @@ class SeaCombatMovementTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (east.equals(hex)) {
                     return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 9, 0, 0) { });
                 }
@@ -79,7 +79,7 @@ class SeaCombatMovementTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
                     return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Fatal Squid", 100, 120, 0) { });
                 }

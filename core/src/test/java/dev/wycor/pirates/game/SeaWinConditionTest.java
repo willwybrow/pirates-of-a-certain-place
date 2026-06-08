@@ -37,7 +37,7 @@ class SeaWinConditionTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, PlayerDetails playerDetails, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 Treasure treasure = treasureByHex.get(hex);
                 if (treasure != null) {
                     return TreasureTile.forTreasure(treasure);

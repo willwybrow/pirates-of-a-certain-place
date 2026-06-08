@@ -23,7 +23,7 @@ public abstract class Monster extends Combatant {
     }
 
     @Override
-    Attack receiveAttack(Attack attack) {
+    Attack receiveAttack(Attack attack, java.util.Random combatRandom) {
         int mitigatedBaseDamage = Math.max(0, attack.unmitigatedAttackDamage() - attack.defenderMitigation());
         int effectivenessAdjustedDamage = mitigatedBaseDamage;
         if (attack.weapon() != null) {
@@ -31,7 +31,7 @@ public abstract class Monster extends Combatant {
             effectivenessAdjustedDamage = CombatDamage.scaleByMultiplier(mitigatedBaseDamage, effectiveness.damageMultiplier());
         }
 
-        int randomizedDamage = CombatDamage.withVariance(effectivenessAdjustedDamage);
+        int randomizedDamage = CombatDamage.withVariance(effectivenessAdjustedDamage, combatRandom);
         attack.setActualDamage(randomizedDamage);
         this.health = Math.max(0, this.health - randomizedDamage);
         return attack;

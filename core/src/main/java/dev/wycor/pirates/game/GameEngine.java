@@ -1,0 +1,223 @@
+package dev.wycor.pirates.game;
+
+import dev.wycor.pirates.geometry.Direction;
+import dev.wycor.pirates.geometry.Hex;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Pure simulation rules. Given a seed and an ordered list of inputs, the engine folds each input
+ * over a {@link GameState} to determine the exact game state. It holds no state of its own, so the
+ * same seed and inputs always yield an identical result.
+ */
+final class GameEngine {
+    private static final long TREASURE_TILE_TRAVEL_DELAY_MILLIS = 1_000;
+
+    private final TileFactory tileFactory;
+
+    GameEngine(TileFactory tileFactory) {
+        this.tileFactory = tileFactory;
+    }
+
+    /** Builds a fresh state from the seed and folds every input due at or before the timestamp. */
+    GameState replay(long seed, List<GameInput> inputs, long upToTimestampMillis) {
+        GameState state = newGame(seed);
+        for (GameInput input : inputs) {
+            if (input.timestampMillis() <= upToTimestampMillis) {
+                applyInput(state, input);
+            }
+        }
+        advance(state, upToTimestampMillis);
+        return state;
+    }
+
+    /** Creates the opening state for a seed and logs the starting line. */
+    GameState newGame(long seed) {
+        GameState state = new GameState(seed, tileFactory);
+        state.addLog("Set sail from home waters.");
+        return state;
+    }
+
+    /**
+     * Applies a single input to the running state, then advances time-gated consequences. Used both
+     * by full replay and by the incremental live cache.
+     */
+    void applyInput(GameState state, GameInput input) {
+        processGameplayInput(state, input);
+        advance(state, input.timestampMillis());
+    }
+
+    /** Advances time-dependent consequences (travel completion, end-of-game logging) to a timestamp. */
+    void advance(GameState state, long timestampMillis) {
+        resolveActiveTravel(state, timestampMillis);
+        if (state.isGameOver()) {
+            addGameOverLog(state);
+        }
+    }
+
+    private void processGameplayInput(GameState state, GameInput input) {
+        if (state.isGameOver()) {
+            return;
+        }
+
+        if (input instanceof GameInput.Travel) {
+            processTravelInput(state, (GameInput.Travel) input);
+            return;
+        }
+
+        Optional<Combatant> liveOpponent = state.liveOpponentAtDestination();
+        if (liveOpponent.isEmpty()) {
+            return;
+        }
+        Combatant opponent = liveOpponent.get();
+
+        if (input instanceof GameInput.Attack) {
+            processAttackInput(state, (GameInput.Attack) input, opponent);
+            return;
+        }
+
+        if (input instanceof GameInput.Flee) {
+            processFleeInput(state);
+        }
+    }
+
+    private void processTravelInput(GameState state, GameInput.Travel travel) {
+        if (state.outstandingTravel().isPresent()) {
+            return;
+        }
+
+        Hex origin = state.player().position();
+        Hex destination = travel.direction().move(origin);
+        state.beginTravel(destination, travel.timestampMillis());
+    }
+
+    private void processAttackInput(GameState state, GameInput.Attack attack, Combatant opponent) {
+        Weapon weapon = attack.weapon();
+        if (!state.player().consumeAmmunition(weapon)) {
+            state.addLog("Out of ammunition for " + weapon.displayName() + ".");
+            return;
+        }
+
+        resolveCombatRound(state, opponent, weapon).forEach(resolved -> addAttackLog(state, resolved));
+    }
+
+    private void processFleeInput(GameState state) {
+        Optional<GameState.ActiveTravel> outstandingTravel = state.outstandingTravel();
+        if (outstandingTravel.isEmpty()) {
+            return;
+        }
+
+        SeaTile destinationTile = state.world().whatsAt(outstandingTravel.get().destination());
+        destinationTile.onPlayerFled();
+        state.cancelActiveTravel();
+        state.addLog("You broke off and stayed at " + state.player().position() + ".");
+    }
+
+    private List<Attack> resolveCombatRound(GameState state, Combatant opponent, Weapon weapon) {
+        Player player = state.player();
+        ArrayList<Attack> attacksThisRound = new ArrayList<>(2);
+
+        Attack playerAttack = new Attack(player, opponent, weapon, player.attack, opponent.defence);
+        attacksThisRound.add(opponent.receiveAttack(playerAttack, state.combatRandom()));
+
+        if (!opponent.isDead()) {
+            Attack opponentAttack = new Attack(opponent, player, null, opponent.attack, player.defence);
+            attacksThisRound.add(player.receiveAttack(opponentAttack, state.combatRandom()));
+        }
+
+        return attacksThisRound;
+    }
+
+    private void resolveActiveTravel(GameState state, long timestampMillis) {
+        Optional<GameState.ActiveTravel> outstandingTravel = state.outstandingTravel();
+        if (outstandingTravel.isEmpty()) {
+            return;
+        }
+
+        GameState.ActiveTravel travel = outstandingTravel.get();
+        Hex destinationHex = travel.destination();
+        if (!World.isWithinWorld(destinationHex)) {
+            state.cancelActiveTravel();
+            return;
+        }
+
+        SeaTile destinationTile = state.world().whatsAt(destinationHex);
+        boolean wasSpied = destinationTile.isSpied();
+        destinationTile.spy();
+        if (!wasSpied) {
+            state.addLog("Set course " + directionTo(state.player().position(), destinationHex)
+                + " and spied " + destinationTile.pendingEvent().name() + ".");
+        }
+
+        Combatant opponent = destinationTile.getCombatant();
+        if (opponent != null && !opponent.isDead()) {
+            return;
+        }
+
+        if (destinationTile instanceof TreasureTile && !destinationTile.isPlayerRewarded()) {
+            long readyAtMillis = travel.timestampMillis() + TREASURE_TILE_TRAVEL_DELAY_MILLIS;
+            if (timestampMillis < readyAtMillis) {
+                return;
+            }
+        }
+
+        if (!destinationTile.isPlayerRewarded()) {
+            applyReward(state, destinationTile.applyRewards());
+        }
+
+        state.player().moveTo(destinationHex);
+        state.player().consumeTravelSupplies();
+        state.clearActiveTravel();
+    }
+
+    private void applyReward(GameState state, Reward reward) {
+        Player player = state.player();
+        if (reward.health() != 0) {
+            player.heal(reward.health());
+        }
+        if (reward.food() != 0) {
+            player.restock(reward.food());
+        }
+        reward.ammunitionByWeapon().forEach(player::restockAmmunition);
+        if (reward.treasure() != null) {
+            player.captureTreasure(reward.treasure());
+            state.addLog("Recovered " + reward.treasure().displayName() + ".");
+        }
+    }
+
+    private void addAttackLog(GameState state, Attack attack) {
+        state.addLog(attack.initiator().name() + " hit " + attack.defender().name()
+            + " for " + attack.actualDamage() + ".");
+    }
+
+    private void addGameOverLog(GameState state) {
+        String message = gameOverMessage(state.gameEndStatus());
+        if (!message.isEmpty() && (state.logIsEmpty() || !message.equals(state.peekLatestLog()))) {
+            state.addLog(message);
+        }
+    }
+
+    static String gameOverMessage(GameState.GameEndStatus status) {
+        switch (status) {
+            case DEFEATED:
+                return "You have been defeated!";
+            case STARVED:
+                return "Your crew has starved!";
+            case TREASURES_FOUND:
+                return "You found all the treasures!";
+            default:
+                return "";
+        }
+    }
+
+    private static Direction directionTo(Hex from, Hex destination) {
+        for (Direction direction : Direction.values()) {
+            if (direction.move(from).equals(destination)) {
+                return direction;
+            }
+        }
+        return null;
+    }
+}

@@ -1,6 +1,7 @@
 package dev.wycor.pirates.game;
 
 import java.util.EnumMap;
+import java.util.Random;
 
 public abstract class SeaTile {
     private final SeaEvent seaEvent;
@@ -16,12 +17,8 @@ public abstract class SeaTile {
         return EmptyTile.generate().spy();
     }
 
-    public static SeaTile random() {
-        return SeaEvent.random().generate();
-    }
-
-    public static SeaTile random(EnumMap<Treasure, Boolean> capturedTreasures) {
-        return SeaEvent.random(capturedTreasures).generate(capturedTreasures);
+    public static SeaTile random(EnumMap<Treasure, Boolean> unavailableTreasures, Random worldGenRandom) {
+        return SeaEvent.random(unavailableTreasures, worldGenRandom).generate();
     }
 
     public boolean isSpied() {

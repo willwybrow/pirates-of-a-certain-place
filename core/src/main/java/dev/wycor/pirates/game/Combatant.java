@@ -15,7 +15,7 @@ public abstract class Combatant {
         this.defence = defence;
     }
 
-    abstract Attack receiveAttack(Attack attack);
+    abstract Attack receiveAttack(Attack attack, java.util.Random combatRandom);
 
     String name() {
         return this.name;

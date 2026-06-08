@@ -38,12 +38,20 @@ public class DrawableWorld {
     private Texture gameOverOverlayTexture;
     private Cursive cursive;
 
+    private final java.util.function.LongSupplier clock;
+
     public DrawableWorld(Sea sea, float worldWidth, float worldHeight, float hexWidth, float hexHeight) {
+        this(sea, worldWidth, worldHeight, hexWidth, hexHeight, System::currentTimeMillis);
+    }
+
+    public DrawableWorld(Sea sea, float worldWidth, float worldHeight, float hexWidth, float hexHeight,
+                         java.util.function.LongSupplier clock) {
         this.sea = sea;
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
         this.hexWidth = hexWidth;
         this.hexHeight = hexHeight;
+        this.clock = clock;
     }
 
     public void create() {
@@ -70,14 +78,14 @@ public class DrawableWorld {
     }
 
     public void draw(float dt) {
-        sea.recalculateGameState(System.currentTimeMillis());
+        sea.recalculateGameState(clock.getAsLong());
         repointCamera(dt);
 
         viewport.apply();
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
         batch.begin();
-        sea.walkTheSpiral(13).forEach(exploredHex -> {
+        sea.generatedHexes().forEach(exploredHex -> {
             drawAtHex(seaTexture, exploredHex);
             SeaTile whatsHere = sea.whatsAt(exploredHex);
             if (!whatsHere.isSpied()) {
