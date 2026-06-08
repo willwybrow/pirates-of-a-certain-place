@@ -5,7 +5,12 @@ import dev.wycor.pirates.game.Weapon;
 
 public class GhostShip extends Monster {
     public GhostShip() {
-        super("Ghost Ship", 100, 10, 0);
+        super("Ghost Ship", 100);
+    }
+
+    @Override
+    protected Weapon strikeWeapon() {
+        return Weapon.GHOST_STRIKE;
     }
 
     @Override

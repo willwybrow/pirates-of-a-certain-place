@@ -67,11 +67,11 @@ final class GameEngine {
             return;
         }
 
-        Optional<Combatant> liveOpponent = state.liveOpponentAtDestination();
+        Optional<Monster> liveOpponent = state.liveOpponentAtDestination();
         if (liveOpponent.isEmpty()) {
             return;
         }
-        Combatant opponent = liveOpponent.get();
+        Monster opponent = liveOpponent.get();
 
         if (input instanceof GameInput.Attack) {
             processAttackInput(state, (GameInput.Attack) input, opponent);
@@ -93,8 +93,11 @@ final class GameEngine {
         state.beginTravel(destination, travel.timestampMillis());
     }
 
-    private void processAttackInput(GameState state, GameInput.Attack attack, Combatant opponent) {
+    private void processAttackInput(GameState state, GameInput.Attack attack, Monster opponent) {
         Weapon weapon = attack.weapon();
+        if (!state.player().canWield(weapon)) {
+            return;
+        }
         if (!state.player().consumeAmmunition(weapon)) {
             state.addLog("Out of ammunition for " + weapon.displayName() + ".");
             return;
@@ -115,16 +118,15 @@ final class GameEngine {
         state.addLog("You broke off and stayed at " + state.player().position() + ".");
     }
 
-    private List<Attack> resolveCombatRound(GameState state, Combatant opponent, Weapon weapon) {
+    private List<Attack> resolveCombatRound(GameState state, Monster opponent, Weapon weapon) {
         Player player = state.player();
         ArrayList<Attack> attacksThisRound = new ArrayList<>(2);
 
-        Attack playerAttack = new Attack(player, opponent, weapon, player.attack, opponent.defence);
+        Attack playerAttack = new Attack(player, opponent, weapon);
         attacksThisRound.add(opponent.receiveAttack(playerAttack, state.combatRandom()));
 
         if (!opponent.isDead()) {
-            Attack opponentAttack = new Attack(opponent, player, null, opponent.attack, player.defence);
-            attacksThisRound.add(player.receiveAttack(opponentAttack, state.combatRandom()));
+            attacksThisRound.add(opponent.strike(player, state.combatRandom()));
         }
 
         return attacksThisRound;
@@ -151,7 +153,7 @@ final class GameEngine {
                 + " and spied " + destinationTile.pendingEvent().name() + ".");
         }
 
-        Combatant opponent = destinationTile.getCombatant();
+        Monster opponent = destinationTile.getCombatant();
         if (opponent != null && !opponent.isDead()) {
             return;
         }

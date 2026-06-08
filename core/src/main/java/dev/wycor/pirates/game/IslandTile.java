@@ -19,7 +19,7 @@ public class IslandTile extends SeaTile {
     }
 
     @Override
-    protected Combatant combatant() {
+    protected Monster combatant() {
         return null;
     }
 

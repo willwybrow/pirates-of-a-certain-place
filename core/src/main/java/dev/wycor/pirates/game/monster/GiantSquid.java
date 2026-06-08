@@ -5,7 +5,12 @@ import dev.wycor.pirates.game.Weapon;
 
 public class GiantSquid extends Monster {
     public GiantSquid() {
-        super("Giant Squid", 130, 10, 0);
+        super("Giant Squid", 61);
+    }
+
+    @Override
+    protected Weapon strikeWeapon() {
+        return Weapon.SQUID_STRIKE;
     }
 
     @Override

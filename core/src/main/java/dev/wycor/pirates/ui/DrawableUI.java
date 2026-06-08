@@ -113,12 +113,12 @@ public class DrawableUI {
 
         float combatButtonsY = worldHeight * 0.5f;
         float combatButtonSpacing = ACTION_BUTTON_HEIGHT * 1.15f;
-        Weapon[] weapons = Weapon.values();
-        float firstWeaponY = combatButtonsY + combatButtonSpacing * ((weapons.length - 1) / 2f);
+        List<Weapon> weapons = sea.playerDetails().wieldableWeapons();
+        float firstWeaponY = combatButtonsY + combatButtonSpacing * ((weapons.size() - 1) / 2f);
 
-        ArrayList<ActionButton> combatButtons = new ArrayList<>(weapons.length + 1);
-        for (int i = 0; i < weapons.length; i++) {
-            Weapon weapon = weapons[i];
+        ArrayList<ActionButton> combatButtons = new ArrayList<>(weapons.size() + 1);
+        for (int i = 0; i < weapons.size(); i++) {
+            Weapon weapon = weapons.get(i);
             float buttonY = firstWeaponY - (i * combatButtonSpacing);
             Texture weaponTexture = BaseUI.weaponTexture(weapon);
             combatButtons.add(new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, buttonY,
@@ -127,7 +127,7 @@ public class DrawableUI {
         }
 
         combatButtons.add(new ActionButton(buttonRectUp, buttonRectDown, uiCentreX,
-            firstWeaponY - (weapons.length * combatButtonSpacing),
+            firstWeaponY - (weapons.size() * combatButtonSpacing),
             ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Flee", sea -> sea.attemptToFlee(now())));
 
         this.combatButtons = combatButtons;

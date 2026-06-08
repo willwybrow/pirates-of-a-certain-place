@@ -4,17 +4,13 @@ public class Attack {
     private final Combatant initiator;
     private final Combatant defender;
     private final Weapon weapon;
-    private final int unmitigatedAttackDamage;
-    private final int defenderMitigation;
     private int actualDamage;
 
-    public Attack(Combatant initiator, Combatant defender, Weapon weapon, int unmitigatedAttackDamage, int defenderMitigation) {
+    public Attack(Combatant initiator, Combatant defender, Weapon weapon) {
         this.initiator = initiator;
         this.defender = defender;
         this.weapon = weapon;
-        this.unmitigatedAttackDamage = unmitigatedAttackDamage;
-        this.defenderMitigation = defenderMitigation;
-        this.actualDamage = Math.max(0, unmitigatedAttackDamage - defenderMitigation);
+        this.actualDamage = Math.max(0, weapon.baseDamage());
     }
 
     public int actualDamage() {
@@ -25,12 +21,8 @@ public class Attack {
         this.actualDamage = Math.max(0, actualDamage);
     }
 
-    public int unmitigatedAttackDamage() {
-        return this.unmitigatedAttackDamage;
-    }
-
-    public int defenderMitigation() {
-        return this.defenderMitigation;
+    public int baseAttackDamage() {
+        return this.weapon.baseDamage();
     }
 
     public Combatant initiator() {

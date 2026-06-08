@@ -19,7 +19,7 @@ class SeaCombatFleeTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 40, 10, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Test Squid", 40));
                 }
                 return EmptyTile.generate();
             }
@@ -46,7 +46,7 @@ class SeaCombatFleeTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 9, 0, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9));
                 }
                 return EmptyTile.generate();
             }

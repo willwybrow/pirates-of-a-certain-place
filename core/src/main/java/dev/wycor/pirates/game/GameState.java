@@ -81,7 +81,7 @@ final class GameState {
             .filter(World::isWithinWorld);
     }
 
-    Optional<Combatant> liveOpponentAtDestination() {
+    Optional<Monster> liveOpponentAtDestination() {
         return playerDestination()
             .map(world::whatsAt)
             .map(SeaTile::getCombatant)

@@ -5,7 +5,12 @@ import dev.wycor.pirates.game.Weapon;
 
 public class SeaweedMonster extends Monster {
     public SeaweedMonster() {
-        super("Seaweed Monster", 100, 10, 0);
+        super("Seaweed Monster", 100);
+    }
+
+    @Override
+    protected Weapon strikeWeapon() {
+        return Weapon.SEAWEED_STRIKE;
     }
 
     @Override

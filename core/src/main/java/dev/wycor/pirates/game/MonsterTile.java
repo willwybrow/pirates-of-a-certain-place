@@ -52,7 +52,7 @@ public class MonsterTile extends SeaTile {
     }
 
     @Override
-    protected Combatant combatant() {
+    protected Monster combatant() {
         return this.monsterHere;
     }
 

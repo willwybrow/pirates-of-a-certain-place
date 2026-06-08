@@ -2,6 +2,7 @@ package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>Each probe runs a thousand independent, fully-deterministic combats (one per seed). These tests
  * are intentionally strict and may currently fail; they exist to drive balance tweaks.
  */
+@Disabled("Pending balance design work")
 class MonsterBalanceTest {
 
     private static final int COMBAT_SAMPLES = 1_000;

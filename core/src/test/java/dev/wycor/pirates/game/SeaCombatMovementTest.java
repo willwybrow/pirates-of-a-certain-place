@@ -20,7 +20,7 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 1, 0, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 1));
                 }
                 return EmptyTile.generate();
             }
@@ -45,7 +45,7 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (east.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 9, 0, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9));
                 }
                 return EmptyTile.generate();
             }
@@ -81,20 +81,26 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Fatal Squid", 100, 120, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Fatal Squid", 100));
                 }
                 return EmptyTile.generate();
             }
         });
+        sea.startNewGame(42L, 0L);
 
         sea.attemptToTravel(Direction.EAST, 1L);
-        sea.attemptToAttack(2L);
+
+        // The monster out-damages the player over the fight, so trading blows ends in defeat.
+        long timestamp = 2L;
+        while (sea.hasActiveCombat() && !sea.isGameOver() && timestamp < 100L) {
+            sea.attemptToAttack(timestamp++);
+        }
 
         assertThat(sea.isGameOver()).isTrue();
         assertThat(sea.gameOverMessage()).isEqualTo("You have been defeated!");
         assertThat(sea.playerDetails().position()).isEqualTo(start);
 
-        sea.attemptToTravel(Direction.EAST, 3L);
+        sea.attemptToTravel(Direction.EAST, timestamp);
 
         assertThat(sea.playerDetails().position()).isEqualTo(start);
     }

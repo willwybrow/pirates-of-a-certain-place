@@ -108,7 +108,8 @@ public class Sea implements GameView {
             player.maxHealth(),
             player.food(),
             player.capturedTreasures(),
-            player.ammunitionByWeapon()
+            player.ammunitionByWeapon(),
+            player.wieldableWeapons()
         );
     }
 

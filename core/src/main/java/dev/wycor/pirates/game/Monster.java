@@ -1,5 +1,8 @@
 package dev.wycor.pirates.game;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class Monster extends Combatant {
 
     protected enum WeaponEffectiveness {
@@ -18,18 +21,29 @@ public abstract class Monster extends Combatant {
         }
     }
 
-    protected Monster(String name, int health, int attack, int defence) {
-        super(name, health, attack, defence);
+    protected Monster(String name, int health) {
+        super(name, health);
+    }
+
+    /** The strike this monster retaliates with. Each monster knows its own strike. */
+    protected abstract Weapon strikeWeapon();
+
+    @Override
+    List<Weapon> wieldableWeapons() {
+        return Collections.singletonList(strikeWeapon());
+    }
+
+    /** Resolves this monster's retaliatory strike against the given target. */
+    Attack strike(Combatant target, java.util.Random combatRandom) {
+        Attack strike = new Attack(this, target, strikeWeapon());
+        return target.receiveAttack(strike, combatRandom);
     }
 
     @Override
     Attack receiveAttack(Attack attack, java.util.Random combatRandom) {
-        int mitigatedBaseDamage = Math.max(0, attack.unmitigatedAttackDamage() - attack.defenderMitigation());
-        int effectivenessAdjustedDamage = mitigatedBaseDamage;
-        if (attack.weapon() != null) {
-            WeaponEffectiveness effectiveness = this.effectivenessAgainst(attack.weapon());
-            effectivenessAdjustedDamage = CombatDamage.scaleByMultiplier(mitigatedBaseDamage, effectiveness.damageMultiplier());
-        }
+        int baseDamage = Math.max(0, attack.baseAttackDamage());
+        int effectivenessAdjustedDamage = CombatDamage.scaleByMultiplier(baseDamage,
+            this.effectivenessAgainst(attack.weapon()).damageMultiplier());
 
         int randomizedDamage = CombatDamage.withVariance(effectivenessAdjustedDamage, combatRandom);
         attack.setActualDamage(randomizedDamage);

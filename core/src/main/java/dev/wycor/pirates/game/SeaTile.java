@@ -50,7 +50,7 @@ public abstract class SeaTile {
         return reward;
     }
 
-    public final Combatant getCombatant() {
+    public final Monster getCombatant() {
         return this.combatant();
     }
 
@@ -58,7 +58,7 @@ public abstract class SeaTile {
         this.handlePlayerFled();
     }
 
-    protected abstract Combatant combatant();
+    protected abstract Monster combatant();
 
     protected abstract Reward completionRewards();
 

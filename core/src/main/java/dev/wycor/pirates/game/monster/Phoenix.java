@@ -5,7 +5,12 @@ import dev.wycor.pirates.game.Weapon;
 
 public class Phoenix extends Monster {
     public Phoenix() {
-        super("Phoenix", 70, 10, 0);
+        super("Phoenix", 70);
+    }
+
+    @Override
+    protected Weapon strikeWeapon() {
+        return Weapon.PHOENIX_STRIKE;
     }
 
     @Override

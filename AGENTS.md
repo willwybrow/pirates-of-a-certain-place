@@ -31,8 +31,15 @@
 - Treat `./gradlew html:dist` as a required verification step for every code change that touches shared/game logic or UI rendering.
 - A change is not complete until `./gradlew html:dist` succeeds.
 
+## Production Code Hygiene
+- Never add code to the main codebase (`src/main`) that is only ever used by tests. Production code must earn its place through production use.
+- Do not weaken access modifiers (e.g. making a member package-private, `protected`, or `public`) solely so a test can reach it. Keep the tightest visibility the production code itself requires.
+- Do not add production members purely for testing (for example, extra enum constants, constructors, fields, methods, or overloads that only tests reference).
+- Instead, exercise behaviour through existing public/production seams, or put test-only constructs in `src/test` (e.g. test subclasses, fakes, builders). If something genuinely needs a seam, design it as a real production abstraction with a production caller.
+
 ## External Reference
 - libGDX wiki is available at `https://libgdx.com/wiki/`; use it for framework-specific behavior when repo sources are unclear.
+- Hexagonal geometry and related algorithms can be found at `https://www.redblobgames.com/grids/hexagons/`; use it for pathfinding algorithms and coordinate systems and hexagonal grid algebra.
 
 ## Game Design Principles
 - High-level gameplay principles and balancing intent live in `GAME_DESIGN.md`.

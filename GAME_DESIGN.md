@@ -2,6 +2,8 @@
 
 This file captures high-level gameplay principles that guide feature work and balancing.
 
+This is an homage to a 90s shareware game called Pirate's Plunder created in 1995 by a now-defunct company called Dexterity Software.
+
 ## Objective
 - You are **Captain Nevarro** of the ship **Odyssey**, searching the rich waters of the **Andorian Sea** for ancient sunken treasures.
 - The sea is unexplored at first, apart from known islands marked on the map

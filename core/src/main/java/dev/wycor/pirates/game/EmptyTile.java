@@ -16,7 +16,7 @@ public class EmptyTile extends SeaTile {
     }
 
     @Override
-    protected Combatant combatant() {
+    protected Monster combatant() {
         return null;
     }
 

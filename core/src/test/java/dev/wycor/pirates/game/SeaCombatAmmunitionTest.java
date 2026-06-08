@@ -19,7 +19,7 @@ class SeaCombatAmmunitionTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Test Squid", 200, 3, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Test Squid", 200));
                 }
                 return EmptyTile.generate();
             }
@@ -47,7 +47,7 @@ class SeaCombatAmmunitionTest {
     void playerStartsEachGameWithOneRoundOfEveryAmmunitionWeapon() {
         Sea sea = new Sea(new TileFactory());
 
-        for (Weapon weapon : Weapon.values()) {
+        for (Weapon weapon : sea.playerDetails().wieldableWeapons()) {
             int ammunition = sea.playerDetails().ammunitionByWeapon().getOrDefault(weapon, 0);
             if (weapon.usesAmmunition()) {
                 assertThat(ammunition).as("starting ammunition for %s", weapon).isEqualTo(1);
@@ -70,7 +70,7 @@ class SeaCombatAmmunitionTest {
                     return IslandTile.generate();
                 }
                 if (monsterHex.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Ammo Squid", 100, 0, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Ammo Squid", 100));
                 }
                 return EmptyTile.generate();
             }
