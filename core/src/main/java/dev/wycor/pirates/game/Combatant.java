@@ -34,7 +34,7 @@ public abstract class Combatant {
         return this.maxHealth;
     }
 
-    boolean isDead() {
+    public boolean isDead() {
         return this.health <= 0;
     }
 }

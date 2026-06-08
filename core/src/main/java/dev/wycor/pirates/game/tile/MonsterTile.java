@@ -1,29 +1,20 @@
-package dev.wycor.pirates.game;
+package dev.wycor.pirates.game.tile;
 
+import dev.wycor.pirates.game.Monster;
+import dev.wycor.pirates.game.Reward;
+import dev.wycor.pirates.game.SeaEvent;
 import dev.wycor.pirates.game.monster.*;
 
 import java.util.function.Supplier;
 
 public class MonsterTile extends SeaTile {
-    private final Supplier<Monster> monsterSupplier;
+    private final Supplier<Monster> monsterSpawner;
     private Monster monsterHere;
 
-    MonsterTile(SeaEvent seaEvent, boolean explored, Supplier<Monster> monsterSupplier) {
+    MonsterTile(SeaEvent seaEvent, boolean explored, Supplier<Monster> monsterSpawner) {
         super(seaEvent, explored);
-        this.monsterSupplier = monsterSupplier;
-        this.monsterHere = monsterSupplier.get();
-    }
-
-    public static MonsterTile kraken() {
-        return giantSquid();
-    }
-
-    public static MonsterTile squid() {
-        return giantSquid();
-    }
-
-    public static MonsterTile ghost() {
-        return ghostShip();
+        this.monsterSpawner = monsterSpawner;
+        this.monsterHere = monsterSpawner.get();
     }
 
     public static MonsterTile giantSquid() {
@@ -63,6 +54,6 @@ public class MonsterTile extends SeaTile {
 
     @Override
     protected void handlePlayerFled() {
-        this.monsterHere = monsterSupplier.get();
+        this.monsterHere = monsterSpawner.get();
     }
 }

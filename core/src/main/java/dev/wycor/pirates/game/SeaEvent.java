@@ -1,5 +1,11 @@
 package dev.wycor.pirates.game;
 
+import dev.wycor.pirates.game.tile.EmptyTile;
+import dev.wycor.pirates.game.tile.IslandTile;
+import dev.wycor.pirates.game.tile.MonsterTile;
+import dev.wycor.pirates.game.tile.SeaTile;
+import dev.wycor.pirates.game.tile.TreasureTile;
+
 import java.util.Random;
 import java.util.EnumMap;
 import java.util.Map;

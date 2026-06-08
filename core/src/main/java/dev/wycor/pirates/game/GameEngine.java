@@ -1,5 +1,7 @@
 package dev.wycor.pirates.game;
 
+import dev.wycor.pirates.game.tile.SeaTile;
+import dev.wycor.pirates.game.tile.TreasureTile;
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 

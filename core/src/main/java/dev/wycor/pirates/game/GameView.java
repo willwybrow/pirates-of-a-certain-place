@@ -1,5 +1,6 @@
 package dev.wycor.pirates.game;
 
+import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.geometry.Hex;
 
 import java.util.List;

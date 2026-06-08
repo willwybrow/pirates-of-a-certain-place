@@ -1,5 +1,9 @@
 package dev.wycor.pirates.game;
 
+import dev.wycor.pirates.game.tile.EmptyTile;
+import dev.wycor.pirates.game.tile.IslandTile;
+import dev.wycor.pirates.game.tile.SeaTile;
+import dev.wycor.pirates.game.tile.TestTiles;
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
@@ -19,7 +23,7 @@ class SeaCombatAmmunitionTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Test Squid", 200));
+                    return TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Test Squid", 200));
                 }
                 return EmptyTile.generate();
             }
@@ -70,7 +74,7 @@ class SeaCombatAmmunitionTest {
                     return IslandTile.generate();
                 }
                 if (monsterHex.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Ammo Squid", 100));
+                    return TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Ammo Squid", 100));
                 }
                 return EmptyTile.generate();
             }

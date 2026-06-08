@@ -1,4 +1,9 @@
-package dev.wycor.pirates.game;
+package dev.wycor.pirates.game.tile;
+
+import dev.wycor.pirates.game.Monster;
+import dev.wycor.pirates.game.Reward;
+import dev.wycor.pirates.game.SeaEvent;
+import dev.wycor.pirates.game.Treasure;
 
 public class TreasureTile extends SeaTile {
     private final Treasure treasure;

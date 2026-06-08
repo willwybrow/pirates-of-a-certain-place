@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.Sea;
 import dev.wycor.pirates.game.SeaEvent;
-import dev.wycor.pirates.game.SeaTile;
+import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.game.Treasure;
 import dev.wycor.pirates.geometry.Hex;
 

@@ -1,5 +1,8 @@
 package dev.wycor.pirates.game;
 
+import dev.wycor.pirates.game.tile.EmptyTile;
+import dev.wycor.pirates.game.tile.SeaTile;
+import dev.wycor.pirates.game.tile.TestTiles;
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
@@ -20,7 +23,7 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 1));
+                    return TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 1));
                 }
                 return EmptyTile.generate();
             }
@@ -45,7 +48,7 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (east.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9));
+                    return TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9));
                 }
                 return EmptyTile.generate();
             }
@@ -81,7 +84,7 @@ class SeaCombatMovementTest {
             @Override
             public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Fatal Squid", 100));
+                    return TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Fatal Squid", 100));
                 }
                 return EmptyTile.generate();
             }
