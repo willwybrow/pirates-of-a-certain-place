@@ -7,9 +7,7 @@ import dev.wycor.pirates.geometry.Hex;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -24,17 +22,13 @@ import java.util.Random;
  * therefore part of the computed game state, not the durable input log.
  */
 final class World {
-    static final int WORLD_LAYERS = 8;
+    static final int WORLD_LAYERS = 7;
 
-    private final TileFactory tileFactory;
-    private final Random worldGenRandom;
-    private final Map<Hex, SeaTile> generatedHexagons = new HashMap<>(500);
+    private final Map<Hex, SeaTile> generatedHexagons = new HashMap<>(250);
 
     World(TileFactory tileFactory, Random worldGenRandom) {
-        this.tileFactory = tileFactory;
-        this.worldGenRandom = worldGenRandom;
         this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
-        preGenerate();
+        preGenerate(tileFactory.forWorld(worldGenRandom));
     }
 
     SeaTile whatsAt(Hex location) {
@@ -42,8 +36,12 @@ final class World {
             return EmptyTile.generate().spy();
         }
 
-        return generatedHexagons.computeIfAbsent(location,
-            hex -> tileFactory.create(hex, worldGenRandom, generatedHexagons.values()));
+        SeaTile tile = generatedHexagons.get(location);
+        if (tile != null) {
+            return tile;
+        }
+
+        return EmptyTile.generate().spy();
     }
 
     /** Snapshot of all currently generated hexes, in a deterministic order. */
@@ -81,7 +79,7 @@ final class World {
             && Math.abs(hex.s()) <= WORLD_LAYERS;
     }
 
-    private void preGenerate() {
+    private void preGenerate(TileFactory tileFactory) {
         ArrayList<Hex> worldHexes = new ArrayList<>();
         Hex.ORIGIN.spiral(WORLD_LAYERS)
             .filter(World::isWithinWorld)
@@ -89,45 +87,11 @@ final class World {
             .forEach(worldHexes::add);
 
         worldHexes.sort(Comparator.comparingInt(Hex::q).thenComparingInt(Hex::r));
+        Map<Hex, SeaTile> generatedTiles = tileFactory.generate(worldHexes);
 
         for (Hex hex : worldHexes) {
-            generatedHexagons.computeIfAbsent(hex,
-                candidate -> tileFactory.create(candidate, worldGenRandom, generatedHexagons.values()));
-        }
-
-        ensureAllTreasuresPlaced(worldHexes);
-    }
-
-    private void ensureAllTreasuresPlaced(List<Hex> worldHexes) {
-        EnumSet<Treasure> placedTreasures = EnumSet.noneOf(Treasure.class);
-        for (SeaTile tile : generatedHexagons.values()) {
-            SeaEvent.treasureFor(tile.pendingEvent()).ifPresent(placedTreasures::add);
-            SeaEvent.treasureFor(tile.completedEvent()).ifPresent(placedTreasures::add);
-        }
-
-        ArrayList<Treasure> missingTreasures = new ArrayList<>();
-        for (Treasure treasure : Treasure.values()) {
-            if (!placedTreasures.contains(treasure)) {
-                missingTreasures.add(treasure);
-            }
-        }
-
-        if (missingTreasures.isEmpty()) {
-            return;
-        }
-
-        Iterator<Treasure> missingIterator = missingTreasures.iterator();
-        for (Hex hex : worldHexes) {
-            if (!missingIterator.hasNext()) {
-                break;
-            }
-
-            SeaTile currentTile = generatedHexagons.get(hex);
-            if (currentTile instanceof TreasureTile) {
-                continue;
-            }
-
-            generatedHexagons.put(hex, TreasureTile.forTreasure(missingIterator.next()));
+            SeaTile generated = generatedTiles.get(hex);
+            generatedHexagons.put(hex, generated == null ? EmptyTile.generate() : generated);
         }
     }
 }

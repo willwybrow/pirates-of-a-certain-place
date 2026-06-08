@@ -21,7 +21,7 @@ class SeaCombatAmmunitionTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
                 if (destination.equals(hex)) {
                     return TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Test Squid", 200));
                 }
@@ -69,7 +69,7 @@ class SeaCombatAmmunitionTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
                 if (islandHex.equals(hex)) {
                     return IslandTile.generate();
                 }

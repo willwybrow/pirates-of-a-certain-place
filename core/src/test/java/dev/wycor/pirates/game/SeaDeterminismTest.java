@@ -29,8 +29,7 @@ class SeaDeterminismTest {
         Sea first = playScript(1L);
         Sea second = playScript(2L);
 
-        // Two different seeds should not produce identical worlds + outcomes for a non-trivial script.
-        assertThat(snapshot(second)).isNotEqualTo(snapshot(first));
+        assertThat(worldSnapshot(second)).isNotEqualTo(worldSnapshot(first));
     }
 
     @Test
@@ -80,6 +79,15 @@ class SeaDeterminismTest {
         builder.append(";ammo=").append(player.ammunitionByWeapon());
         builder.append(";gameOver=").append(sea.isGameOver());
         builder.append(";log=").append(sea.recentLog());
+        return builder.toString();
+    }
+
+    private static String worldSnapshot(Sea sea) {
+        StringBuilder builder = new StringBuilder();
+        for (Hex hex : sea.generatedHexes()) {
+            builder.append(hex.q()).append(',').append(hex.r())
+                .append(':').append(sea.whatsAt(hex).pendingEvent().name()).append(';');
+        }
         return builder.toString();
     }
 

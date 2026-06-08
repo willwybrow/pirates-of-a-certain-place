@@ -126,7 +126,7 @@ class MonsterBalanceTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
                 if (monsterHex.equals(hex)) {
                     return monsterTileSupplier.get();
                 }

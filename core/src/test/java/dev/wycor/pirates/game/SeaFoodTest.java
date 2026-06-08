@@ -24,7 +24,7 @@ class SeaFoodTest {
     void eachVisitedTileConsumesOneFoodWhileFoodIsAvailable() {
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
                 return EmptyTile.generate();
             }
         });
@@ -39,7 +39,7 @@ class SeaFoodTest {
     void reachingZeroFoodEndsTheGame() {
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
                 return EmptyTile.generate();
             }
         });
@@ -67,7 +67,7 @@ class SeaFoodTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
                 if (islandHex.equals(hex)) {
                     return IslandTile.generate();
                 }
@@ -86,7 +86,7 @@ class SeaFoodTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, java.util.Random worldGenRandom, Collection<SeaTile> existingTiles) {
+            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
                 if (islandHex.equals(hex)) {
                     return IslandTile.generate();
                 }
