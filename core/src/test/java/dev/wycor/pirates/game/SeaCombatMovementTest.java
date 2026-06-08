@@ -62,7 +62,11 @@ class SeaCombatMovementTest {
         assertThat(sea.playerDetails().position()).isEqualTo(start);
         assertThat(sea.getPlayerDestination()).contains(east);
 
-        sea.attemptToAttack(4L);
+        long timestamp = 4L;
+        while (sea.hasActiveCombat() && timestamp < 20L) {
+            sea.attemptToAttack(timestamp);
+            timestamp += 1L;
+        }
 
         assertThat(sea.playerDetails().position()).isEqualTo(east);
         assertThat(sea.getPlayerDestination()).isEmpty();

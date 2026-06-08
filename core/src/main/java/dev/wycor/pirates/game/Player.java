@@ -17,7 +17,7 @@ class Player extends Combatant {
     private final EnumMap<Treasure, Boolean> capturedTreasures;
 
     Player(Hex initialPosition) {
-        super("You", INITIAL_HEALTH, 5, 0);
+        super("You", INITIAL_HEALTH, 10, 0);
         this.position = initialPosition;
         this.food = INITIAL_FOOD;
         this.ammunitionByWeapon = new EnumMap<>(Weapon.class);
@@ -44,7 +44,10 @@ class Player extends Combatant {
 
     @Override
     Attack receiveAttack(Attack attack) {
-        this.health = Math.max(0, this.health - attack.actualDamage());
+        int mitigatedBaseDamage = Math.max(0, attack.unmitigatedAttackDamage() - attack.defenderMitigation());
+        int randomizedDamage = CombatDamage.withVariance(mitigatedBaseDamage);
+        attack.setActualDamage(randomizedDamage);
+        this.health = Math.max(0, this.health - randomizedDamage);
         return attack;
     }
 

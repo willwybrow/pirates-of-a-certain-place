@@ -52,7 +52,7 @@ class SeaCombatAmmunitionTest {
                     return IslandTile.generate();
                 }
                 if (monsterHex.equals(hex)) {
-                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Ammo Squid", 9, 0, 0) { });
+                    return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> new Monster("Ammo Squid", 40, 0, 0) { });
                 }
                 return EmptyTile.generate();
             }

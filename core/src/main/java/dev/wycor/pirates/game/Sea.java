@@ -3,7 +3,17 @@ package dev.wycor.pirates.game;
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class Sea {
@@ -141,13 +151,11 @@ public class Sea {
         ArrayList<Attack> attacksThisRound = new ArrayList<>(2);
 
         Attack playerAttack = new Attack(player, opponent, weapon, player.attack, opponent.defence);
-        opponent.receiveAttack(playerAttack);
-        attacksThisRound.add(playerAttack);
+        attacksThisRound.add(opponent.receiveAttack(playerAttack));
 
         if (!opponent.isDead()) {
             Attack opponentAttack = new Attack(opponent, player, null, opponent.attack, player.defence);
-            player.receiveAttack(opponentAttack);
-            attacksThisRound.add(opponentAttack);
+            attacksThisRound.add(player.receiveAttack(opponentAttack));
         }
 
         return Collections.unmodifiableList(new ArrayList<>(attacksThisRound));
@@ -309,10 +317,6 @@ public class Sea {
 
         player.moveTo(destinationHex);
         player.consumeTravelSupplies();
-    }
-
-    private void markProcessed(InputEvent inputEvent) {
-        inputEvent.process();
     }
 
     private void addLog(String line) {
