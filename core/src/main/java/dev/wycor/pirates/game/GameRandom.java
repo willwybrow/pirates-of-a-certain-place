@@ -13,6 +13,7 @@ public final class GameRandom {
 
     private final Random worldGen;
     private final Random combat;
+    private final Random hazard;
 
     public GameRandom(long seed) {
         // Expand the single game seed into independent sub-seeds. Using a dedicated
@@ -20,6 +21,7 @@ public final class GameRandom {
         Random seeding = new Random(seed);
         this.worldGen = new Random(seeding.nextLong());
         this.combat = new Random(seeding.nextLong());
+        this.hazard = new Random(seeding.nextLong());
     }
 
     /** Random stream used while generating the world layout from the seed. */
@@ -30,5 +32,10 @@ public final class GameRandom {
     /** Random stream used while resolving combat (damage variance, etc.). */
     public Random combat() {
         return this.combat;
+    }
+
+    /** Random stream used while resolving hazards (which treasure/tile a whirlpool affects, etc.). */
+    public Random hazard() {
+        return this.hazard;
     }
 }

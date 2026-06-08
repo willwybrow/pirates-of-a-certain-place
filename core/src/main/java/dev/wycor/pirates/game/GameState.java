@@ -45,6 +45,10 @@ final class GameState {
         return this.random.combat();
     }
 
+    java.util.Random hazardRandom() {
+        return this.random.hazard();
+    }
+
     // --- active travel (replaces the old InputEvent travel flags) ---
 
     void beginTravel(Hex destination, long timestampMillis) {

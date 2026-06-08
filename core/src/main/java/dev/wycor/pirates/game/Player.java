@@ -2,6 +2,7 @@ package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.geometry.Hex;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -72,6 +73,12 @@ class Player extends Combatant {
         this.health = Math.min(INITIAL_HEALTH, this.health + amount);
     }
 
+    void takeDamage(int amount) {
+        if (amount > 0) {
+            this.health = Math.max(0, this.health - amount);
+        }
+    }
+
     int maxHealth() {
         return INITIAL_HEALTH;
     }
@@ -110,6 +117,20 @@ class Player extends Combatant {
 
     void captureTreasure(Treasure treasure) {
         this.capturedTreasures.put(treasure, true);
+    }
+
+    void loseTreasure(Treasure treasure) {
+        this.capturedTreasures.put(treasure, false);
+    }
+
+    List<Treasure> capturedTreasureList() {
+        ArrayList<Treasure> captured = new ArrayList<>();
+        for (Map.Entry<Treasure, Boolean> entry : this.capturedTreasures.entrySet()) {
+            if (entry.getValue()) {
+                captured.add(entry.getKey());
+            }
+        }
+        return captured;
     }
 
     Map<Treasure, Boolean> capturedTreasures() {

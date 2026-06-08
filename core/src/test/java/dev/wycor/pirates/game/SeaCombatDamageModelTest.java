@@ -58,7 +58,8 @@ class SeaCombatDamageModelTest {
         sea.attemptToAttack(Weapon.CUTLASS, 4L);
         int damageTaken = playerHealthBeforeAttack - sea.playerDetails().health();
 
-        assertThat(damageTaken).isBetween(7, 13);
+        // The Giant Squid strikes with SQUID_STRIKE (base 5), so 5 +/- the 3-point combat variance.
+        assertThat(damageTaken).isBetween(2, 8);
     }
 
     private static Sea prepareSeaForCombat(SeaEvent monsterEvent, Supplier<Monster> monsterSupplier) {

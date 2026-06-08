@@ -53,6 +53,28 @@ final class World {
         return hexes;
     }
 
+    /**
+     * Hides the given treasure under a random unexplored (un-spied) tile, replacing whatever was
+     * there. Returns {@code true} if a hiding spot was found, {@code false} if every tile is already
+     * explored (in which case the treasure cannot be re-hidden).
+     */
+    boolean rehideTreasureUnderUnexploredTile(Treasure treasure, Random random) {
+        ArrayList<Hex> unexploredHexes = new ArrayList<>();
+        for (Hex hex : generatedHexes()) {
+            if (!generatedHexagons.get(hex).isSpied()) {
+                unexploredHexes.add(hex);
+            }
+        }
+
+        if (unexploredHexes.isEmpty()) {
+            return false;
+        }
+
+        Hex chosen = unexploredHexes.get(random.nextInt(unexploredHexes.size()));
+        generatedHexagons.put(chosen, TreasureTile.forTreasure(treasure));
+        return true;
+    }
+
     static boolean isWithinWorld(Hex hex) {
         return Math.abs(hex.q()) <= WORLD_LAYERS
             && Math.abs(hex.r()) <= WORLD_LAYERS

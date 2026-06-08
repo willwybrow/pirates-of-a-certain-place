@@ -1,6 +1,7 @@
 package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.game.tile.EmptyTile;
+import dev.wycor.pirates.game.tile.HazardTile;
 import dev.wycor.pirates.game.tile.IslandTile;
 import dev.wycor.pirates.game.tile.MonsterTile;
 import dev.wycor.pirates.game.tile.SeaTile;
@@ -15,6 +16,8 @@ import java.util.function.Supplier;
 public enum SeaEvent {
     NOTHING(EmptyTile::generate),
     ISLAND(IslandTile::generate),
+    ICEBERG(HazardTile::iceberg),
+    WHIRLPOOL(HazardTile::whirlpool),
     GIANT_SQUID(MonsterTile::giantSquid),
     SEAWEED_MONSTER(MonsterTile::seaweedMonster),
     PHOENIX(MonsterTile::phoenix),
@@ -57,7 +60,13 @@ public enum SeaEvent {
         if (roll < 35) {
             return PIRATE_SHIP;
         }
-        if (roll < 50) {
+        if (roll < 40) {
+            return ICEBERG;
+        }
+        if (roll < 45) {
+            return WHIRLPOOL;
+        }
+        if (roll < 60) {
             SeaEvent treasureEvent = randomAvailableTreasureEvent(unavailableTreasures, random);
             if (treasureEvent != null) {
                 return treasureEvent;

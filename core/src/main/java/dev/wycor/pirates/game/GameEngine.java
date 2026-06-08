@@ -1,5 +1,6 @@
 package dev.wycor.pirates.game;
 
+import dev.wycor.pirates.game.tile.HazardTile;
 import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.game.tile.TreasureTile;
 import dev.wycor.pirates.geometry.Direction;
@@ -15,7 +16,8 @@ import java.util.Optional;
  * same seed and inputs always yield an identical result.
  */
 final class GameEngine {
-    private static final long TREASURE_TILE_TRAVEL_DELAY_MILLIS = 1_000;
+    private static final long TILE_TRAVEL_DELAY_MILLIS = 1_000;
+    private static final int ICEBERG_DAMAGE = 20;
 
     private final TileFactory tileFactory;
 
@@ -160,11 +162,17 @@ final class GameEngine {
             return;
         }
 
-        if (destinationTile instanceof TreasureTile && !destinationTile.isPlayerRewarded()) {
-            long readyAtMillis = travel.timestampMillis() + TREASURE_TILE_TRAVEL_DELAY_MILLIS;
+        boolean isPendingHazard = destinationTile instanceof HazardTile && !destinationTile.isCompleted();
+        boolean isPendingTreasure = destinationTile instanceof TreasureTile && !destinationTile.isPlayerRewarded();
+        if (isPendingHazard || isPendingTreasure) {
+            long readyAtMillis = travel.timestampMillis() + TILE_TRAVEL_DELAY_MILLIS;
             if (timestampMillis < readyAtMillis) {
                 return;
             }
+        }
+
+        if (isPendingHazard) {
+            resolveHazard(state, (HazardTile) destinationTile);
         }
 
         if (!destinationTile.isPlayerRewarded()) {
@@ -174,6 +182,43 @@ final class GameEngine {
         state.player().moveTo(destinationHex);
         state.player().consumeTravelSupplies();
         state.clearActiveTravel();
+    }
+
+    private void resolveHazard(GameState state, HazardTile hazardTile) {
+        switch (hazardTile.hazard()) {
+            case ICEBERG:
+                resolveIceberg(state);
+                break;
+            case WHIRLPOOL:
+                resolveWhirlpool(state);
+                break;
+            default:
+                break;
+        }
+        hazardTile.trigger();
+    }
+
+    private void resolveIceberg(GameState state) {
+        state.player().takeDamage(ICEBERG_DAMAGE);
+        state.addLog("An iceberg gouged the hull for " + ICEBERG_DAMAGE + " damage.");
+    }
+
+    private void resolveWhirlpool(GameState state) {
+        List<Treasure> capturedTreasures = state.player().capturedTreasureList();
+        if (capturedTreasures.isEmpty()) {
+            state.addLog("A whirlpool churned past, but you had no treasure to lose.");
+            return;
+        }
+
+        Treasure lostTreasure = capturedTreasures.get(state.hazardRandom().nextInt(capturedTreasures.size()));
+        boolean rehidden = state.world().rehideTreasureUnderUnexploredTile(lostTreasure, state.hazardRandom());
+        if (!rehidden) {
+            state.addLog("A whirlpool churned past, but there was nowhere left to hide your treasure.");
+            return;
+        }
+
+        state.player().loseTreasure(lostTreasure);
+        state.addLog("A whirlpool swallowed the " + lostTreasure.displayName() + " and hid it anew.");
     }
 
     private void applyReward(GameState state, Reward reward) {

@@ -33,6 +33,8 @@ public class DrawableWorld {
     private Texture pirateShipTexture;
     private Texture islandTexture;
     private Texture stockedIslandTexture;
+    private Texture icebergTexture;
+    private Texture whirlpoolTexture;
     private Texture fogOfWarTexture;
     private Texture shipTexture;
     private Texture gameOverOverlayTexture;
@@ -66,6 +68,8 @@ public class DrawableWorld {
         pirateShipTexture = new Texture("pirate_ship_1x_32.png");
         islandTexture = new Texture("island_empty_1x_32.png");
         stockedIslandTexture = new Texture("island_stocked_1x_32.png");
+        icebergTexture = new Texture("iceberg_1x_32.png");
+        whirlpoolTexture = new Texture("whirlpool_1x_32.png");
         fogOfWarTexture = new Texture("unexplored_hex_32.png");
         shipTexture = new Texture("hero_ship_1x_32.png");
         BaseUI.loadTreasureTextures();
@@ -94,6 +98,12 @@ public class DrawableWorld {
                 switch (whatsHere.pendingEvent()) {
                     case ISLAND:
                         drawAtHex(stockedIslandTexture, exploredHex);
+                        break;
+                    case ICEBERG:
+                        drawAtHex(icebergTexture, exploredHex);
+                        break;
+                    case WHIRLPOOL:
+                        drawAtHex(whirlpoolTexture, exploredHex);
                         break;
                     case GIANT_SQUID:
                         drawAtHex(giantSquidTexture, exploredHex);
@@ -184,6 +194,8 @@ public class DrawableWorld {
         pirateShipTexture.dispose();
         islandTexture.dispose();
         stockedIslandTexture.dispose();
+        icebergTexture.dispose();
+        whirlpoolTexture.dispose();
         fogOfWarTexture.dispose();
         shipTexture.dispose();
         gameOverOverlayTexture.dispose();
