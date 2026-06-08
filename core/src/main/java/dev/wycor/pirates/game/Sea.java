@@ -25,7 +25,6 @@ import java.util.Random;
  */
 public class Sea implements GameView {
 
-    private final TileFactory tileFactory;
     private final GameEngine engine;
     private final Random seedSource = new Random();
 
@@ -33,7 +32,6 @@ public class Sea implements GameView {
     private GameState state;
 
     public Sea(TileFactory tileFactory) {
-        this.tileFactory = Objects.requireNonNull(tileFactory, "tileFactory");
         this.engine = new GameEngine(tileFactory);
         startNewGame(seedSource.nextLong(), 0L);
     }

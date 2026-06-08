@@ -2,7 +2,6 @@ package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.game.monster.GiantSquid;
 import dev.wycor.pirates.game.monster.Phoenix;
-import dev.wycor.pirates.game.tile.EmptyTile;
 import dev.wycor.pirates.game.tile.IslandTile;
 import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.game.tile.TestTiles;
@@ -10,7 +9,8 @@ import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,14 +69,11 @@ class SeaCombatDamageModelTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                if (islandHex.equals(hex)) {
-                    return IslandTile.generate();
-                }
-                if (monsterHex.equals(hex)) {
-                    return TestTiles.testMonster(monsterEvent, false, monsterSupplier);
-                }
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                generated.put(islandHex, IslandTile.generate());
+                generated.put(monsterHex, TestTiles.testMonster(monsterEvent, false, monsterSupplier));
+                return generated;
             }
         });
 

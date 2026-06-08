@@ -1,13 +1,11 @@
 package dev.wycor.pirates.game;
 
-import dev.wycor.pirates.game.tile.EmptyTile;
 import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.game.tile.TreasureTile;
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,12 +38,12 @@ class SeaWinConditionTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                Treasure treasure = treasureByHex.get(hex);
-                if (treasure != null) {
-                    return TreasureTile.forTreasure(treasure);
+            public Map<Hex, SeaTile> generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                for (Map.Entry<Hex, Treasure> entry : treasureByHex.entrySet()) {
+                    generated.put(entry.getKey(), TreasureTile.forTreasure(entry.getValue()));
                 }
-                return EmptyTile.generate();
+                return generated;
             }
         });
 

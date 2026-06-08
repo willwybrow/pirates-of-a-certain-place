@@ -27,7 +27,7 @@ final class GameState {
 
     GameState(long seed, TileFactory tileFactory) {
         this.random = new GameRandom(seed);
-        this.world = new World(tileFactory, random.worldGen());
+        this.world = new World(tileFactory);
         this.player = new Player(Hex.ORIGIN);
     }
 

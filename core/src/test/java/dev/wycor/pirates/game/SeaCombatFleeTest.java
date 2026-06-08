@@ -1,13 +1,13 @@
 package dev.wycor.pirates.game;
 
-import dev.wycor.pirates.game.tile.EmptyTile;
 import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.game.tile.TestTiles;
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,11 +20,10 @@ class SeaCombatFleeTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                if (destination.equals(hex)) {
-                    return TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Test Squid", 40));
-                }
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Test Squid", 40)));
+                return generated;
             }
         });
 
@@ -47,11 +46,10 @@ class SeaCombatFleeTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                if (destination.equals(hex)) {
-                    return TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9));
-                }
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9)));
+                return generated;
             }
         });
 

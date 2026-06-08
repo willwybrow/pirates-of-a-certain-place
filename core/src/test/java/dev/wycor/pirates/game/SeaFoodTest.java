@@ -1,13 +1,13 @@
 package dev.wycor.pirates.game;
 
-import dev.wycor.pirates.game.tile.EmptyTile;
 import dev.wycor.pirates.game.tile.IslandTile;
 import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,8 +24,8 @@ class SeaFoodTest {
     void eachVisitedTileConsumesOneFoodWhileFoodIsAvailable() {
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                return new HashMap<>();
             }
         });
 
@@ -39,8 +39,8 @@ class SeaFoodTest {
     void reachingZeroFoodEndsTheGame() {
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                return new HashMap<>();
             }
         });
 
@@ -67,11 +67,10 @@ class SeaFoodTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                if (islandHex.equals(hex)) {
-                    return IslandTile.generate();
-                }
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                generated.put(islandHex, IslandTile.generate());
+                return generated;
             }
         });
 
@@ -86,11 +85,10 @@ class SeaFoodTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                if (islandHex.equals(hex)) {
-                    return IslandTile.generate();
-                }
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                generated.put(islandHex, IslandTile.generate());
+                return generated;
             }
         });
 

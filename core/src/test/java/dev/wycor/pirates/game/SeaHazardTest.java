@@ -1,6 +1,5 @@
 package dev.wycor.pirates.game;
 
-import dev.wycor.pirates.game.tile.EmptyTile;
 import dev.wycor.pirates.game.tile.HazardTile;
 import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.game.tile.TreasureTile;
@@ -8,7 +7,8 @@ import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,11 +21,10 @@ class SeaHazardTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                if (destination.equals(hex)) {
-                    return HazardTile.iceberg();
-                }
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                generated.put(destination, HazardTile.iceberg());
+                return generated;
             }
         });
 
@@ -57,14 +56,11 @@ class SeaHazardTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                if (treasureHex.equals(hex)) {
-                    return TreasureTile.emeraldOfHope();
-                }
-                if (whirlpoolHex.equals(hex)) {
-                    return HazardTile.whirlpool();
-                }
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                generated.put(treasureHex, TreasureTile.emeraldOfHope());
+                generated.put(whirlpoolHex, HazardTile.whirlpool());
+                return generated;
             }
         });
         sea.startNewGame(7L, 0L);
@@ -100,11 +96,10 @@ class SeaHazardTest {
 
         Sea sea = new Sea(new TileFactory() {
             @Override
-            public SeaTile create(Hex hex, Collection<SeaTile> existingTiles) {
-                if (whirlpoolHex.equals(hex)) {
-                    return HazardTile.whirlpool();
-                }
-                return EmptyTile.generate();
+            public Map<Hex, SeaTile> generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                generated.put(whirlpoolHex, HazardTile.whirlpool());
+                return generated;
             }
         });
 
