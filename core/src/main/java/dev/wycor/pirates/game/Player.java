@@ -63,7 +63,7 @@ class Player extends Combatant {
     @Override
     Attack receiveAttack(Attack attack, java.util.Random combatRandom) {
         int baseDamage = Math.max(0, attack.baseAttackDamage());
-        int randomizedDamage = CombatDamage.withVariance(baseDamage, combatRandom);
+        int randomizedDamage = CombatDamage.withVariance(baseDamage, attack.weapon(), combatRandom);
         attack.setActualDamage(randomizedDamage);
         this.health = Math.max(0, this.health - randomizedDamage);
         return attack;

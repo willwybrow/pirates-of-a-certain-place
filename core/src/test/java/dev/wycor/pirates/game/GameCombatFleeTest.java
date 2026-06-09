@@ -47,7 +47,7 @@ class GameCombatFleeTest {
             @Override
             public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
-                generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9)));
+                generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 20)));
                 return new World(generated);
             }
         }.createGame();

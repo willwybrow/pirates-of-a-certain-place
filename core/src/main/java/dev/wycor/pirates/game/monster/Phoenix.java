@@ -3,9 +3,26 @@ package dev.wycor.pirates.game.monster;
 import dev.wycor.pirates.game.Monster;
 import dev.wycor.pirates.game.Weapon;
 
+import java.util.Random;
+
 public class Phoenix extends Monster {
+    public static final int MIN_HEALTH = 66;
+    public static final int MAX_HEALTH = 68;
+
     public Phoenix() {
-        super("Phoenix", 70);
+        this(MIN_HEALTH);
+    }
+
+    private Phoenix(int health) {
+        super("Phoenix", health);
+    }
+
+    public static Phoenix withHealth(int health) {
+        return new Phoenix(health);
+    }
+
+    public static int rollHealth(Random random) {
+        return randomInclusive(random, MIN_HEALTH, MAX_HEALTH);
     }
 
     @Override

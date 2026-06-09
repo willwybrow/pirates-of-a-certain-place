@@ -68,7 +68,13 @@ public class TileFactory {
         }
 
         for (int i = 0; i < MONSTER_COUNT_PER_TYPE; i++) {
-            List<Supplier<MonsterTile>> list = Arrays.asList(MonsterTile::giantSquid, MonsterTile::seaweedMonster, MonsterTile::phoenix, MonsterTile::ghostShip, MonsterTile::pirateShip);
+            List<Supplier<MonsterTile>> list = Arrays.asList(
+                () -> MonsterTile.giantSquid(this.worldGenRandom),
+                MonsterTile::seaweedMonster,
+                () -> MonsterTile.phoenix(this.worldGenRandom),
+                MonsterTile::ghostShip,
+                () -> MonsterTile.pirateShip(this.worldGenRandom)
+            );
 
             for (Supplier<MonsterTile> monsterTileSupplier : list) {
                 generated.put(tilesToGenerate.get(pointer), monsterTileSupplier.get());

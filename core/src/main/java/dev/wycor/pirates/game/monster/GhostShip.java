@@ -4,8 +4,10 @@ import dev.wycor.pirates.game.Monster;
 import dev.wycor.pirates.game.Weapon;
 
 public class GhostShip extends Monster {
+    public static final int HEALTH = 74;
+
     public GhostShip() {
-        super("Ghost Ship", 100);
+        super("Ghost Ship", HEALTH);
     }
 
     @Override

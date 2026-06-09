@@ -46,7 +46,7 @@ class GameCombatMovementTest {
             @Override
             public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
-                generated.put(east, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9)));
+                generated.put(east, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 20)));
                 return new World(generated);
             }
         }.createGame();
@@ -81,7 +81,8 @@ class GameCombatMovementTest {
             @Override
             public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
-                generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Fatal Squid", 100)));
+                generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false,
+                    () -> TestMonsters.withHealthAndStrike("Fatal Squid", 170, Weapon.PHOENIX_STRIKE)));
                 return new World(generated);
             }
         }.createGame();

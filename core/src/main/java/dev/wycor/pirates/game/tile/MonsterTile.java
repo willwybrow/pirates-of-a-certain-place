@@ -5,6 +5,7 @@ import dev.wycor.pirates.game.Reward;
 import dev.wycor.pirates.game.SeaEvent;
 import dev.wycor.pirates.game.monster.*;
 
+import java.util.Random;
 import java.util.function.Supplier;
 
 public class MonsterTile extends SeaTile {
@@ -21,6 +22,11 @@ public class MonsterTile extends SeaTile {
         return new MonsterTile(SeaEvent.GIANT_SQUID, false, GiantSquid::new);
     }
 
+    public static MonsterTile giantSquid(Random random) {
+        int health = GiantSquid.rollHealth(random);
+        return new MonsterTile(SeaEvent.GIANT_SQUID, false, () -> GiantSquid.withHealth(health));
+    }
+
     public static MonsterTile seaweedMonster() {
         return new MonsterTile(SeaEvent.SEAWEED_MONSTER, false, SeaweedMonster::new);
     }
@@ -29,12 +35,22 @@ public class MonsterTile extends SeaTile {
         return new MonsterTile(SeaEvent.PHOENIX, false, Phoenix::new);
     }
 
+    public static MonsterTile phoenix(Random random) {
+        int health = Phoenix.rollHealth(random);
+        return new MonsterTile(SeaEvent.PHOENIX, false, () -> Phoenix.withHealth(health));
+    }
+
     public static MonsterTile ghostShip() {
         return new MonsterTile(SeaEvent.GHOST_SHIP, false, GhostShip::new);
     }
 
     public static MonsterTile pirateShip() {
         return new MonsterTile(SeaEvent.PIRATE_SHIP, false, PirateShip::new);
+    }
+
+    public static MonsterTile pirateShip(Random random) {
+        int health = PirateShip.rollHealth(random);
+        return new MonsterTile(SeaEvent.PIRATE_SHIP, false, () -> PirateShip.withHealth(health));
     }
 
     @Override

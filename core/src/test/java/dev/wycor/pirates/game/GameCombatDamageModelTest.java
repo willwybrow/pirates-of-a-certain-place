@@ -1,6 +1,7 @@
 package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.game.monster.GiantSquid;
+import dev.wycor.pirates.game.monster.PirateShip;
 import dev.wycor.pirates.game.monster.Phoenix;
 import dev.wycor.pirates.game.tile.IslandTile;
 import dev.wycor.pirates.game.tile.SeaTile;
@@ -50,6 +51,17 @@ class GameCombatDamageModelTest {
     }
 
     @Test
+    void cutlassDamageFallsWithinEmpiricalRange() {
+        Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID, GiantSquid::new);
+
+        int opponentHealthBeforeAttack = opponentHealth(game);
+        game.attemptToAttack(Weapon.CUTLASS, 4L);
+        int damageDone = opponentHealthBeforeAttack - opponentHealth(game);
+
+        assertThat(damageDone).isBetween(6, 11);
+    }
+
+    @Test
     void monsterCounterattackDamageFallsWithinExpectedRange() {
         Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID, GiantSquid::new);
 
@@ -59,6 +71,28 @@ class GameCombatDamageModelTest {
 
         // The Giant Squid strikes with SQUID_STRIKE (base 5), so 5 +/- the 3-point combat variance.
         assertThat(damageTaken).isBetween(2, 8);
+    }
+
+    @Test
+    void phoenixCounterattackDamageFallsWithinEmpiricalRange() {
+        Game game = prepareSeaForCombat(SeaEvent.PHOENIX, Phoenix::new);
+
+        int playerHealthBeforeAttack = game.playerDetails().health();
+        game.attemptToAttack(Weapon.CUTLASS, 4L);
+        int damageTaken = playerHealthBeforeAttack - game.playerDetails().health();
+
+        assertThat(damageTaken).isBetween(8, 10);
+    }
+
+    @Test
+    void pirateShipCounterattackDamageFallsWithinEmpiricalRange() {
+        Game game = prepareSeaForCombat(SeaEvent.PIRATE_SHIP, PirateShip::new);
+
+        int playerHealthBeforeAttack = game.playerDetails().health();
+        game.attemptToAttack(Weapon.CUTLASS, 4L);
+        int damageTaken = playerHealthBeforeAttack - game.playerDetails().health();
+
+        assertThat(damageTaken).isBetween(4, 6);
     }
 
     private static Game prepareSeaForCombat(SeaEvent monsterEvent, Supplier<Monster> monsterSupplier) {

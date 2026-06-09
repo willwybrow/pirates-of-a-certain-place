@@ -3,16 +3,13 @@ package dev.wycor.pirates.game;
 import java.util.Random;
 
 final class CombatDamage {
-    private static final int MIN_DAMAGE_VARIANCE = -3;
-    private static final int MAX_DAMAGE_VARIANCE = 3;
-
     private CombatDamage() {
     }
 
-    static int withVariance(int baseDamage, Random random) {
+    static int withVariance(int baseDamage, Weapon weapon, Random random) {
         int boundedBaseDamage = Math.max(0, baseDamage);
-        int varianceRange = (MAX_DAMAGE_VARIANCE - MIN_DAMAGE_VARIANCE) + 1;
-        int randomVariance = random.nextInt(varianceRange) + MIN_DAMAGE_VARIANCE;
+        int varianceRange = (weapon.maxVariance() - weapon.minVariance()) + 1;
+        int randomVariance = random.nextInt(varianceRange) + weapon.minVariance();
         return Math.max(0, boundedBaseDamage + randomVariance);
     }
 

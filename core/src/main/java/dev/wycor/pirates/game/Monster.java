@@ -2,12 +2,14 @@ package dev.wycor.pirates.game;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public abstract class Monster extends Combatant {
 
     protected enum WeaponEffectiveness {
         SUPER_EFFECTIVE(3.0),
         MEDIUM_EFFECTIVE(2.0),
+        NORMAL_EFFECTIVE(1.0),
         NOT_VERY_EFFECTIVE(0.5);
 
         private final double damageMultiplier;
@@ -45,7 +47,7 @@ public abstract class Monster extends Combatant {
         int effectivenessAdjustedDamage = CombatDamage.scaleByMultiplier(baseDamage,
             this.effectivenessAgainst(attack.weapon()).damageMultiplier());
 
-        int randomizedDamage = CombatDamage.withVariance(effectivenessAdjustedDamage, combatRandom);
+        int randomizedDamage = CombatDamage.withVariance(effectivenessAdjustedDamage, attack.weapon(), combatRandom);
         attack.setActualDamage(randomizedDamage);
         this.health = Math.max(0, this.health - randomizedDamage);
         return attack;
@@ -53,9 +55,16 @@ public abstract class Monster extends Combatant {
 
     protected WeaponEffectiveness effectivenessAgainst(Weapon weapon) {
         if (weapon == Weapon.CUTLASS) {
-            return WeaponEffectiveness.NOT_VERY_EFFECTIVE;
+            return WeaponEffectiveness.NORMAL_EFFECTIVE;
         }
 
         return WeaponEffectiveness.MEDIUM_EFFECTIVE;
+    }
+
+    protected static int randomInclusive(Random random, int minValue, int maxValue) {
+        int boundedMin = Math.min(minValue, maxValue);
+        int boundedMax = Math.max(minValue, maxValue);
+        int range = (boundedMax - boundedMin) + 1;
+        return random.nextInt(range) + boundedMin;
     }
 }

@@ -20,6 +20,15 @@ final class TestMonsters {
         };
     }
 
+    static Monster withHealthAndStrike(String name, int health, Weapon strikeWeapon) {
+        return new Monster(name, health) {
+            @Override
+            protected Weapon strikeWeapon() {
+                return strikeWeapon;
+            }
+        };
+    }
+
     /** A harmless monster with the given health whose strikes never damage the target. */
     static Monster harmless(String name, int health) {
         return new Monster(name, health) {
