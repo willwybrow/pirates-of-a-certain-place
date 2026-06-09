@@ -26,9 +26,8 @@ final class World {
 
     private final Map<Hex, SeaTile> generatedHexagons = new HashMap<>(250);
 
-    World(TileFactory tileFactory) {
-        this.generatedHexagons.put(Hex.ORIGIN, SeaTile.startingSquare());
-        this.generatedHexagons.putAll(tileFactory.generate());
+    World(Map<Hex, SeaTile> tiles) {
+        this.generatedHexagons.putAll(tiles);
     }
 
     SeaTile whatsAt(Hex location) {
@@ -77,21 +76,5 @@ final class World {
         return Math.abs(hex.q()) <= WORLD_LAYERS
             && Math.abs(hex.r()) <= WORLD_LAYERS
             && Math.abs(hex.s()) <= WORLD_LAYERS;
-    }
-
-    private void preGenerate(TileFactory tileFactory) {
-        ArrayList<Hex> worldHexes = new ArrayList<>();
-        Hex.ORIGIN.spiral(WORLD_LAYERS)
-            .filter(World::isWithinWorld)
-            .filter(hex -> !Hex.ORIGIN.equals(hex))
-            .forEach(worldHexes::add);
-
-        worldHexes.sort(Comparator.comparingInt(Hex::q).thenComparingInt(Hex::r));
-        Map<Hex, SeaTile> generatedTiles = tileFactory.generate();
-
-        for (Hex hex : worldHexes) {
-            SeaTile generated = generatedTiles.get(hex);
-            generatedHexagons.put(hex, generated == null ? EmptyTile.generate() : generated);
-        }
     }
 }

@@ -7,36 +7,35 @@ import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SeaCombatFleeTest {
+class GameCombatFleeTest {
 
     @Test
     void fleeingKeepsDamageAlreadyDoneToPlayer() {
         Hex start = Hex.ORIGIN;
         Hex destination = Direction.EAST.move(start);
 
-        Sea sea = new Sea(new TileFactory() {
+        Game game = new TestGameFactory() {
             @Override
-            public Map<Hex, SeaTile> generate() {
+            public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Test Squid", 40)));
-                return generated;
+                return new World(generated);
             }
-        });
+        }.createGame();
 
-        sea.attemptToTravel(Direction.EAST, 1L);
-        sea.attemptToAttack(2L);
+        game.attemptToTravel(Direction.EAST, 1L);
+        game.attemptToAttack(2L);
 
-        int healthAfterCombatRound = sea.playerDetails().health();
+        int healthAfterCombatRound = game.playerDetails().health();
         assertThat(healthAfterCombatRound).isLessThan(100);
 
-        sea.attemptToFlee(3L);
+        game.attemptToFlee(3L);
 
-        assertThat(sea.playerDetails().position()).isEqualTo(start);
-        assertThat(sea.playerDetails().health()).isEqualTo(healthAfterCombatRound);
+        assertThat(game.playerDetails().position()).isEqualTo(start);
+        assertThat(game.playerDetails().health()).isEqualTo(healthAfterCombatRound);
     }
 
     @Test
@@ -44,26 +43,26 @@ class SeaCombatFleeTest {
         Hex start = Hex.ORIGIN;
         Hex destination = Direction.EAST.move(start);
 
-        Sea sea = new Sea(new TileFactory() {
+        Game game = new TestGameFactory() {
             @Override
-            public Map<Hex, SeaTile> generate() {
+            public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9)));
-                return generated;
+                return new World(generated);
             }
-        });
+        }.createGame();
 
-        sea.attemptToTravel(Direction.EAST, 1L);
-        sea.attemptToAttack(2L);
-        assertThat(sea.hasActiveCombat()).isTrue();
+        game.attemptToTravel(Direction.EAST, 1L);
+        game.attemptToAttack(2L);
+        assertThat(game.hasActiveCombat()).isTrue();
 
-        sea.attemptToFlee(3L);
+        game.attemptToFlee(3L);
 
-        sea.attemptToTravel(Direction.EAST, 4L);
-        sea.attemptToAttack(5L);
+        game.attemptToTravel(Direction.EAST, 4L);
+        game.attemptToAttack(5L);
 
-        assertThat(sea.playerDetails().position()).isEqualTo(start);
-        assertThat(sea.hasActiveCombat())
+        assertThat(game.playerDetails().position()).isEqualTo(start);
+        assertThat(game.hasActiveCombat())
             .as("monster should be reset after flee, so one attack is not enough to finish")
             .isTrue();
     }

@@ -62,6 +62,15 @@ public class Hex {
         return direction.move(this);
     }
 
+    /**
+     *
+     * @param n
+     * @return the nth centred hexagonal number
+     */
+    public static int centredHexagonalNumber(int n) {
+        return (int)Math.round(Math.pow(n, 3) - Math.pow(n-1, 3));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

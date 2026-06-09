@@ -13,13 +13,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Creates tiles for world generation.
@@ -33,53 +30,38 @@ public class TileFactory {
     private static final int MONSTER_COUNT_PER_TYPE = 6;
     private static final int WHIRLPOOL_COUNT = 2;
     private static final int ICEBERG_COUNT = 2;
-    private static final int MONSTER_TYPE_COUNT = 5;
-    private static final int NON_EMPTY_TILE_COUNT = ISLAND_COUNT
-        + MONSTER_COUNT_PER_TYPE * MONSTER_TYPE_COUNT
-        + WHIRLPOOL_COUNT
-        + ICEBERG_COUNT
-        + Treasure.values().length;
 
-    private final Map<Hex, SeaTile> generatedTiles;
+    private final Random worldGenRandom;
 
-    public TileFactory() {
-        this.generatedTiles = new HashMap<>();
-    }
 
-    public TileFactory(Random worldGenRandom) {
-        this.generatedTiles = generateAllTiles(Objects.requireNonNull(worldGenRandom, "worldGenRandom"));
+    public TileFactory(GameRandom gameRandom) {
+        this.worldGenRandom = gameRandom.worldGen();
     }
 
     /**
-     * Creates a world-scoped tile factory backed by the seed-derived world generation stream.
+     * Generates a mutable world filled with tiles for tracking the game state. Called once at game start.
+     * @return A new world
      */
-    TileFactory forWorld(Random worldGenRandom) {
-        if (this.getClass() == TileFactory.class) {
-            return new TileFactory(worldGenRandom);
-        }
-        return this;
+    public World generate() {
+        return new World(this.generateAllTiles(World.WORLD_LAYERS));
     }
 
-    /**
-     * Returns a copy of all non-origin world tiles.
-     */
-    public Map<Hex, SeaTile> generate() {
-        return new HashMap<>(this.generatedTiles);
-    }
-
-    private static Map<Hex, SeaTile> generateAllTiles(Random worldGenRandom) {
+    private Map<Hex, SeaTile> generateAllTiles(int layers) {
+        int hexCount = Hex.centredHexagonalNumber(layers);
         HashMap<Hex, SeaTile> generated = new HashMap<>();
 
-        ArrayList<Hex> tilesToGenerate = new ArrayList<>(217);
+        ArrayList<Hex> tilesToGenerate = new ArrayList<>(hexCount);
 
         Hex.ORIGIN.spiral(World.WORLD_LAYERS)
             .filter(World::isWithinWorld)
             .filter(hex -> !Hex.ORIGIN.equals(hex))
             .forEach(tilesToGenerate::add);
 
-        Collections.shuffle(tilesToGenerate, worldGenRandom);
+        Collections.shuffle(tilesToGenerate, this.worldGenRandom);
 
         int pointer = 0;
+        generated.put(Hex.ORIGIN, SeaTile.startingSquare());
+
         for (int i = 0; i < ISLAND_COUNT; i++) {
             generated.put(tilesToGenerate.get(pointer), IslandTile.generate());
             pointer++;

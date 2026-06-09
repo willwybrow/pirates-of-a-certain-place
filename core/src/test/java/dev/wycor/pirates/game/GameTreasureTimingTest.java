@@ -11,36 +11,37 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SeaTreasureTimingTest {
+class GameTreasureTimingTest {
 
     @Test
     void treasureTileRevealsImmediatelyAndCompletesMovementAfterDelay() {
+        GameRandom gameRandom = new GameRandom(0L);
         Hex start = Hex.ORIGIN;
         Direction direction = Direction.EAST;
         Hex destination = direction.move(start);
 
-        Sea sea = new Sea(new TileFactory() {
+        Game game = new Game(gameRandom, new TileFactory(gameRandom) {
             @Override
-            public Map<Hex, SeaTile> generate() {
+            public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(destination, TreasureTile.emeraldOfHope());
-                return generated;
+                return new World(generated);
             }
-        });
+        }).startNewGame(0L);
 
-        sea.attemptToTravel(direction, 1L);
+        game.attemptToTravel(direction, 1L);
 
         long now = 0L;
-        sea.recalculateGameState(now);
+        game.recalculateGameState(now);
 
-        SeaTile destinationTile = sea.whatsAt(destination);
+        SeaTile destinationTile = game.whatsAt(destination);
         assertThat(destinationTile.isSpied()).isTrue();
-        assertThat(sea.playerDetails().position()).isEqualTo(start);
-        assertThat(sea.playerDetails().capturedTreasures().get(Treasure.EMERALD_OF_HOPE)).isFalse();
+        assertThat(game.playerDetails().position()).isEqualTo(start);
+        assertThat(game.playerDetails().capturedTreasures().get(Treasure.EMERALD_OF_HOPE)).isFalse();
 
-        sea.recalculateGameState(now + 2_000L);
+        game.recalculateGameState(now + 2_000L);
 
-        assertThat(sea.playerDetails().position()).isEqualTo(destination);
-        assertThat(sea.playerDetails().capturedTreasures().get(Treasure.EMERALD_OF_HOPE)).isTrue();
+        assertThat(game.playerDetails().position()).isEqualTo(destination);
+        assertThat(game.playerDetails().capturedTreasures().get(Treasure.EMERALD_OF_HOPE)).isTrue();
     }
 }

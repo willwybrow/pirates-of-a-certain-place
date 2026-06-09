@@ -3,9 +3,12 @@ package dev.wycor.pirates;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.ScreenUtils;
-import dev.wycor.pirates.game.Sea;
+import dev.wycor.pirates.game.Game;
+import dev.wycor.pirates.game.GameRandom;
 import dev.wycor.pirates.game.TileFactory;
 import dev.wycor.pirates.ui.BaseUI;import dev.wycor.pirates.ui.DrawableStatus;import dev.wycor.pirates.ui.DrawableUI;import dev.wycor.pirates.ui.DrawableWorld;
+
+import java.util.Random;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
@@ -19,10 +22,22 @@ public class Main extends ApplicationAdapter {
     private static final float HEX_HEIGHT = BaseUI.THIRTY_TWO_PIXELS;
     private static final float TARGET_ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT;
 
-    private final Sea sea = new Sea(new TileFactory());
-    private final DrawableWorld world = new DrawableWorld(sea, LEFT_WIDTH, TOP_LEFT_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
-    private final DrawableStatus status = new DrawableStatus(sea, LEFT_WIDTH, BOTTOM_LEFT_HEIGHT);
-    private final DrawableUI ui = new DrawableUI(sea, RIGHT_WIDTH, SCREEN_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
+    private final Game game;
+    private final Random seedSource;
+
+    private final DrawableWorld world;
+    private final DrawableStatus status;
+    private final DrawableUI ui;
+
+    public Main() {
+        this.seedSource = new Random();
+        GameRandom gameRandom = new GameRandom(seedSource.nextLong());
+        this.game = new Game(gameRandom, new TileFactory(gameRandom));
+
+        world = new DrawableWorld(game, LEFT_WIDTH, TOP_LEFT_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
+        status = new DrawableStatus(game, LEFT_WIDTH, BOTTOM_LEFT_HEIGHT);
+        ui = new DrawableUI(game, RIGHT_WIDTH, SCREEN_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
+    }
 
     @Override
     public void create() {

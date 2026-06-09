@@ -6,7 +6,7 @@ This is an homage to a 90s shareware game called Pirate's Plunder created in 199
 
 ## Objective
 - You are **Captain Nevarro** of the ship **Odyssey**, searching the rich waters of the **Andorian Sea** for ancient sunken treasures.
-- The sea is unexplored at first, apart from known islands marked on the map
+- The game is unexplored at first, apart from known islands marked on the map
 - Each tile explored may contain a Treasure, a helpful Item, a Hazard or a Monster.
 - Collect all ten Treasures to win the game!
 

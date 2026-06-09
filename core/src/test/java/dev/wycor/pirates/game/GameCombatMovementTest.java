@@ -7,11 +7,10 @@ import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SeaCombatMovementTest {
+class GameCombatMovementTest {
 
     @Test
     void playerMovesIntoDestinationImmediatelyWhenCombatEnds() {
@@ -19,21 +18,21 @@ class SeaCombatMovementTest {
         Direction direction = Direction.EAST;
         Hex destination = direction.move(start);
 
-        Sea sea = new Sea(new TileFactory() {
+        Game game = new TestGameFactory() {
             @Override
-            public Map<Hex, SeaTile> generate() {
+            public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 1)));
-                return generated;
+                return new World(generated);
             }
-        });
+        }.createGame();
 
-        sea.attemptToTravel(direction, 1L);
-        assertThat(sea.playerDetails().position()).isEqualTo(start);
+        game.attemptToTravel(direction, 1L);
+        assertThat(game.playerDetails().position()).isEqualTo(start);
 
-        sea.attemptToAttack(2L);
+        game.attemptToAttack(2L);
 
-        assertThat(sea.playerDetails().position())
+        assertThat(game.playerDetails().position())
             .as("player should enter destination as soon as killing blow ends combat")
             .isEqualTo(destination);
     }
@@ -43,34 +42,34 @@ class SeaCombatMovementTest {
         Hex start = Hex.ORIGIN;
         Hex east = Direction.EAST.move(start);
 
-        Sea sea = new Sea(new TileFactory() {
+        Game game = new TestGameFactory() {
             @Override
-            public Map<Hex, SeaTile> generate() {
+            public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(east, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.harmless("Test Squid", 9)));
-                return generated;
+                return new World(generated);
             }
-        });
+        }.createGame();
 
-        sea.attemptToTravel(Direction.EAST, 1L);
+        game.attemptToTravel(Direction.EAST, 1L);
 
-        assertThat(sea.hasActiveCombat()).isTrue();
-        assertThat(sea.getPlayerDestination()).contains(east);
+        assertThat(game.hasActiveCombat()).isTrue();
+        assertThat(game.getPlayerDestination()).contains(east);
 
-        sea.attemptToTravel(Direction.WEST, 2L);
-        sea.attemptToAttack(3L);
+        game.attemptToTravel(Direction.WEST, 2L);
+        game.attemptToAttack(3L);
 
-        assertThat(sea.playerDetails().position()).isEqualTo(start);
-        assertThat(sea.getPlayerDestination()).contains(east);
+        assertThat(game.playerDetails().position()).isEqualTo(start);
+        assertThat(game.getPlayerDestination()).contains(east);
 
         long timestamp = 4L;
-        while (sea.hasActiveCombat() && timestamp < 20L) {
-            sea.attemptToAttack(timestamp);
+        while (game.hasActiveCombat() && timestamp < 20L) {
+            game.attemptToAttack(timestamp);
             timestamp += 1L;
         }
 
-        assertThat(sea.playerDetails().position()).isEqualTo(east);
-        assertThat(sea.getPlayerDestination()).isEmpty();
+        assertThat(game.playerDetails().position()).isEqualTo(east);
+        assertThat(game.getPlayerDestination()).isEmpty();
     }
 
     @Test
@@ -78,30 +77,29 @@ class SeaCombatMovementTest {
         Hex start = Hex.ORIGIN;
         Hex destination = Direction.EAST.move(start);
 
-        Sea sea = new Sea(new TileFactory() {
+        Game game = new TestGameFactory() {
             @Override
-            public Map<Hex, SeaTile> generate() {
+            public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(destination, TestTiles.testMonster(SeaEvent.GIANT_SQUID, false, () -> TestMonsters.withHealth("Fatal Squid", 100)));
-                return generated;
+                return new World(generated);
             }
-        });
-        sea.startNewGame(42L, 0L);
+        }.createGame();
 
-        sea.attemptToTravel(Direction.EAST, 1L);
+        game.attemptToTravel(Direction.EAST, 1L);
 
         // The monster out-damages the player over the fight, so trading blows ends in defeat.
         long timestamp = 2L;
-        while (sea.hasActiveCombat() && !sea.isGameOver() && timestamp < 100L) {
-            sea.attemptToAttack(timestamp++);
+        while (game.hasActiveCombat() && !game.isGameOver() && timestamp < 100L) {
+            game.attemptToAttack(timestamp++);
         }
 
-        assertThat(sea.isGameOver()).isTrue();
-        assertThat(sea.gameOverMessage()).isEqualTo("You have been defeated!");
-        assertThat(sea.playerDetails().position()).isEqualTo(start);
+        assertThat(game.isGameOver()).isTrue();
+        assertThat(game.gameOverMessage()).isEqualTo("You have been defeated!");
+        assertThat(game.playerDetails().position()).isEqualTo(start);
 
-        sea.attemptToTravel(Direction.EAST, timestamp);
+        game.attemptToTravel(Direction.EAST, timestamp);
 
-        assertThat(sea.playerDetails().position()).isEqualTo(start);
+        assertThat(game.playerDetails().position()).isEqualTo(start);
     }
 }

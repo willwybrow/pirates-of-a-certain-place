@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import dev.wycor.pirates.game.Sea;
+import dev.wycor.pirates.game.Game;
 import dev.wycor.pirates.game.SeaEvent;
 import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.game.Treasure;
@@ -16,7 +16,7 @@ import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 public class DrawableWorld {
     private static final float FLOATS_PER_PIXEL = 0.005f;
 
-    private final Sea sea;
+    private final Game game;
     private final float worldWidth;
     private final float worldHeight;
     private final float hexWidth;
@@ -42,13 +42,13 @@ public class DrawableWorld {
 
     private final java.util.function.LongSupplier clock;
 
-    public DrawableWorld(Sea sea, float worldWidth, float worldHeight, float hexWidth, float hexHeight) {
-        this(sea, worldWidth, worldHeight, hexWidth, hexHeight, System::currentTimeMillis);
+    public DrawableWorld(Game game, float worldWidth, float worldHeight, float hexWidth, float hexHeight) {
+        this(game, worldWidth, worldHeight, hexWidth, hexHeight, System::currentTimeMillis);
     }
 
-    public DrawableWorld(Sea sea, float worldWidth, float worldHeight, float hexWidth, float hexHeight,
+    public DrawableWorld(Game game, float worldWidth, float worldHeight, float hexWidth, float hexHeight,
                          java.util.function.LongSupplier clock) {
-        this.sea = sea;
+        this.game = game;
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
         this.hexWidth = hexWidth;
@@ -82,16 +82,16 @@ public class DrawableWorld {
     }
 
     public void draw(float dt) {
-        sea.recalculateGameState(clock.getAsLong());
+        game.recalculateGameState(clock.getAsLong());
         repointCamera(dt);
 
         viewport.apply();
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
         batch.begin();
-        sea.generatedHexes().forEach(exploredHex -> {
+        game.generatedHexes().forEach(exploredHex -> {
             drawAtHex(seaTexture, exploredHex);
-            SeaTile whatsHere = sea.whatsAt(exploredHex);
+            SeaTile whatsHere = game.whatsAt(exploredHex);
             if (!whatsHere.isSpied()) {
                 drawAtHex(fogOfWarTexture, exploredHex);
             } else if (!whatsHere.isCompleted()) {
@@ -157,15 +157,15 @@ public class DrawableWorld {
                 drawAtHex(islandTexture, exploredHex);
             }
         });
-        drawAtHex(shipTexture, sea.playerDetails().position());
+        drawAtHex(shipTexture, game.playerDetails().position());
 
-        if (sea.isGameOver()) {
+        if (game.isGameOver()) {
             Vector3 cameraPosition = viewport.getCamera().position;
             float overlayX = cameraPosition.x - worldWidth / 2f;
             float overlayY = cameraPosition.y - worldHeight / 2f;
             batch.draw(gameOverOverlayTexture, overlayX, overlayY, worldWidth, worldHeight);
 
-            String gameOverLabel = sea.gameOverMessage();
+            String gameOverLabel = game.gameOverMessage();
             float letterWidth = BaseUI.CURSIVE_LETTER_WIDTH;
             float textX = cameraPosition.x - (gameOverLabel.length() * letterWidth) / 2f;
             float textY = cameraPosition.y;
@@ -207,7 +207,7 @@ public class DrawableWorld {
     }
 
     private Hex cameraFocusHex() {
-        return sea.getPlayerDestination().orElseGet(() -> sea.playerDetails().position());
+        return game.getPlayerDestination().orElseGet(() -> game.playerDetails().position());
     }
 
     private Vector3 centreOfHex(Hex position) {

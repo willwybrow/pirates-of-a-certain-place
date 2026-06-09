@@ -11,7 +11,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SeaWinConditionTest {
+class GameWinConditionTest {
 
     @Test
     void collectingAllTreasuresEndsGameWithWinMessage() {
@@ -36,26 +36,26 @@ class SeaWinConditionTest {
             treasureByHex.put(cursor, treasures[i]);
         }
 
-        Sea sea = new Sea(new TileFactory() {
+        Game game = new TestGameFactory() {
             @Override
-            public Map<Hex, SeaTile> generate() {
+            public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 for (Map.Entry<Hex, Treasure> entry : treasureByHex.entrySet()) {
                     generated.put(entry.getKey(), TreasureTile.forTreasure(entry.getValue()));
                 }
-                return generated;
+                return new World(generated);
             }
-        });
+        }.createGame();
 
         long timestamp = 1L;
         for (Direction direction : route) {
-            sea.attemptToTravel(direction, timestamp);
-            sea.recalculateGameState(timestamp + 2_000L);
+            game.attemptToTravel(direction, timestamp);
+            game.recalculateGameState(timestamp + 2_000L);
             timestamp += 1L;
         }
 
-        assertThat(sea.playerDetails().capturedTreasures().values()).allMatch(Boolean::booleanValue);
-        assertThat(sea.isGameOver()).isTrue();
-        assertThat(sea.gameOverMessage()).isEqualTo("You found all the treasures!");
+        assertThat(game.playerDetails().capturedTreasures().values()).allMatch(Boolean::booleanValue);
+        assertThat(game.isGameOver()).isTrue();
+        assertThat(game.gameOverMessage()).isEqualTo("You found all the treasures!");
     }
 }

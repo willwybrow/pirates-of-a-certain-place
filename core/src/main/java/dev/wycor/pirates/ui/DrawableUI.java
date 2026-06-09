@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import dev.wycor.pirates.game.Sea;
+import dev.wycor.pirates.game.Game;
 import dev.wycor.pirates.game.Weapon;
 import dev.wycor.pirates.geometry.Direction;
 
@@ -51,16 +51,16 @@ public class DrawableUI {
     private List<DirectionButton> directionButtons;
     private List<ActionButton> combatButtons;
     private List<ActionButton> gameOverButtons;
-    private final Sea sea;
+    private final Game game;
     private final java.util.function.LongSupplier clock;
 
-    public DrawableUI(Sea sea, float worldWidth, float worldHeight, float unitWidth, float unitHeight) {
-        this(sea, worldWidth, worldHeight, unitWidth, unitHeight, System::currentTimeMillis);
+    public DrawableUI(Game game, float worldWidth, float worldHeight, float unitWidth, float unitHeight) {
+        this(game, worldWidth, worldHeight, unitWidth, unitHeight, System::currentTimeMillis);
     }
 
-    public DrawableUI(Sea sea, float worldWidth, float worldHeight, float unitWidth, float unitHeight,
+    public DrawableUI(Game game, float worldWidth, float worldHeight, float unitWidth, float unitHeight,
                       java.util.function.LongSupplier clock) {
-        this.sea = sea;
+        this.game = game;
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
 
@@ -113,7 +113,7 @@ public class DrawableUI {
 
         float combatButtonsY = worldHeight * 0.5f;
         float combatButtonSpacing = ACTION_BUTTON_HEIGHT * 1.15f;
-        List<Weapon> weapons = sea.playerDetails().wieldableWeapons();
+        List<Weapon> weapons = game.playerDetails().wieldableWeapons();
         float firstWeaponY = combatButtonsY + combatButtonSpacing * ((weapons.size() - 1) / 2f);
 
         ArrayList<ActionButton> combatButtons = new ArrayList<>(weapons.size() + 1);
@@ -150,11 +150,11 @@ public class DrawableUI {
         uiBatch.begin();
         uiBatch.draw(uiPanelBackgroundTexture, 0f, 0f, worldWidth, worldHeight);
 
-        if (sea.isGameOver()) {
-            gameOverButtons.forEach(button -> button.draw(uiBatch, cursive, sea));
-        } else if (sea.hasActiveCombat()) {
+        if (game.isGameOver()) {
+            gameOverButtons.forEach(button -> button.draw(uiBatch, cursive, game));
+        } else if (game.hasActiveCombat()) {
             cursive.write(uiBatch, 4 * gridSquare, worldHeight - 8 * gridSquare, "COMBAT!");
-            combatButtons.forEach(button -> button.draw(uiBatch, cursive, sea));
+            combatButtons.forEach(button -> button.draw(uiBatch, cursive, game));
         } else {
             directionButtons.forEach(db -> db.draw(uiBatch));
         }
@@ -185,13 +185,13 @@ public class DrawableUI {
         uiBatch.dispose();
     }
 
-    private static String weaponButtonLabel(Sea sea, Weapon weapon) {
+    private static String weaponButtonLabel(Game game, Weapon weapon) {
         String label = weaponButtonLabel(weapon);
         if (!weapon.usesAmmunition()) {
             return label;
         }
 
-        int ammunition = sea.playerDetails().ammunitionByWeapon().getOrDefault(weapon, 0);
+        int ammunition = game.playerDetails().ammunitionByWeapon().getOrDefault(weapon, 0);
         return label + " [" + ammunition + "]";
     }
 
@@ -202,10 +202,10 @@ public class DrawableUI {
     static class DirectionButton {
         private final Texture button;
         private final Texture arrow;
-        private final Consumer<Sea> action;
+        private final Consumer<Game> action;
         private final Rectangle rectangle;
 
-        DirectionButton(Texture button, Texture arrow, float worldX, float worldY, float widthInWorld, float heightInWorld, Consumer<Sea> action) {
+        DirectionButton(Texture button, Texture arrow, float worldX, float worldY, float widthInWorld, float heightInWorld, Consumer<Game> action) {
             this.button = button;
             this.arrow = arrow;
             this.action = action;
@@ -222,8 +222,8 @@ public class DrawableUI {
             return this.rectangle.contains(screenPoint);
         }
 
-        void actOn(Sea sea) {
-            this.action.accept(sea);
+        void actOn(Game game) {
+            this.action.accept(game);
         }
     }
 
@@ -231,18 +231,18 @@ public class DrawableUI {
         private final Texture upTexture;
         private final Texture downTexture;
         private final Texture iconTexture;
-        private final Function<Sea, String> label;
-        private final Consumer<Sea> action;
+        private final Function<Game, String> label;
+        private final Consumer<Game> action;
         private final Rectangle rectangle;
         private boolean pressed;
 
         ActionButton(Texture upTexture, Texture downTexture, float worldCenterX, float worldCenterY, float widthInWorld,
-                      float heightInWorld, String label, Consumer<Sea> action) {
+                      float heightInWorld, String label, Consumer<Game> action) {
             this(upTexture, downTexture, worldCenterX, worldCenterY, widthInWorld, heightInWorld, null, sea -> label, action);
         }
 
         ActionButton(Texture upTexture, Texture downTexture, float worldCenterX, float worldCenterY, float widthInWorld,
-                     float heightInWorld, Texture iconTexture, Function<Sea, String> label, Consumer<Sea> action) {
+                     float heightInWorld, Texture iconTexture, Function<Game, String> label, Consumer<Game> action) {
             this.upTexture = upTexture;
             this.downTexture = downTexture;
             this.iconTexture = iconTexture;
@@ -256,10 +256,10 @@ public class DrawableUI {
             );
         }
 
-        void draw(SpriteBatch batch, Cursive cursive, Sea sea) {
+        void draw(SpriteBatch batch, Cursive cursive, Game game) {
             batch.draw(pressed ? downTexture : upTexture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 
-            String text = label.apply(sea);
+            String text = label.apply(game);
             float textWidth = text.length() * BaseUI.CURSIVE_LETTER_WIDTH;
 
             float iconWidth = 0f;
@@ -292,8 +292,8 @@ public class DrawableUI {
             this.pressed = pressed;
         }
 
-        void actOn(Sea sea) {
-            this.action.accept(sea);
+        void actOn(Game game) {
+            this.action.accept(game);
         }
     }
 
@@ -306,24 +306,24 @@ public class DrawableUI {
 
         @Override
         public boolean keyUp(int keycode) {
-            if (sea.isGameOver()) {
+            if (game.isGameOver()) {
                 switch (keycode) {
                     case Input.Keys.ENTER:
                     case Input.Keys.N:
-                        sea.startNewGame(now());
+                        game.startNewGame(now());
                         return true;
                     default:
                         return false;
                 }
             }
 
-            if (sea.hasActiveCombat()) {
+            if (game.hasActiveCombat()) {
                 switch (keycode) {
                     case Input.Keys.SPACE:
-                        sea.attemptToAttack(Weapon.CUTLASS, now());
+                        game.attemptToAttack(Weapon.CUTLASS, now());
                         return true;
                     case Input.Keys.F:
-                        sea.attemptToFlee(now());
+                        game.attemptToFlee(now());
                         return true;
                     default:
                         return false;
@@ -332,22 +332,22 @@ public class DrawableUI {
 
             switch(keycode) {
                 case Input.Keys.E:
-                    sea.attemptToTravel(Direction.NORTHEAST, now());
+                    game.attemptToTravel(Direction.NORTHEAST, now());
                     return true;
                 case Input.Keys.D:
-                    sea.attemptToTravel(Direction.EAST, now());
+                    game.attemptToTravel(Direction.EAST, now());
                     return true;
                 case Input.Keys.X:
-                    sea.attemptToTravel(Direction.SOUTHEAST, now());
+                    game.attemptToTravel(Direction.SOUTHEAST, now());
                     return true;
                 case Input.Keys.Z:
-                    sea.attemptToTravel(Direction.SOUTHWEST, now());
+                    game.attemptToTravel(Direction.SOUTHWEST, now());
                     return true;
                 case Input.Keys.A:
-                    sea.attemptToTravel(Direction.WEST, now());
+                    game.attemptToTravel(Direction.WEST, now());
                     return true;
                 case Input.Keys.W:
-                    sea.attemptToTravel(Direction.NORTHWEST, now());
+                    game.attemptToTravel(Direction.NORTHWEST, now());
                     return true;
             }
             return false;
@@ -361,7 +361,7 @@ public class DrawableUI {
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
             Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
-            if (button == Input.Buttons.LEFT && sea.isGameOver()) {
+            if (button == Input.Buttons.LEFT && game.isGameOver()) {
                 boolean anyPressed = false;
                 for (ActionButton gameOverButton : gameOverButtons) {
                     boolean inside = gameOverButton.pointInside(clickPoint);
@@ -371,7 +371,7 @@ public class DrawableUI {
                 return anyPressed;
             }
 
-            if (button == Input.Buttons.LEFT && sea.hasActiveCombat()) {
+            if (button == Input.Buttons.LEFT && game.hasActiveCombat()) {
                 boolean anyPressed = false;
                 for (ActionButton combatButton : combatButtons) {
                     boolean inside = combatButton.pointInside(clickPoint);
@@ -389,12 +389,12 @@ public class DrawableUI {
             if (button == Input.Buttons.LEFT) {
                 Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
 
-                if (sea.isGameOver()) {
+                if (game.isGameOver()) {
                     boolean acted = gameOverButtons.stream()
                         .filter(b -> b.pointInside(clickPoint))
                         .findFirst()
                         .map(b -> {
-                            b.actOn(sea);
+                            b.actOn(game);
                             return true;
                         })
                         .orElse(false);
@@ -402,12 +402,12 @@ public class DrawableUI {
                     return acted;
                 }
 
-                if (sea.hasActiveCombat()) {
+                if (game.hasActiveCombat()) {
                     boolean acted = combatButtons.stream()
                         .filter(b -> b.pointInside(clickPoint))
                         .findFirst()
                         .map(b -> {
-                            b.actOn(sea);
+                            b.actOn(game);
                             return true;
                         })
                         .orElse(false);
@@ -419,7 +419,7 @@ public class DrawableUI {
                     .filter(db -> db.pointInside(clickPoint))
                     .findFirst()
                     .map(db -> {
-                        db.actOn(sea);
+                        db.actOn(game);
                         return true;
                     }).orElse(false);
             }

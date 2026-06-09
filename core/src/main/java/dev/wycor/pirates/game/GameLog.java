@@ -11,16 +11,7 @@ import java.util.List;
  */
 public final class GameLog {
 
-    private final long seed;
     private final List<GameInput> inputs = new ArrayList<>();
-
-    public GameLog(long seed) {
-        this.seed = seed;
-    }
-
-    public long seed() {
-        return this.seed;
-    }
 
     public void append(GameInput input) {
         this.inputs.add(input);

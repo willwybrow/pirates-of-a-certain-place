@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.PlayerDetails;
-import dev.wycor.pirates.game.Sea;
+import dev.wycor.pirates.game.Game;
 import dev.wycor.pirates.game.Treasure;
 
 import java.util.Map;
@@ -20,7 +20,7 @@ public class DrawableStatus {
     private static final int FOOD_FIELD_WIDTH = 3;
     private static final int ENEMY_HEALTH_FIELD_WIDTH = 3;
 
-    private final Sea sea;
+    private final Game game;
     private final float worldWidth;
     private final float worldHeight;
 
@@ -36,8 +36,8 @@ public class DrawableStatus {
     private Texture backgroundTexture;
     private Cursive cursive;
 
-    public DrawableStatus(Sea sea, float worldWidth, float worldHeight) {
-        this.sea = sea;
+    public DrawableStatus(Game game, float worldWidth, float worldHeight) {
+        this.game = game;
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
         this.numberOfLines = Math.round(worldHeight / LINE_HEIGHT);
@@ -62,7 +62,7 @@ public class DrawableStatus {
         batch.begin();
         batch.draw(backgroundTexture, 0f, 0f, worldWidth, worldHeight);
 
-        PlayerDetails player = sea.playerDetails();
+        PlayerDetails player = game.playerDetails();
 
         String healthLabel = "Health: "
             + leftPad(Integer.toString(player.health()), HEALTH_FIELD_WIDTH)
@@ -76,7 +76,7 @@ public class DrawableStatus {
         batch.setColor(0.95f, 0.72f, 0.22f, 1f);
         cursive.write(batch, Math.max(0f, foodX), worldHeight - LINE_HEIGHT, foodLabel);
 
-        sea.currentOpponentDetails().ifPresent(opponent -> {
+        game.currentOpponentDetails().ifPresent(opponent -> {
             String opponentLabel = opponent.name()
                 + ": "
                 + leftPad(Integer.toString(opponent.health()), ENEMY_HEALTH_FIELD_WIDTH)
@@ -91,7 +91,7 @@ public class DrawableStatus {
 
         drawTreasureProgress(player.capturedTreasures());
 
-        String[] logLines = sea.recentLog().toArray(new String[]{});
+        String[] logLines = game.recentLog().toArray(new String[]{});
         int visibleLogLines = Math.max(0, numberOfLines - 3);
 
         for (int i = 0; i < Math.min(logLines.length, visibleLogLines); i++) {

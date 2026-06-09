@@ -124,28 +124,28 @@ class MonsterBalanceTest {
                                             Weapon openingWeapon) {
         Hex monsterHex = Direction.EAST.move(Hex.ORIGIN);
 
-        Sea sea = new Sea(new TileFactory() {
+        Game game = new Game(new GameRandom(0L), new TileFactory(new GameRandom(0L)) {
             @Override
-            public Map<Hex, SeaTile> generate() {
+            public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(monsterHex, monsterTileSupplier.get());
-                return generated;
+                return new World(generated);
             }
         });
-        sea.startNewGame(seed, 0L);
+        game.startNewGame(0L);
 
-        sea.attemptToTravel(Direction.EAST, 1L);
+        game.attemptToTravel(Direction.EAST, 1L);
 
         long timestamp = 2L;
-        if (openingWeapon != null && sea.hasActiveCombat() && !sea.isGameOver()) {
-            sea.attemptToAttack(openingWeapon, timestamp++);
+        if (openingWeapon != null && game.hasActiveCombat() && !game.isGameOver()) {
+            game.attemptToAttack(openingWeapon, timestamp++);
         }
 
-        while (sea.hasActiveCombat() && !sea.isGameOver()) {
-            sea.attemptToAttack(Weapon.CUTLASS, timestamp++);
+        while (game.hasActiveCombat() && !game.isGameOver()) {
+            game.attemptToAttack(Weapon.CUTLASS, timestamp++);
         }
 
         // The player wins if the monster is gone and the player is still standing.
-        return !sea.isGameOver();
+        return !game.isGameOver();
     }
 }
