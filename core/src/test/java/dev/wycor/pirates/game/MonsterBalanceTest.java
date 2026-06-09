@@ -124,14 +124,18 @@ class MonsterBalanceTest {
                                             Weapon openingWeapon) {
         Hex monsterHex = Direction.EAST.move(Hex.ORIGIN);
 
-        Game game = new Game(new GameRandom(0L), new TileFactory(new GameRandom(0L)) {
+        GameRandom gameRandom = new GameRandom(0L);
+        TileFactory tileFactory = new TileFactory(gameRandom.world()) {
             @Override
             public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(monsterHex, monsterTileSupplier.get());
                 return new World(generated);
             }
-        });
+        };
+        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
+        Game game = new Game(tileFactory, attackResolver, hazardEngine);
         game.startNewGame(0L);
 
         game.attemptToTravel(Direction.EAST, 1L);

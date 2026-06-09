@@ -11,7 +11,6 @@ import dev.wycor.pirates.geometry.Hex;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +33,8 @@ public class TileFactory {
     private final Random worldGenRandom;
 
 
-    public TileFactory(GameRandom gameRandom) {
-        this.worldGenRandom = gameRandom.worldGen();
+    public TileFactory(Random worldRandom) {
+        this.worldGenRandom = worldRandom;
     }
 
     /**

@@ -34,7 +34,10 @@ class GameDeterminismTest {
 
     private static Game playScript(long seed) {
         GameRandom gameRandom = new GameRandom(seed);
-        Game game = new Game(gameRandom, new TileFactory(gameRandom));
+        TileFactory tileFactory = new TileFactory(gameRandom.world());
+        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
+        Game game = new Game(tileFactory, attackResolver, hazardEngine);
         game.startNewGame(0L);
 
         long timestamp = 1L;

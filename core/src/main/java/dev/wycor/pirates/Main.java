@@ -3,10 +3,15 @@ package dev.wycor.pirates;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.ScreenUtils;
+import dev.wycor.pirates.game.AttackResolver;
 import dev.wycor.pirates.game.Game;
 import dev.wycor.pirates.game.GameRandom;
+import dev.wycor.pirates.game.HazardEngine;
 import dev.wycor.pirates.game.TileFactory;
-import dev.wycor.pirates.ui.BaseUI;import dev.wycor.pirates.ui.DrawableStatus;import dev.wycor.pirates.ui.DrawableUI;import dev.wycor.pirates.ui.DrawableWorld;
+import dev.wycor.pirates.ui.BaseUI;
+import dev.wycor.pirates.ui.DrawableStatus;
+import dev.wycor.pirates.ui.DrawableUI;
+import dev.wycor.pirates.ui.DrawableWorld;
 
 import java.util.Random;
 
@@ -32,7 +37,10 @@ public class Main extends ApplicationAdapter {
     public Main() {
         this.seedSource = new Random();
         GameRandom gameRandom = new GameRandom(seedSource.nextLong());
-        this.game = new Game(gameRandom, new TileFactory(gameRandom));
+        TileFactory tileFactory = new TileFactory(gameRandom.world());
+        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
+        this.game = new Game(tileFactory, attackResolver, hazardEngine);
 
         world = new DrawableWorld(game, LEFT_WIDTH, TOP_LEFT_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
         status = new DrawableStatus(game, LEFT_WIDTH, BOTTOM_LEFT_HEIGHT);

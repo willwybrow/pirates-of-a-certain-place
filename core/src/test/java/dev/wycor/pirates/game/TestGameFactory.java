@@ -4,24 +4,29 @@ import java.util.Random;
 
 abstract class TestGameFactory extends TileFactory {
 
-    private final GameRandom gameRandom;
+    private final AttackResolver attackResolver;
+    private final HazardEngine hazardEngine;
 
     TestGameFactory() {
         this(newDeterministicGameRandom());
     }
 
     private TestGameFactory(GameRandom gameRandom) {
-        super(gameRandom);
-        this.gameRandom = gameRandom;
+        super(gameRandom.world());
+        this.attackResolver = new AttackResolver(gameRandom.combat());
+        this.hazardEngine = new HazardEngine(gameRandom.hazard());
     }
 
     final Game createGame() {
-        return new Game(this.gameRandom, this).startNewGame(0L);
+        return new Game(this, this.attackResolver, this.hazardEngine).startNewGame(0L);
     }
 
     static Game createDefaultGame() {
         GameRandom gameRandom = newDeterministicGameRandom();
-        return new Game(gameRandom, new TileFactory(gameRandom)).startNewGame(0L);
+        TileFactory tileFactory = new TileFactory(gameRandom.world());
+        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
+        return new Game(tileFactory, attackResolver, hazardEngine).startNewGame(0L);
     }
 
     private static GameRandom newDeterministicGameRandom() {

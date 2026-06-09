@@ -10,7 +10,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 /**
  * Single-game state and simulation logic.
@@ -21,21 +20,22 @@ import java.util.Random;
 public class Game {
     private static final int MAX_LOG_LINES = 60;
     private static final long TILE_TRAVEL_DELAY_MILLIS = 1_000L;
-    private static final int ICEBERG_DAMAGE = 20;
 
     private final ArrayDeque<String> logLines = new ArrayDeque<>();
-    private final GameRandom gameRandom;
     private final TileFactory tileFactory;
+    private final AttackResolver attackResolver;
+    private final HazardEngine hazardEngine;
 
     private GameLog log;
     private World world;
     private Player player;
     private ActiveTravel activeTravel;
 
-    public Game(GameRandom gameRandom, TileFactory tileFactory) {
-        this.gameRandom = gameRandom;
+    public Game(TileFactory tileFactory, AttackResolver attackResolver, HazardEngine hazardEngine) {
         this.tileFactory = tileFactory;
-        startNewGame(System.currentTimeMillis());
+        this.attackResolver = attackResolver;
+        this.hazardEngine = hazardEngine;
+        startNewGame(0L);
     }
 
     public Game startNewGame(long timestamp) {
@@ -182,7 +182,7 @@ public class Game {
             return;
         }
 
-        resolveCombatRound(opponent, weapon).forEach(this::addAttackLog);
+        this.attackResolver.resolveCombatRound(player, opponent, weapon).forEach(this::addAttackLog);
     }
 
     private void processFleeInput() {
@@ -195,19 +195,6 @@ public class Game {
         destinationTile.onPlayerFled();
         cancelActiveTravel();
         addLog("You broke off and stayed at " + player.position() + ".");
-    }
-
-    private List<Attack> resolveCombatRound(Monster opponent, Weapon weapon) {
-        ArrayList<Attack> attacksThisRound = new ArrayList<>(2);
-
-        Attack playerAttack = new Attack(player, opponent, weapon);
-        attacksThisRound.add(opponent.receiveAttack(playerAttack, gameRandom.combat()));
-
-        if (!opponent.isDead()) {
-            attacksThisRound.add(opponent.strike(player, gameRandom.combat()));
-        }
-
-        return attacksThisRound;
     }
 
     private void resolveActiveTravel(long timestampMillis) {
@@ -246,7 +233,7 @@ public class Game {
         }
 
         if (isPendingHazard) {
-            resolveHazard((HazardTile) destinationTile);
+            this.hazardEngine.resolve((HazardTile) destinationTile, player, world).forEach(this::addLog);
         }
 
         if (!destinationTile.isPlayerRewarded()) {
@@ -256,43 +243,6 @@ public class Game {
         player.moveTo(destinationHex);
         player.consumeTravelSupplies();
         clearActiveTravel();
-    }
-
-    private void resolveHazard(HazardTile hazardTile) {
-        switch (hazardTile.hazard()) {
-            case ICEBERG:
-                resolveIceberg();
-                break;
-            case WHIRLPOOL:
-                resolveWhirlpool();
-                break;
-            default:
-                break;
-        }
-        hazardTile.trigger();
-    }
-
-    private void resolveIceberg() {
-        player.takeDamage(ICEBERG_DAMAGE);
-        addLog("An iceberg gouged the hull for " + ICEBERG_DAMAGE + " damage.");
-    }
-
-    private void resolveWhirlpool() {
-        List<Treasure> capturedTreasures = player.capturedTreasureList();
-        if (capturedTreasures.isEmpty()) {
-            addLog("A whirlpool churned past, but you had no treasure to lose.");
-            return;
-        }
-
-        Treasure lostTreasure = capturedTreasures.get(gameRandom.hazard().nextInt(capturedTreasures.size()));
-        boolean rehidden = world.rehideTreasureUnderUnexploredTile(lostTreasure, gameRandom.hazard());
-        if (!rehidden) {
-            addLog("A whirlpool churned past, but there was nowhere left to hide your treasure.");
-            return;
-        }
-
-        player.loseTreasure(lostTreasure);
-        addLog("A whirlpool swallowed the " + lostTreasure.displayName() + " and hid it anew.");
     }
 
     private void applyReward(Reward reward) {
@@ -322,6 +272,9 @@ public class Game {
     }
 
     private GameEndStatus gameEndStatus() {
+        if (player == null) {
+            return GameEndStatus.PRESTARTED;
+        }
         if (player.hasCapturedAllTreasures()) {
             return GameEndStatus.TREASURES_FOUND;
         }
@@ -336,6 +289,8 @@ public class Game {
 
     static String gameOverMessage(GameEndStatus status) {
         switch (status) {
+            case PRESTARTED:
+                return "Welcome to Pirate's Plunder!";
             case DEFEATED:
                 return "You have been defeated!";
             case STARVED:
@@ -398,6 +353,7 @@ public class Game {
     }
 
     private enum GameEndStatus {
+        PRESTARTED,
         ONGOING,
         DEFEATED,
         STARVED,

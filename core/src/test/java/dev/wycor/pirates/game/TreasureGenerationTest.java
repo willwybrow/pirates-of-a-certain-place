@@ -14,7 +14,10 @@ class TreasureGenerationTest {
     @Test
     void generatedWorldHasOriginalFixedComposition() {
         GameRandom gameRandom = new GameRandom(0L);
-        Game game = new Game(gameRandom, new TileFactory(gameRandom));
+        TileFactory tileFactory = new TileFactory(gameRandom.world());
+        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
+        Game game = new Game(tileFactory, attackResolver, hazardEngine);
         game.startNewGame(42L);
 
         EnumMap<SeaEvent, Integer> counts = countPendingEvents(game);

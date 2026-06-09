@@ -20,14 +20,17 @@ class GameTreasureTimingTest {
         Direction direction = Direction.EAST;
         Hex destination = direction.move(start);
 
-        Game game = new Game(gameRandom, new TileFactory(gameRandom) {
+        TileFactory tileFactory = new TileFactory(gameRandom.world()) {
             @Override
             public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(destination, TreasureTile.emeraldOfHope());
                 return new World(generated);
             }
-        }).startNewGame(0L);
+        };
+        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
+        Game game = new Game(tileFactory, attackResolver, hazardEngine).startNewGame(0L);
 
         game.attemptToTravel(direction, 1L);
 

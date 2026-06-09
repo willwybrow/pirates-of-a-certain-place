@@ -11,7 +11,7 @@ import java.util.Random;
  */
 public final class GameRandom {
 
-    private final Random worldGen;
+    private final Random world;
     private final Random combat;
     private final Random hazard;
 
@@ -19,14 +19,14 @@ public final class GameRandom {
         // Expand the single game seed into independent sub-seeds. Using a dedicated
         // seeding Random keeps the derivation deterministic and stable across runs.
         Random seeding = new Random(seed);
-        this.worldGen = new Random(seeding.nextLong());
+        this.world = new Random(seeding.nextLong());
         this.combat = new Random(seeding.nextLong());
         this.hazard = new Random(seeding.nextLong());
     }
 
     /** Random stream used while generating the world layout from the seed. */
-    public Random worldGen() {
-        return this.worldGen;
+    public Random world() {
+        return this.world;
     }
 
     /** Random stream used while resolving combat (damage variance, etc.). */
