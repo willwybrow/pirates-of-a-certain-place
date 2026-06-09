@@ -2,6 +2,7 @@ package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.game.tile.EmptyTile;
 import dev.wycor.pirates.game.tile.HazardTile;
+import dev.wycor.pirates.game.tile.ItemTile;
 import dev.wycor.pirates.game.tile.IslandTile;
 import dev.wycor.pirates.game.tile.MonsterTile;
 import dev.wycor.pirates.game.tile.SeaTile;
@@ -23,6 +24,10 @@ public enum SeaEvent {
     PHOENIX(MonsterTile::phoenix),
     GHOST_SHIP(MonsterTile::ghostShip),
     PIRATE_SHIP(MonsterTile::pirateShip),
+    TAR(ItemTile::tar),
+    MAP(ItemTile::map),
+    SEXTANT(ItemTile::sextant),
+    SPYGLASS(ItemTile::spyglass),
     EMERALD_OF_HOPE(TreasureTile::emeraldOfHope),
     GOLDEN_SWORD_OF_YR(TreasureTile::goldenSwordOfYr),
     KING_FLYNNS_ROYAL_SCEPTRE(TreasureTile::kingFlynnsRoyalSceptre),

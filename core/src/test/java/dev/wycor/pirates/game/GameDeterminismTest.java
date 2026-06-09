@@ -37,7 +37,8 @@ class GameDeterminismTest {
         TileFactory tileFactory = new TileFactory(gameRandom.world());
         AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
-        Game game = new Game(tileFactory, attackResolver, hazardEngine);
+        ItemEngine itemEngine = new ItemEngine();
+        Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);
         game.startNewGame(0L);
 
         long timestamp = 1L;

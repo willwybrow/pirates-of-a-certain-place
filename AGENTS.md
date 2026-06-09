@@ -1,5 +1,12 @@
 # AGENTS.md
 
+## Important must-follow rules that always apply
+- Write GOOD code.
+- Don't write shitty code.
+- I have to read this stuff so make it not utterly incomprehensible.
+- Write **GOOD** code!!
+- After you write some code, look at it again and check: "is this code shit?" and if it is, rewrite it.
+
 ## Scope
 - Gradle multi-project libGDX game with three modules: `core`, `lwjgl3`, and `html` (see `settings.gradle`).
 

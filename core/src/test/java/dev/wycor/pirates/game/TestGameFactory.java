@@ -6,6 +6,7 @@ abstract class TestGameFactory extends TileFactory {
 
     private final AttackResolver attackResolver;
     private final HazardEngine hazardEngine;
+    private final ItemEngine itemEngine;
 
     TestGameFactory() {
         this(newDeterministicGameRandom());
@@ -15,10 +16,11 @@ abstract class TestGameFactory extends TileFactory {
         super(gameRandom.world());
         this.attackResolver = new AttackResolver(gameRandom.combat());
         this.hazardEngine = new HazardEngine(gameRandom.hazard());
+        this.itemEngine = new ItemEngine();
     }
 
     final Game createGame() {
-        return new Game(this, this.attackResolver, this.hazardEngine).startNewGame(0L);
+        return new Game(this, this.attackResolver, this.hazardEngine, this.itemEngine).startNewGame(0L);
     }
 
     static Game createDefaultGame() {
@@ -26,7 +28,8 @@ abstract class TestGameFactory extends TileFactory {
         TileFactory tileFactory = new TileFactory(gameRandom.world());
         AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
-        return new Game(tileFactory, attackResolver, hazardEngine).startNewGame(0L);
+        ItemEngine itemEngine = new ItemEngine();
+        return new Game(tileFactory, attackResolver, hazardEngine, itemEngine).startNewGame(0L);
     }
 
     private static GameRandom newDeterministicGameRandom() {

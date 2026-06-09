@@ -2,6 +2,7 @@ package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.game.tile.EmptyTile;
 import dev.wycor.pirates.game.tile.HazardTile;
+import dev.wycor.pirates.game.tile.ItemTile;
 import dev.wycor.pirates.game.tile.IslandTile;
 import dev.wycor.pirates.game.tile.MonsterTile;
 import dev.wycor.pirates.game.tile.SeaTile;
@@ -29,6 +30,10 @@ public class TileFactory {
     private static final int MONSTER_COUNT_PER_TYPE = 6;
     private static final int WHIRLPOOL_COUNT = 2;
     private static final int ICEBERG_COUNT = 2;
+    private static final int TAR_COUNT = 3;
+    private static final int MAP_COUNT = 3;
+    private static final int SEXTANT_COUNT = 4;
+    private static final int SPYGLASS_COUNT = 4;
 
     private final Random worldGenRandom;
 
@@ -86,6 +91,22 @@ public class TileFactory {
         }
         for (int i = 0; i < ICEBERG_COUNT; i++) {
             generated.put(tilesToGenerate.get(pointer), HazardTile.iceberg());
+            pointer++;
+        }
+        for (int i = 0; i < TAR_COUNT; i++) {
+            generated.put(tilesToGenerate.get(pointer), ItemTile.tar());
+            pointer++;
+        }
+        for (int i = 0; i < MAP_COUNT; i++) {
+            generated.put(tilesToGenerate.get(pointer), ItemTile.map());
+            pointer++;
+        }
+        for (int i = 0; i < SEXTANT_COUNT; i++) {
+            generated.put(tilesToGenerate.get(pointer), ItemTile.sextant());
+            pointer++;
+        }
+        for (int i = 0; i < SPYGLASS_COUNT; i++) {
+            generated.put(tilesToGenerate.get(pointer), ItemTile.spyglass());
             pointer++;
         }
         for (Treasure treasure : Treasure.values()) {

@@ -30,7 +30,8 @@ class GameTreasureTimingTest {
         };
         AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
-        Game game = new Game(tileFactory, attackResolver, hazardEngine).startNewGame(0L);
+        ItemEngine itemEngine = new ItemEngine();
+        Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine).startNewGame(0L);
 
         game.attemptToTravel(direction, 1L);
 

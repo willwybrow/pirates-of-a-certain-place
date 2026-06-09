@@ -40,6 +40,7 @@ public class DrawableUI {
     private Texture arrowNorthWest;
     private Texture arrowWest;
     private Texture arrowSouthWest;
+    private Texture crosshair;
     private Texture buttonRectUp;
     private Texture buttonRectDown;
 
@@ -85,6 +86,7 @@ public class DrawableUI {
         arrowNorthWest = new Texture("arrow_upleft_16.png");
         arrowWest = new Texture("arrow_left_16.png");
         arrowSouthWest = new Texture("arrow_downleft_16.png");
+        crosshair = new Texture("crosshair_1x_25.png");
         buttonRectUp = new Texture("button_rect_up_72x15.png");
         buttonRectDown = new Texture("button_rect_down_72x15.png");
         BaseUI.loadWeaponTextures();
@@ -185,6 +187,7 @@ public class DrawableUI {
         uiBatch.draw(uiPanelBackgroundTexture, 0f, 0f, worldWidth, worldHeight);
 
         boolean activeCombat = game.hasActiveCombat();
+        boolean awaitingSpyglassDirection = game.isAwaitingSpyglassDirection();
 
         if (game.isGameOver()) {
             newGameButton.draw(uiBatch, cursive, game);
@@ -192,7 +195,11 @@ public class DrawableUI {
             cursive.write(uiBatch, 4 * gridSquare, worldHeight - 8 * gridSquare, "COMBAT!");
             fleeButton.draw(uiBatch, cursive, game);
         } else {
-            directionButtons.forEach(db -> db.draw(uiBatch));
+            Texture directionIcon = awaitingSpyglassDirection ? crosshair : null;
+            directionButtons.forEach(db -> db.draw(uiBatch, directionIcon));
+            if (awaitingSpyglassDirection) {
+                cursive.write(uiBatch, 4 * gridSquare, worldHeight - 8 * gridSquare, "SPYGLASS: CHOOSE DIRECTION");
+            }
         }
 
         weaponButtons.forEach(button -> button.draw(uiBatch, cursive, game, activeCombat));
@@ -217,6 +224,7 @@ public class DrawableUI {
         arrowNorthWest.dispose();
         arrowWest.dispose();
         arrowSouthWest.dispose();
+        crosshair.dispose();
         buttonRectUp.dispose();
         buttonRectDown.dispose();
         BaseUI.disposeWeaponTextures();
@@ -251,9 +259,10 @@ public class DrawableUI {
             this.rectangle = new Rectangle(worldX - widthInWorld / 2f, worldY - heightInWorld / 2f, widthInWorld, heightInWorld);
         }
 
-        void draw(SpriteBatch batch) {
+        void draw(SpriteBatch batch, Texture iconOverride) {
             batch.draw(button, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-            batch.draw(arrow, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+            Texture icon = iconOverride == null ? arrow : iconOverride;
+            batch.draw(icon, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         }
 
         boolean pointInside(Vector2 screenPoint) {

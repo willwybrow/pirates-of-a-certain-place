@@ -7,9 +7,12 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.wycor.pirates.game.Game;
 import dev.wycor.pirates.game.SeaEvent;
+import dev.wycor.pirates.game.TileHighlight;
 import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.game.Treasure;
 import dev.wycor.pirates.geometry.Hex;
+
+import com.badlogic.gdx.graphics.Color;
 
 import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
@@ -35,6 +38,10 @@ public class DrawableWorld {
     private Texture stockedIslandTexture;
     private Texture icebergTexture;
     private Texture whirlpoolTexture;
+    private Texture tarTexture;
+    private Texture mapTexture;
+    private Texture sextantTexture;
+    private Texture spyglassTexture;
     private Texture fogOfWarTexture;
     private Texture shipTexture;
     private Texture gameOverOverlayTexture;
@@ -70,6 +77,10 @@ public class DrawableWorld {
         stockedIslandTexture = new Texture("island_stocked_1x_32.png");
         icebergTexture = new Texture("iceberg_1x_32.png");
         whirlpoolTexture = new Texture("whirlpool_1x_32.png");
+        tarTexture = new Texture("tar_1x_32.png");
+        mapTexture = new Texture("map_1x_32.png");
+        sextantTexture = new Texture("sextant_1x_32.png");
+        spyglassTexture = new Texture("spyglass_1x_32.png");
         fogOfWarTexture = new Texture("unexplored_hex_32.png");
         shipTexture = new Texture("hero_ship_1x_32.png");
         BaseUI.loadTreasureTextures();
@@ -104,6 +115,18 @@ public class DrawableWorld {
                         break;
                     case WHIRLPOOL:
                         drawAtHex(whirlpoolTexture, exploredHex);
+                        break;
+                    case TAR:
+                        drawAtHex(tarTexture, exploredHex);
+                        break;
+                    case MAP:
+                        drawAtHex(mapTexture, exploredHex);
+                        break;
+                    case SEXTANT:
+                        drawAtHex(sextantTexture, exploredHex);
+                        break;
+                    case SPYGLASS:
+                        drawAtHex(spyglassTexture, exploredHex);
                         break;
                     case GIANT_SQUID:
                         drawAtHex(giantSquidTexture, exploredHex);
@@ -157,6 +180,8 @@ public class DrawableWorld {
                 drawAtHex(islandTexture, exploredHex);
             }
         });
+
+        drawTileHighlights();
         drawAtHex(shipTexture, game.playerDetails().position());
 
         if (game.isGameOver()) {
@@ -196,6 +221,10 @@ public class DrawableWorld {
         stockedIslandTexture.dispose();
         icebergTexture.dispose();
         whirlpoolTexture.dispose();
+        tarTexture.dispose();
+        mapTexture.dispose();
+        sextantTexture.dispose();
+        spyglassTexture.dispose();
         fogOfWarTexture.dispose();
         shipTexture.dispose();
         gameOverOverlayTexture.dispose();
@@ -207,7 +236,31 @@ public class DrawableWorld {
     }
 
     private Hex cameraFocusHex() {
+        java.util.Optional<Hex> cameraFocusOverrideHex = game.cameraFocusOverrideHex();
+        if (cameraFocusOverrideHex.isPresent()) {
+            return cameraFocusOverrideHex.get();
+        }
         return game.getPlayerDestination().orElseGet(() -> game.playerDetails().position());
+    }
+
+    private void drawTileHighlights() {
+        for (TileHighlight highlight : game.activeTileHighlights()) {
+            switch (highlight.color()) {
+                case GREEN:
+                    batch.setColor(0.2f, 0.9f, 0.2f, 0.45f);
+                    break;
+                case RED:
+                    batch.setColor(0.95f, 0.2f, 0.2f, 0.45f);
+                    break;
+                default:
+                    batch.setColor(Color.WHITE);
+                    break;
+            }
+
+            drawAtHex(seaTexture, highlight.hex());
+        }
+
+        batch.setColor(Color.WHITE);
     }
 
     private Vector3 centreOfHex(Hex position) {

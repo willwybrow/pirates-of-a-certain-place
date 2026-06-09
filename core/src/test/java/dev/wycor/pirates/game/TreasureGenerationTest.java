@@ -17,7 +17,8 @@ class TreasureGenerationTest {
         TileFactory tileFactory = new TileFactory(gameRandom.world());
         AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
-        Game game = new Game(tileFactory, attackResolver, hazardEngine);
+        ItemEngine itemEngine = new ItemEngine();
+        Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);
         game.startNewGame(42L);
 
         EnumMap<SeaEvent, Integer> counts = countPendingEvents(game);
@@ -31,6 +32,10 @@ class TreasureGenerationTest {
         assertThat(counts.getOrDefault(SeaEvent.PIRATE_SHIP, 0)).isEqualTo(6);
         assertThat(counts.getOrDefault(SeaEvent.WHIRLPOOL, 0)).isEqualTo(2);
         assertThat(counts.getOrDefault(SeaEvent.ICEBERG, 0)).isEqualTo(2);
+        assertThat(counts.getOrDefault(SeaEvent.TAR, 0)).isEqualTo(3);
+        assertThat(counts.getOrDefault(SeaEvent.MAP, 0)).isEqualTo(3);
+        assertThat(counts.getOrDefault(SeaEvent.SEXTANT, 0)).isEqualTo(4);
+        assertThat(counts.getOrDefault(SeaEvent.SPYGLASS, 0)).isEqualTo(4);
 
         for (Treasure treasure : Treasure.values()) {
             assertThat(counts.getOrDefault(SeaEvent.valueOf(treasure.name()), 0))
@@ -38,7 +43,7 @@ class TreasureGenerationTest {
                 .isEqualTo(1);
         }
 
-        assertThat(counts.getOrDefault(SeaEvent.NOTHING, 0)).isEqualTo(117);
+        assertThat(counts.getOrDefault(SeaEvent.NOTHING, 0)).isEqualTo(103);
     }
 
     private static EnumMap<SeaEvent, Integer> countPendingEvents(Game game) {

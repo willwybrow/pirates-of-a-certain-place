@@ -7,6 +7,7 @@ import dev.wycor.pirates.game.AttackResolver;
 import dev.wycor.pirates.game.Game;
 import dev.wycor.pirates.game.GameRandom;
 import dev.wycor.pirates.game.HazardEngine;
+import dev.wycor.pirates.game.ItemEngine;
 import dev.wycor.pirates.game.TileFactory;
 import dev.wycor.pirates.ui.BaseUI;
 import dev.wycor.pirates.ui.DrawableStatus;
@@ -40,7 +41,8 @@ public class Main extends ApplicationAdapter {
         TileFactory tileFactory = new TileFactory(gameRandom.world());
         AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
-        this.game = new Game(tileFactory, attackResolver, hazardEngine);
+        ItemEngine itemEngine = new ItemEngine();
+        this.game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);
 
         world = new DrawableWorld(game, LEFT_WIDTH, TOP_LEFT_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
         status = new DrawableStatus(game, LEFT_WIDTH, BOTTOM_LEFT_HEIGHT);
