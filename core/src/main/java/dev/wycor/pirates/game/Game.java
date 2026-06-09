@@ -48,10 +48,6 @@ public class Game {
         return this;
     }
 
-    public List<GameInput> inputs() {
-        return this.log.inputs();
-    }
-
     public Game recalculateGameState(long timestampMillis) {
         advance(timestampMillis);
         return this;

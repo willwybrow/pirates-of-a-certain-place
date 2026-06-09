@@ -49,8 +49,9 @@ public class DrawableUI {
     private SpriteBatch uiBatch;
 
     private List<DirectionButton> directionButtons;
-    private List<ActionButton> combatButtons;
-    private List<ActionButton> gameOverButtons;
+    private List<ActionButton> weaponButtons;
+    private ActionButton fleeButton;
+    private ActionButton newGameButton;
     private final Game game;
     private final java.util.function.LongSupplier clock;
 
@@ -96,45 +97,78 @@ public class DrawableUI {
         // the seven movement buttons
 
         float uiCentreX = worldWidth / 2f;
-        float uiCentreY = worldHeight / 2f;
+        float movementControlsCenterY = worldHeight * 0.77f;
 
-        float verticalSpacing = 0.85f;
+        float verticalSpacing = 0.78f;
         float horizontalSpacing = 0.53f;
 
         this.directionButtons = List.of(
-            new DirectionButton(button, arrowNorthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHWEST, now())),
-            new DirectionButton(button, arrowNorthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHEAST, now())),
-            new DirectionButton(button, arrowWest, uiCentreX - 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.WEST, now())),
-            /* new DirectionButton(button, button, uiCentreX, uiCentreY - 2 * unitHeight, unitWidth, unitHeight, sea -> sea.whatsAt(sea.currentPosition()).complete()), // TODO -- middle button?? */
-            new DirectionButton(button, arrowEast, uiCentreX + 2f * horizontalSpacing * unitWidth, uiCentreY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.EAST, now())),
-            new DirectionButton(button, arrowSouthWest, uiCentreX - horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHWEST, now())),
-            new DirectionButton(button, arrowSouthEast, uiCentreX + horizontalSpacing * unitWidth, uiCentreY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHEAST, now()))
+            new DirectionButton(button, arrowNorthWest, uiCentreX - horizontalSpacing * unitWidth, movementControlsCenterY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHWEST, now())),
+            new DirectionButton(button, arrowNorthEast, uiCentreX + horizontalSpacing * unitWidth, movementControlsCenterY + verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.NORTHEAST, now())),
+            new DirectionButton(button, arrowWest, uiCentreX - 2f * horizontalSpacing * unitWidth, movementControlsCenterY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.WEST, now())),
+            /* new DirectionButton(button, button, uiCentreX, movementControlsCenterY - 2 * unitHeight, unitWidth, unitHeight, sea -> sea.whatsAt(sea.currentPosition()).complete()), // TODO -- middle button?? */
+            new DirectionButton(button, arrowEast, uiCentreX + 2f * horizontalSpacing * unitWidth, movementControlsCenterY, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.EAST, now())),
+            new DirectionButton(button, arrowSouthWest, uiCentreX - horizontalSpacing * unitWidth, movementControlsCenterY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHWEST, now())),
+            new DirectionButton(button, arrowSouthEast, uiCentreX + horizontalSpacing * unitWidth, movementControlsCenterY - verticalSpacing * unitHeight, unitWidth, unitHeight, sea -> sea.attemptToTravel(Direction.SOUTHEAST, now()))
         );
 
-        float combatButtonsY = worldHeight * 0.5f;
-        float combatButtonSpacing = ACTION_BUTTON_HEIGHT * 1.15f;
-        List<Weapon> weapons = game.playerDetails().wieldableWeapons();
-        float firstWeaponY = combatButtonsY + combatButtonSpacing * ((weapons.size() - 1) / 2f);
+        float weaponBottomY = ACTION_BUTTON_HEIGHT;
+        float lowestDirectionButtonY = movementControlsCenterY - (verticalSpacing * unitHeight);
+        float lowestDirectionBottom = lowestDirectionButtonY - (unitHeight / 2f);
+        float weaponTopLimit = lowestDirectionBottom - ACTION_BUTTON_HEIGHT;
 
-        ArrayList<ActionButton> combatButtons = new ArrayList<>(weapons.size() + 1);
-        for (int i = 0; i < weapons.size(); i++) {
-            Weapon weapon = weapons.get(i);
-            float buttonY = firstWeaponY - (i * combatButtonSpacing);
-            Texture weaponTexture = BaseUI.weaponTexture(weapon);
-            combatButtons.add(new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, buttonY,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, weaponTexture, sea -> weaponButtonLabel(sea, weapon),
-                sea -> sea.attemptToAttack(weapon, now())));
+        float defaultWeaponButtonSpacing = ACTION_BUTTON_HEIGHT * 1.15f;
+        float weaponButtonSpacing = defaultWeaponButtonSpacing;
+        List<Weapon> weapons = game.playerDetails().wieldableWeapons();
+        if (weapons.size() > 1) {
+            float maxSpacingToAvoidOverlap = (weaponTopLimit - weaponBottomY) / (weapons.size() - 1);
+            weaponButtonSpacing = Math.min(defaultWeaponButtonSpacing, maxSpacingToAvoidOverlap);
+            weaponButtonSpacing = Math.max(0f, weaponButtonSpacing);
         }
 
-        combatButtons.add(new ActionButton(buttonRectUp, buttonRectDown, uiCentreX,
-            firstWeaponY - (weapons.size() * combatButtonSpacing),
-            ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "Flee", sea -> sea.attemptToFlee(now())));
+        float firstWeaponY = weaponBottomY;
 
-        this.combatButtons = combatButtons;
+        ArrayList<ActionButton> weaponButtons = new ArrayList<>(weapons.size());
+        for (int i = 0; i < weapons.size(); i++) {
+            Weapon weapon = weapons.get(weapons.size() - 1 - i);
+            float buttonY = firstWeaponY + (i * weaponButtonSpacing);
+            Texture weaponTexture = BaseUI.weaponTexture(weapon);
+            weaponButtons.add(new ActionButton(
+                buttonRectUp,
+                buttonRectDown,
+                uiCentreX,
+                buttonY,
+                ACTION_BUTTON_WIDTH,
+                ACTION_BUTTON_HEIGHT,
+                weaponTexture,
+                sea -> weaponButtonLabel(sea, weapon),
+                sea -> sea.attemptToAttack(weapon, now()),
+                true,
+                true
+            ));
+        }
+        this.weaponButtons = weaponButtons;
 
-        this.gameOverButtons = List.of(
-            new ActionButton(buttonRectUp, buttonRectDown, uiCentreX, worldHeight * 0.45f,
-                ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, "New Game", sea -> sea.startNewGame(now()))
+        this.fleeButton = new ActionButton(
+            buttonRectUp,
+            buttonRectDown,
+            uiCentreX,
+            movementControlsCenterY,
+            ACTION_BUTTON_WIDTH,
+            ACTION_BUTTON_HEIGHT,
+            "Flee",
+            sea -> sea.attemptToFlee(now())
+        );
+
+        this.newGameButton = new ActionButton(
+            buttonRectUp,
+            buttonRectDown,
+            uiCentreX,
+            movementControlsCenterY,
+            ACTION_BUTTON_WIDTH,
+            ACTION_BUTTON_HEIGHT,
+            "New Game",
+            sea -> sea.startNewGame(now())
         );
 
         Gdx.input.setInputProcessor(new InputHandler());
@@ -150,14 +184,18 @@ public class DrawableUI {
         uiBatch.begin();
         uiBatch.draw(uiPanelBackgroundTexture, 0f, 0f, worldWidth, worldHeight);
 
+        boolean activeCombat = game.hasActiveCombat();
+
         if (game.isGameOver()) {
-            gameOverButtons.forEach(button -> button.draw(uiBatch, cursive, game));
-        } else if (game.hasActiveCombat()) {
+            newGameButton.draw(uiBatch, cursive, game);
+        } else if (activeCombat) {
             cursive.write(uiBatch, 4 * gridSquare, worldHeight - 8 * gridSquare, "COMBAT!");
-            combatButtons.forEach(button -> button.draw(uiBatch, cursive, game));
+            fleeButton.draw(uiBatch, cursive, game);
         } else {
             directionButtons.forEach(db -> db.draw(uiBatch));
         }
+
+        weaponButtons.forEach(button -> button.draw(uiBatch, cursive, game, activeCombat));
 
         uiBatch.end();
     }
@@ -210,7 +248,7 @@ public class DrawableUI {
             this.arrow = arrow;
             this.action = action;
 
-            this.rectangle = new Rectangle(worldX - widthInWorld / 2f, worldY + heightInWorld / 2f, widthInWorld, heightInWorld);
+            this.rectangle = new Rectangle(worldX - widthInWorld / 2f, worldY - heightInWorld / 2f, widthInWorld, heightInWorld);
         }
 
         void draw(SpriteBatch batch) {
@@ -233,21 +271,44 @@ public class DrawableUI {
         private final Texture iconTexture;
         private final Function<Game, String> label;
         private final Consumer<Game> action;
+        private final boolean leftAlignedContent;
+        private final boolean hideBackgroundWhenDisabled;
         private final Rectangle rectangle;
         private boolean pressed;
 
         ActionButton(Texture upTexture, Texture downTexture, float worldCenterX, float worldCenterY, float widthInWorld,
                       float heightInWorld, String label, Consumer<Game> action) {
-            this(upTexture, downTexture, worldCenterX, worldCenterY, widthInWorld, heightInWorld, null, sea -> label, action);
+            this(
+                upTexture,
+                downTexture,
+                worldCenterX,
+                worldCenterY,
+                widthInWorld,
+                heightInWorld,
+                null,
+                sea -> label,
+                action,
+                false,
+                false
+            );
         }
 
         ActionButton(Texture upTexture, Texture downTexture, float worldCenterX, float worldCenterY, float widthInWorld,
                      float heightInWorld, Texture iconTexture, Function<Game, String> label, Consumer<Game> action) {
+            this(upTexture, downTexture, worldCenterX, worldCenterY, widthInWorld, heightInWorld,
+                iconTexture, label, action, false, false);
+        }
+
+        ActionButton(Texture upTexture, Texture downTexture, float worldCenterX, float worldCenterY, float widthInWorld,
+                     float heightInWorld, Texture iconTexture, Function<Game, String> label, Consumer<Game> action,
+                     boolean leftAlignedContent, boolean hideBackgroundWhenDisabled) {
             this.upTexture = upTexture;
             this.downTexture = downTexture;
             this.iconTexture = iconTexture;
             this.action = action;
             this.label = label;
+            this.leftAlignedContent = leftAlignedContent;
+            this.hideBackgroundWhenDisabled = hideBackgroundWhenDisabled;
             this.rectangle = new Rectangle(
                 worldCenterX - widthInWorld / 2f,
                 worldCenterY - heightInWorld / 2f,
@@ -257,7 +318,14 @@ public class DrawableUI {
         }
 
         void draw(SpriteBatch batch, Cursive cursive, Game game) {
-            batch.draw(pressed ? downTexture : upTexture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+            draw(batch, cursive, game, true);
+        }
+
+        void draw(SpriteBatch batch, Cursive cursive, Game game, boolean enabled) {
+            if (enabled || !hideBackgroundWhenDisabled) {
+                batch.draw(enabled && pressed ? downTexture : upTexture, rectangle.x, rectangle.y, rectangle.width,
+                    rectangle.height);
+            }
 
             String text = label.apply(game);
             float textWidth = text.length() * BaseUI.CURSIVE_LETTER_WIDTH;
@@ -271,7 +339,12 @@ public class DrawableUI {
             }
 
             float contentWidth = textWidth + iconWidth + iconGap;
-            float contentX = rectangle.x + (rectangle.width - contentWidth) / 2f;
+            float contentX;
+            if (leftAlignedContent) {
+                contentX = rectangle.x + (BaseUI.CURSIVE_LETTER_WIDTH * 0.8f);
+            } else {
+                contentX = rectangle.x + (rectangle.width - contentWidth) / 2f;
+            }
 
             if (iconTexture != null) {
                 float iconHeight = rectangle.height * 0.8f;
@@ -362,22 +435,23 @@ public class DrawableUI {
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
             Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
             if (button == Input.Buttons.LEFT && game.isGameOver()) {
-                boolean anyPressed = false;
-                for (ActionButton gameOverButton : gameOverButtons) {
-                    boolean inside = gameOverButton.pointInside(clickPoint);
-                    gameOverButton.setPressed(inside);
-                    anyPressed = anyPressed || inside;
-                }
-                return anyPressed;
+                boolean inside = newGameButton.pointInside(clickPoint);
+                newGameButton.setPressed(inside);
+                return inside;
             }
 
             if (button == Input.Buttons.LEFT && game.hasActiveCombat()) {
                 boolean anyPressed = false;
-                for (ActionButton combatButton : combatButtons) {
-                    boolean inside = combatButton.pointInside(clickPoint);
-                    combatButton.setPressed(inside);
+                for (ActionButton weaponButton : weaponButtons) {
+                    boolean inside = weaponButton.pointInside(clickPoint);
+                    weaponButton.setPressed(inside);
                     anyPressed = anyPressed || inside;
                 }
+
+                boolean fleePressed = fleeButton.pointInside(clickPoint);
+                fleeButton.setPressed(fleePressed);
+                anyPressed = anyPressed || fleePressed;
+
                 return anyPressed;
             }
 
@@ -390,20 +464,16 @@ public class DrawableUI {
                 Vector2 clickPoint = uiViewport.unproject(new Vector2(screenX, screenY));
 
                 if (game.isGameOver()) {
-                    boolean acted = gameOverButtons.stream()
-                        .filter(b -> b.pointInside(clickPoint))
-                        .findFirst()
-                        .map(b -> {
-                            b.actOn(game);
-                            return true;
-                        })
-                        .orElse(false);
-                    gameOverButtons.forEach(b -> b.setPressed(false));
+                    boolean acted = newGameButton.pointInside(clickPoint);
+                    if (acted) {
+                        newGameButton.actOn(game);
+                    }
+                    newGameButton.setPressed(false);
                     return acted;
                 }
 
                 if (game.hasActiveCombat()) {
-                    boolean acted = combatButtons.stream()
+                    boolean acted = weaponButtons.stream()
                         .filter(b -> b.pointInside(clickPoint))
                         .findFirst()
                         .map(b -> {
@@ -411,7 +481,14 @@ public class DrawableUI {
                             return true;
                         })
                         .orElse(false);
-                    combatButtons.forEach(b -> b.setPressed(false));
+
+                    if (!acted && fleeButton.pointInside(clickPoint)) {
+                        fleeButton.actOn(game);
+                        acted = true;
+                    }
+
+                    weaponButtons.forEach(b -> b.setPressed(false));
+                    fleeButton.setPressed(false);
                     return acted;
                 }
 
