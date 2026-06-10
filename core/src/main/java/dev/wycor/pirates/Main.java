@@ -38,8 +38,8 @@ public class Main extends ApplicationAdapter {
     public Main() {
         this.seedSource = new Random();
         GameRandom gameRandom = new GameRandom(seedSource.nextLong());
-        TileFactory tileFactory = new TileFactory(gameRandom.world());
-        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        TileFactory tileFactory = new TileFactory(gameRandom.world(), gameRandom.monster());
+        AttackResolver attackResolver = new AttackResolver(gameRandom.monster());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
         ItemEngine itemEngine = new ItemEngine();
         this.game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);

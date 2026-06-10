@@ -1,6 +1,7 @@
 package dev.wycor.pirates.game;
 
 import dev.wycor.pirates.game.tile.HazardTile;
+import dev.wycor.pirates.game.tile.EmptyTile;
 import dev.wycor.pirates.game.tile.ItemTile;
 import dev.wycor.pirates.game.tile.MonsterTile;
 import dev.wycor.pirates.game.tile.SeaTile;
@@ -10,6 +11,7 @@ import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -72,22 +74,28 @@ class GameItemTest {
         assertThat(game.getPlayerDestination()).contains(mapHex);
         assertThat(game.whatsAt(mapHex).pendingEvent()).isEqualTo(SeaEvent.MAP);
         assertThat(game.whatsAt(mapHex).isCompleted()).isFalse();
+        assertThat(game.whatsAt(nearestTreasure).isSpied()).isFalse();
+        assertThat(game.whatsAt(distantTreasure).isSpied()).isFalse();
+        assertThat(game.transientFocusHex(1L)).isEmpty();
+        assertThat(game.activeTileHighlights()).isEmpty();
+
+        game.recalculateGameState(2_000L);
+
+        assertThat(game.playerDetails().position()).isEqualTo(origin);
+        assertThat(game.getPlayerDestination()).contains(mapHex);
+        assertThat(game.whatsAt(mapHex).pendingEvent()).isEqualTo(SeaEvent.MAP);
         assertThat(game.whatsAt(nearestTreasure).isSpied()).isTrue();
         assertThat(game.whatsAt(distantTreasure).isSpied()).isFalse();
-        assertThat(game.transientFocusHex(1L)).contains(nearestTreasure);
+        assertThat(game.transientFocusHex(2_000L)).contains(nearestTreasure);
         assertThat(game.activeTileHighlights())
             .extracting(TileHighlight::hex, TileHighlight::color)
             .containsExactly(org.assertj.core.groups.Tuple.tuple(nearestTreasure, TileHighlight.Color.GREEN));
 
-        game.recalculateGameState(1_000L);
-        assertThat(game.playerDetails().position()).isEqualTo(origin);
-        assertThat(game.whatsAt(mapHex).pendingEvent()).isEqualTo(SeaEvent.MAP);
-
-        game.recalculateGameState(3_000L);
+        game.recalculateGameState(4_000L);
         assertThat(game.playerDetails().position()).isEqualTo(mapHex);
         assertThat(game.getPlayerDestination()).isEmpty();
         assertThat(game.whatsAt(mapHex).isCompleted()).isTrue();
-        assertThat(game.transientFocusHex(3_000L)).isEmpty();
+        assertThat(game.transientFocusHex(4_000L)).isEmpty();
         assertThat(game.activeTileHighlights()).isEmpty();
     }
 
@@ -104,7 +112,7 @@ class GameItemTest {
             public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(sextantHex, ItemTile.sextant());
-                generated.put(nearMonsterHex, MonsterTile.giantSquid());
+                generated.put(nearMonsterHex, MonsterTile.giantSquid(new Random(0L)));
                 generated.put(nearHazardHex, HazardTile.iceberg());
                 generated.put(farHazardHex, HazardTile.whirlpool());
                 return new World(generated);
@@ -148,6 +156,8 @@ class GameItemTest {
             public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
                 generated.put(spyglassHex, ItemTile.spyglass());
+                generated.put(revealCentre, EmptyTile.generate());
+                generated.put(revealNeighbour, EmptyTile.generate());
                 return new World(generated);
             }
         }.createGame();
@@ -160,15 +170,24 @@ class GameItemTest {
         assertThat(game.getPlayerDestination()).contains(spyglassHex);
         assertThat(game.whatsAt(spyglassHex).pendingEvent()).isEqualTo(SeaEvent.SPYGLASS);
         assertThat(game.whatsAt(spyglassHex).isCompleted()).isFalse();
+        assertThat(game.whatsAt(revealCentre).isSpied()).isFalse();
+        assertThat(game.whatsAt(revealNeighbour).isSpied()).isFalse();
 
         game.attemptToTravel(Direction.EAST, 2L);
 
         assertThat(game.isAwaitingSpyglassDirection()).isFalse();
+        assertThat(game.playerDetails().position()).isEqualTo(origin);
+        assertThat(game.playerDetails().food()).isEqualTo(20);
+        assertThat(game.getPlayerDestination()).contains(spyglassHex);
+        assertThat(game.whatsAt(spyglassHex).isCompleted()).isFalse();
+        assertThat(game.whatsAt(revealCentre).isSpied()).isTrue();
+        assertThat(game.whatsAt(revealNeighbour).isSpied()).isTrue();
+
+        game.recalculateGameState(2_000L);
+
         assertThat(game.playerDetails().position()).isEqualTo(spyglassHex);
         assertThat(game.playerDetails().food()).isEqualTo(19);
         assertThat(game.getPlayerDestination()).isEmpty();
         assertThat(game.whatsAt(spyglassHex).isCompleted()).isTrue();
-        assertThat(game.whatsAt(revealCentre).isSpied()).isTrue();
-        assertThat(game.whatsAt(revealNeighbour).isSpied()).isTrue();
     }
 }

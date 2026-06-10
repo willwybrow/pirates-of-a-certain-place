@@ -19,7 +19,8 @@ class GameCombatDamageModelTest {
 
     @Test
     void superEffectiveWeaponDamageFallsWithinExpectedRange() {
-        Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID, GiantSquid::new);
+        Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID,
+            () -> GiantSquid.withHealth(GiantSquid.MIN_HEALTH));
 
         int opponentHealthBeforeAttack = opponentHealth(game);
         game.attemptToAttack(Weapon.HARPOON, 4L);
@@ -30,7 +31,8 @@ class GameCombatDamageModelTest {
 
     @Test
     void mediumEffectiveWeaponDamageFallsWithinExpectedRange() {
-        Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID, GiantSquid::new);
+        Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID,
+            () -> GiantSquid.withHealth(GiantSquid.MIN_HEALTH));
 
         int opponentHealthBeforeAttack = opponentHealth(game);
         game.attemptToAttack(Weapon.CANNON, 4L);
@@ -41,7 +43,8 @@ class GameCombatDamageModelTest {
 
     @Test
     void notVeryEffectiveWeaponDamageFallsWithinExpectedRange() {
-        Game game = prepareSeaForCombat(SeaEvent.PHOENIX, Phoenix::new);
+        Game game = prepareSeaForCombat(SeaEvent.PHOENIX,
+            () -> Phoenix.withHealth(Phoenix.MIN_HEALTH));
 
         int opponentHealthBeforeAttack = opponentHealth(game);
         game.attemptToAttack(Weapon.FLAMING_ARROWS, 4L);
@@ -52,7 +55,8 @@ class GameCombatDamageModelTest {
 
     @Test
     void cutlassDamageFallsWithinEmpiricalRange() {
-        Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID, GiantSquid::new);
+        Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID,
+            () -> GiantSquid.withHealth(GiantSquid.MIN_HEALTH));
 
         int opponentHealthBeforeAttack = opponentHealth(game);
         game.attemptToAttack(Weapon.CUTLASS, 4L);
@@ -63,7 +67,8 @@ class GameCombatDamageModelTest {
 
     @Test
     void monsterCounterattackDamageFallsWithinExpectedRange() {
-        Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID, GiantSquid::new);
+        Game game = prepareSeaForCombat(SeaEvent.GIANT_SQUID,
+            () -> GiantSquid.withHealth(GiantSquid.MIN_HEALTH));
 
         int playerHealthBeforeAttack = game.playerDetails().health();
         game.attemptToAttack(Weapon.CUTLASS, 4L);
@@ -75,7 +80,8 @@ class GameCombatDamageModelTest {
 
     @Test
     void phoenixCounterattackDamageFallsWithinEmpiricalRange() {
-        Game game = prepareSeaForCombat(SeaEvent.PHOENIX, Phoenix::new);
+        Game game = prepareSeaForCombat(SeaEvent.PHOENIX,
+            () -> Phoenix.withHealth(Phoenix.MIN_HEALTH));
 
         int playerHealthBeforeAttack = game.playerDetails().health();
         game.attemptToAttack(Weapon.CUTLASS, 4L);
@@ -86,7 +92,8 @@ class GameCombatDamageModelTest {
 
     @Test
     void pirateShipCounterattackDamageFallsWithinEmpiricalRange() {
-        Game game = prepareSeaForCombat(SeaEvent.PIRATE_SHIP, PirateShip::new);
+        Game game = prepareSeaForCombat(SeaEvent.PIRATE_SHIP,
+            () -> PirateShip.withHealth(PirateShip.MIN_HEALTH));
 
         int playerHealthBeforeAttack = game.playerDetails().health();
         game.attemptToAttack(Weapon.CUTLASS, 4L);

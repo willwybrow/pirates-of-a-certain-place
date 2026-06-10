@@ -1,10 +1,8 @@
 package dev.wycor.pirates.game;
 
-import dev.wycor.pirates.game.tile.SeaTile;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,8 +12,8 @@ class TreasureGenerationTest {
     @Test
     void generatedWorldHasOriginalFixedComposition() {
         GameRandom gameRandom = new GameRandom(0L);
-        TileFactory tileFactory = new TileFactory(gameRandom.world());
-        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        TileFactory tileFactory = new TileFactory(gameRandom.world(), gameRandom.monster());
+        AttackResolver attackResolver = new AttackResolver(gameRandom.monster());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
         ItemEngine itemEngine = new ItemEngine();
         Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);

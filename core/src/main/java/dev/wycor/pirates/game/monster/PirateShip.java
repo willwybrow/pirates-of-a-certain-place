@@ -9,10 +9,6 @@ public class PirateShip extends Monster {
     public static final int MIN_HEALTH = 57;
     public static final int MAX_HEALTH = 62;
 
-    public PirateShip() {
-        this(MIN_HEALTH);
-    }
-
     private PirateShip(int health) {
         super("Pirate Ship", health);
     }

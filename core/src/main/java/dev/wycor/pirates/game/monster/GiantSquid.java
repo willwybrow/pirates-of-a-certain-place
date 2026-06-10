@@ -9,10 +9,6 @@ public class GiantSquid extends Monster {
     public static final int MIN_HEALTH = 61;
     public static final int MAX_HEALTH = 64;
 
-    public GiantSquid() {
-        this(MIN_HEALTH);
-    }
-
     private GiantSquid(int health) {
         super("Giant Squid", health);
     }

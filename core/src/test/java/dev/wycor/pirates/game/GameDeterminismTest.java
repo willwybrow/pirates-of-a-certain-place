@@ -4,9 +4,6 @@ import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GameDeterminismTest {
@@ -34,8 +31,8 @@ class GameDeterminismTest {
 
     private static Game playScript(long seed) {
         GameRandom gameRandom = new GameRandom(seed);
-        TileFactory tileFactory = new TileFactory(gameRandom.world());
-        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        TileFactory tileFactory = new TileFactory(gameRandom.world(), gameRandom.monster());
+        AttackResolver attackResolver = new AttackResolver(gameRandom.monster());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
         ItemEngine itemEngine = new ItemEngine();
         Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);

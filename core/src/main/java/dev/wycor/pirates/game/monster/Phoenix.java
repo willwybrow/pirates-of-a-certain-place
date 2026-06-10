@@ -9,10 +9,6 @@ public class Phoenix extends Monster {
     public static final int MIN_HEALTH = 66;
     public static final int MAX_HEALTH = 68;
 
-    public Phoenix() {
-        this(MIN_HEALTH);
-    }
-
     private Phoenix(int health) {
         super("Phoenix", health);
     }

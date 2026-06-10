@@ -12,7 +12,7 @@ import java.util.Random;
 public final class GameRandom {
 
     private final Random world;
-    private final Random combat;
+    private final Random monster;
     private final Random hazard;
 
     public GameRandom(long seed) {
@@ -20,7 +20,7 @@ public final class GameRandom {
         // seeding Random keeps the derivation deterministic and stable across runs.
         Random seeding = new Random(seed);
         this.world = new Random(seeding.nextLong());
-        this.combat = new Random(seeding.nextLong());
+        this.monster = new Random(seeding.nextLong());
         this.hazard = new Random(seeding.nextLong());
     }
 
@@ -29,9 +29,9 @@ public final class GameRandom {
         return this.world;
     }
 
-    /** Random stream used while resolving combat (damage variance, etc.). */
-    public Random combat() {
-        return this.combat;
+    /** Random stream used for monster combat (damage variance, monster health, etc.). */
+    public Random monster() {
+        return this.monster;
     }
 
     /** Random stream used while resolving hazards (which treasure/tile a whirlpool affects, etc.). */

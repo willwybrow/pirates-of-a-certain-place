@@ -10,38 +10,38 @@ import dev.wycor.pirates.game.tile.TreasureTile;
 
 import java.util.Random;
 import java.util.EnumMap;
+import java.util.function.Function;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public enum SeaEvent {
-    NOTHING(EmptyTile::generate),
-    ISLAND(IslandTile::generate),
-    ICEBERG(HazardTile::iceberg),
-    WHIRLPOOL(HazardTile::whirlpool),
+    NOTHING(random -> EmptyTile.generate()),
+    ISLAND(random -> IslandTile.generate()),
+    ICEBERG(random -> HazardTile.iceberg()),
+    WHIRLPOOL(random -> HazardTile.whirlpool()),
     GIANT_SQUID(MonsterTile::giantSquid),
     SEAWEED_MONSTER(MonsterTile::seaweedMonster),
     PHOENIX(MonsterTile::phoenix),
     GHOST_SHIP(MonsterTile::ghostShip),
     PIRATE_SHIP(MonsterTile::pirateShip),
-    TAR(ItemTile::tar),
-    MAP(ItemTile::map),
-    SEXTANT(ItemTile::sextant),
-    SPYGLASS(ItemTile::spyglass),
-    EMERALD_OF_HOPE(TreasureTile::emeraldOfHope),
-    GOLDEN_SWORD_OF_YR(TreasureTile::goldenSwordOfYr),
-    KING_FLYNNS_ROYAL_SCEPTRE(TreasureTile::kingFlynnsRoyalSceptre),
-    SACRED_ONYX_CROSS(TreasureTile::sacredOnyxCross),
-    LOST_PEARL_OF_JEHVA(TreasureTile::lostPearlOfJehva),
-    QUEEN_LATHAS_CROWN(TreasureTile::queenLathasCrown),
-    RUBY_RING_OF_POWER(TreasureTile::rubyRingOfPower),
-    SILVER_CHALICE_OF_AUNGE(TreasureTile::silverChaliceOfAunge),
-    MURPHYS_CHEST_OF_GOLD(TreasureTile::murphysChestOfGold),
-    QUEEN_LATHAS_NECKLACE(TreasureTile::queenLathasNecklace);
+    TAR(random -> ItemTile.tar()),
+    MAP(random -> ItemTile.map()),
+    SEXTANT(random -> ItemTile.sextant()),
+    SPYGLASS(random -> ItemTile.spyglass()),
+    EMERALD_OF_HOPE(random -> TreasureTile.emeraldOfHope()),
+    GOLDEN_SWORD_OF_YR(random -> TreasureTile.goldenSwordOfYr()),
+    KING_FLYNNS_ROYAL_SCEPTRE(random -> TreasureTile.kingFlynnsRoyalSceptre()),
+    SACRED_ONYX_CROSS(random -> TreasureTile.sacredOnyxCross()),
+    LOST_PEARL_OF_JEHVA(random -> TreasureTile.lostPearlOfJehva()),
+    QUEEN_LATHAS_CROWN(random -> TreasureTile.queenLathasCrown()),
+    RUBY_RING_OF_POWER(random -> TreasureTile.rubyRingOfPower()),
+    SILVER_CHALICE_OF_AUNGE(random -> TreasureTile.silverChaliceOfAunge()),
+    MURPHYS_CHEST_OF_GOLD(random -> TreasureTile.murphysChestOfGold()),
+    QUEEN_LATHAS_NECKLACE(random -> TreasureTile.queenLathasNecklace());
 
-    private final Supplier<? extends SeaTile> tileGenerator;
+    private final Function<Random, ? extends SeaTile> tileGenerator;
 
-    SeaEvent(Supplier<? extends SeaTile> tileGenerator) {
+    SeaEvent(Function<Random, ? extends SeaTile> tileGenerator) {
         this.tileGenerator = tileGenerator;
     }
 
@@ -80,8 +80,8 @@ public enum SeaEvent {
         return NOTHING;
     }
 
-    public SeaTile generate() {
-        return this.tileGenerator.get();
+    public SeaTile generate(Random monsterRandom) {
+        return this.tileGenerator.apply(monsterRandom);
     }
 
     public static Optional<Treasure> treasureFor(SeaEvent seaEvent) {

@@ -7,7 +7,6 @@ import dev.wycor.pirates.geometry.Hex;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +19,7 @@ class GameTreasureTimingTest {
         Direction direction = Direction.EAST;
         Hex destination = direction.move(start);
 
-        TileFactory tileFactory = new TileFactory(gameRandom.world()) {
+        TileFactory tileFactory = new TileFactory(gameRandom.world(), gameRandom.monster()) {
             @Override
             public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
@@ -28,7 +27,7 @@ class GameTreasureTimingTest {
                 return new World(generated);
             }
         };
-        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        AttackResolver attackResolver = new AttackResolver(gameRandom.monster());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
         ItemEngine itemEngine = new ItemEngine();
         Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine).startNewGame(0L);

@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Random;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -90,25 +90,25 @@ class MonsterBalanceTest {
         assertSuperEffectiveOpeningWinRate(MonsterTile::pirateShip, Weapon.CANNON);
     }
 
-    private static void assertCutlassWinRateIsBalanced(Supplier<MonsterTile> monsterTileSupplier) {
-        double winRate = measureWinRate(monsterTileSupplier, null);
+    private static void assertCutlassWinRateIsBalanced(Function<Random, MonsterTile> monsterTileFactory) {
+        double winRate = measureWinRate(monsterTileFactory, null);
         assertThat(winRate)
             .as("player cutlass win rate over %d combats", COMBAT_SAMPLES)
             .isBetween(CUTLASS_MIN_WIN_RATE, CUTLASS_MAX_WIN_RATE);
     }
 
-    private static void assertSuperEffectiveOpeningWinRate(Supplier<MonsterTile> monsterTileSupplier,
+    private static void assertSuperEffectiveOpeningWinRate(Function<Random, MonsterTile> monsterTileFactory,
                                                            Weapon superEffectiveWeapon) {
-        double winRate = measureWinRate(monsterTileSupplier, superEffectiveWeapon);
+        double winRate = measureWinRate(monsterTileFactory, superEffectiveWeapon);
         assertThat(winRate)
             .as("player win rate with an opening %s over %d combats", superEffectiveWeapon, COMBAT_SAMPLES)
             .isBetween(SUPER_EFFECTIVE_MIN_WIN_RATE, SUPER_EFFECTIVE_MAX_WIN_RATE);
     }
 
-    private static double measureWinRate(Supplier<MonsterTile> monsterTileSupplier, Weapon openingWeapon) {
+    private static double measureWinRate(Function<Random, MonsterTile> monsterTileFactory, Weapon openingWeapon) {
         int playerWins = 0;
         for (int seed = 0; seed < COMBAT_SAMPLES; seed++) {
-            if (playerWinsCombat(monsterTileSupplier, seed, openingWeapon)) {
+            if (playerWinsCombat(monsterTileFactory, seed, openingWeapon)) {
                 playerWins++;
             }
         }
@@ -120,20 +120,20 @@ class MonsterBalanceTest {
      * the player fires one round of it first; thereafter (and for the whole fight otherwise) the player
      * keeps swinging the Cutlass until either the monster dies (player wins) or the player dies.
      */
-    private static boolean playerWinsCombat(Supplier<MonsterTile> monsterTileSupplier, long seed,
+    private static boolean playerWinsCombat(Function<Random, MonsterTile> monsterTileFactory, long seed,
                                             Weapon openingWeapon) {
         Hex monsterHex = Direction.EAST.move(Hex.ORIGIN);
 
-        GameRandom gameRandom = new GameRandom(0L);
-        TileFactory tileFactory = new TileFactory(gameRandom.world()) {
+        GameRandom gameRandom = new GameRandom(seed);
+        TileFactory tileFactory = new TileFactory(gameRandom.world(), gameRandom.monster()) {
             @Override
             public World generate() {
                 HashMap<Hex, SeaTile> generated = new HashMap<>();
-                generated.put(monsterHex, monsterTileSupplier.get());
+                generated.put(monsterHex, monsterTileFactory.apply(gameRandom.monster()));
                 return new World(generated);
             }
         };
-        AttackResolver attackResolver = new AttackResolver(gameRandom.combat());
+        AttackResolver attackResolver = new AttackResolver(gameRandom.monster());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
         ItemEngine itemEngine = new ItemEngine();
         Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);

@@ -36,10 +36,12 @@ public class TileFactory {
     private static final int SPYGLASS_COUNT = 4;
 
     private final Random worldGenRandom;
+    private final Random monsterGenRandom;
 
 
-    public TileFactory(Random worldRandom) {
+    public TileFactory(Random worldRandom, Random monsterRandom) {
         this.worldGenRandom = worldRandom;
+        this.monsterGenRandom = monsterRandom;
     }
 
     /**
@@ -73,11 +75,11 @@ public class TileFactory {
 
         for (int i = 0; i < MONSTER_COUNT_PER_TYPE; i++) {
             List<Supplier<MonsterTile>> list = Arrays.asList(
-                () -> MonsterTile.giantSquid(this.worldGenRandom),
-                MonsterTile::seaweedMonster,
-                () -> MonsterTile.phoenix(this.worldGenRandom),
-                MonsterTile::ghostShip,
-                () -> MonsterTile.pirateShip(this.worldGenRandom)
+                () -> MonsterTile.giantSquid(this.monsterGenRandom),
+                () -> MonsterTile.seaweedMonster(this.monsterGenRandom),
+                () -> MonsterTile.phoenix(this.monsterGenRandom),
+                () -> MonsterTile.ghostShip(this.monsterGenRandom),
+                () -> MonsterTile.pirateShip(this.monsterGenRandom)
             );
 
             for (Supplier<MonsterTile> monsterTileSupplier : list) {

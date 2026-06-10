@@ -4,6 +4,7 @@ import dev.wycor.pirates.game.monster.GhostShip;
 import dev.wycor.pirates.game.monster.GiantSquid;
 import dev.wycor.pirates.game.monster.Phoenix;
 import dev.wycor.pirates.game.monster.PirateShip;
+import dev.wycor.pirates.game.monster.SeaweedMonster;
 import dev.wycor.pirates.game.tile.MonsterTile;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +24,13 @@ class MonsterStatCalibrationTest {
     }
 
     @Test
+    void seaweedMonsterHealthRollsWithinEmpiricalRange() {
+        assertRolledHealthRange(MonsterTile::seaweedMonster,
+            SeaweedMonster.MIN_HEALTH,
+            SeaweedMonster.MAX_HEALTH);
+    }
+
+    @Test
     void phoenixHealthRollsWithinEmpiricalRange() {
         assertRolledHealthRange(MonsterTile::phoenix, Phoenix.MIN_HEALTH, Phoenix.MAX_HEALTH);
     }
@@ -33,9 +41,8 @@ class MonsterStatCalibrationTest {
     }
 
     @Test
-    void ghostShipHealthMatchesEmpiricalCeiling() {
-        int health = MonsterTile.ghostShip().getCombatant().maxHealth();
-        assertThat(health).isEqualTo(GhostShip.HEALTH);
+    void ghostShipHealthRollsWithinEmpiricalRange() {
+        assertRolledHealthRange(MonsterTile::ghostShip, GhostShip.MIN_HEALTH, GhostShip.MAX_HEALTH);
     }
 
     private static void assertRolledHealthRange(Function<Random, MonsterTile> tileFactory,

@@ -23,8 +23,10 @@ public abstract class SeaTile {
         return EmptyTile.generate().spy();
     }
 
-    public static SeaTile random(EnumMap<Treasure, Boolean> unavailableTreasures, Random worldGenRandom) {
-        return SeaEvent.random(unavailableTreasures, worldGenRandom).generate();
+    public static SeaTile random(EnumMap<Treasure, Boolean> unavailableTreasures,
+                                 Random worldGenRandom,
+                                 Random monsterRandom) {
+        return SeaEvent.random(unavailableTreasures, worldGenRandom).generate(monsterRandom);
     }
 
     public boolean isSpied() {
@@ -42,10 +44,6 @@ public abstract class SeaTile {
 
     public SeaEvent completedEvent() {
         return this.isCompleted() ? this.seaEvent : SeaEvent.NOTHING;
-    }
-
-    public final boolean hasReward() {
-        return this.reward() != null;
     }
 
     public final Reward applyRewards() {
