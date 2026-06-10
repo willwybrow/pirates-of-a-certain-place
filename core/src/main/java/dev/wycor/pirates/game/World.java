@@ -18,7 +18,7 @@ import java.util.Random;
  * <p>The layout (which tile sits on which hex, where treasures are placed) is a pure function of
  * the world-generation random stream, which is itself derived from the game seed. Constructing a
  * {@code World} with the same seed always produces the same layout. Per-tile mutable state
- * ({@code spied}/{@code rewarded}/monster health, etc.) changes as the game is simulated and is
+ * ({@code spied}/completion/monster health, etc.) changes as the game is simulated and is
  * therefore part of the computed game state, not the durable input log.
  */
 final class World {

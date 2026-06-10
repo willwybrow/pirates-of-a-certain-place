@@ -1,5 +1,7 @@
 package dev.wycor.pirates.game.tile;
 
+import dev.wycor.pirates.game.Hazard;
+import dev.wycor.pirates.game.Item;
 import dev.wycor.pirates.game.Monster;
 import dev.wycor.pirates.game.Reward;
 import dev.wycor.pirates.game.SeaEvent;
@@ -87,13 +89,30 @@ public class TreasureTile extends SeaTile {
     }
 
     @Override
+    protected void complete() {
+        this.claimed = true;
+    }
+
+    @Override
+    protected Item item() {
+        return null;
+    }
+
+    @Override
+    protected Hazard hazard() {
+        return null;
+    }
+
+    @Override
     protected Monster combatant() {
         return null;
     }
 
     @Override
-    protected Reward completionRewards() {
-        this.claimed = true;
+    protected Reward reward() {
+        if (this.claimed) {
+            return null;
+        }
         return new Reward(this.treasure);
     }
 }

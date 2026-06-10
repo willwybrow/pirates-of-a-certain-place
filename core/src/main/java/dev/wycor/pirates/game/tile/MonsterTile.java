@@ -1,5 +1,7 @@
 package dev.wycor.pirates.game.tile;
 
+import dev.wycor.pirates.game.Hazard;
+import dev.wycor.pirates.game.Item;
 import dev.wycor.pirates.game.Monster;
 import dev.wycor.pirates.game.Reward;
 import dev.wycor.pirates.game.SeaEvent;
@@ -10,12 +12,14 @@ import java.util.function.Supplier;
 
 public class MonsterTile extends SeaTile {
     private final Supplier<Monster> monsterSpawner;
+    private boolean lootClaimed;
     private Monster monsterHere;
 
     MonsterTile(SeaEvent seaEvent, boolean explored, Supplier<Monster> monsterSpawner) {
         super(seaEvent, explored);
         this.monsterSpawner = monsterSpawner;
         this.monsterHere = monsterSpawner.get();
+        this.lootClaimed = false;
     }
 
     public static MonsterTile giantSquid() {
@@ -55,7 +59,22 @@ public class MonsterTile extends SeaTile {
 
     @Override
     public boolean isCompleted() {
-        return this.monsterHere.isDead();
+        return this.monsterHere.isDead() && this.lootClaimed;
+    }
+
+    @Override
+    protected void complete() {
+        this.lootClaimed = true;
+    }
+
+    @Override
+    protected Item item() {
+        return null;
+    }
+
+    @Override
+    protected Hazard hazard() {
+        return null;
     }
 
     @Override
@@ -64,8 +83,8 @@ public class MonsterTile extends SeaTile {
     }
 
     @Override
-    protected Reward completionRewards() {
-        return new Reward(0, 0);
+    protected Reward reward() {
+        return null;
     }
 
     @Override

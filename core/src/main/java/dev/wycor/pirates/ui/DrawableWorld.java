@@ -88,13 +88,15 @@ public class DrawableWorld {
         cursive = new Cursive();
         cursive.create();
 
-        viewport.getCamera().position.set(centreOfHex(cameraFocusHex()));
+        long now = clock.getAsLong();
+        viewport.getCamera().position.set(centreOfHex(cameraFocusHex(now)));
         viewport.getCamera().update();
     }
 
     public void draw(float dt) {
-        game.recalculateGameState(clock.getAsLong());
-        repointCamera(dt);
+        long now = clock.getAsLong();
+        game.recalculateGameState(now);
+        repointCamera(dt, now);
 
         viewport.apply();
         batch.setProjectionMatrix(viewport.getCamera().combined);
@@ -230,15 +232,15 @@ public class DrawableWorld {
         gameOverOverlayTexture.dispose();
     }
 
-    private void repointCamera(float dt) {
-        Vector3 cameraTarget = centreOfHex(cameraFocusHex());
+    private void repointCamera(float dt, long timestampMillis) {
+        Vector3 cameraTarget = centreOfHex(cameraFocusHex(timestampMillis));
         viewport.getCamera().position.lerp(cameraTarget, 1.0f - (float) Math.exp(-5.0f * dt));
     }
 
-    private Hex cameraFocusHex() {
-        java.util.Optional<Hex> cameraFocusOverrideHex = game.cameraFocusOverrideHex();
-        if (cameraFocusOverrideHex.isPresent()) {
-            return cameraFocusOverrideHex.get();
+    private Hex cameraFocusHex(long timestampMillis) {
+        java.util.Optional<Hex> transientFocusHex = game.transientFocusHex(timestampMillis);
+        if (transientFocusHex.isPresent()) {
+            return transientFocusHex.get();
         }
         return game.getPlayerDestination().orElseGet(() -> game.playerDetails().position());
     }

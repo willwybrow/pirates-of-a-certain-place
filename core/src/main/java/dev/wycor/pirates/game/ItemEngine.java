@@ -20,7 +20,7 @@ public final class ItemEngine {
             case SEXTANT:
                 return resolveSextant(encounterHex, world);
             case SPYGLASS:
-                return Resolution.awaitingDirection("Found a Spyglass. Choose a direction.");
+                return Resolution.logOnly("Found a Spyglass. Choose a direction.");
             case TAR:
             default:
                 return Resolution.empty();
@@ -42,11 +42,9 @@ public final class ItemEngine {
         Hex treasureHex = nearestTreasure.get();
         world.whatsAt(treasureHex).spy();
 
-        return Resolution.withFocusAndHighlight(
-            "Map marked the nearest unclaimed treasure.",
-            treasureHex,
-            new TileHighlight(treasureHex, TileHighlight.Color.GREEN)
-        );
+        ArrayList<TileHighlight> highlights = new ArrayList<>();
+        highlights.add(new TileHighlight(treasureHex, TileHighlight.Color.GREEN));
+        return Resolution.withHighlights("Map marked the nearest unclaimed treasure.", highlights);
     }
 
     private Resolution resolveSextant(Hex encounterHex, World world) {
@@ -131,47 +129,26 @@ public final class ItemEngine {
     static final class Resolution {
         private final ArrayList<String> logLines;
         private final ArrayList<TileHighlight> highlights;
-        private final Hex focusHex;
-        private final boolean awaitingSpyglassDirection;
 
-        private Resolution(ArrayList<String> logLines,
-                           ArrayList<TileHighlight> highlights,
-                           Hex focusHex,
-                           boolean awaitingSpyglassDirection) {
+        private Resolution(ArrayList<String> logLines, ArrayList<TileHighlight> highlights) {
             this.logLines = logLines;
             this.highlights = highlights;
-            this.focusHex = focusHex;
-            this.awaitingSpyglassDirection = awaitingSpyglassDirection;
         }
 
         static Resolution empty() {
-            return new Resolution(new ArrayList<>(), new ArrayList<>(), null, false);
+            return new Resolution(new ArrayList<>(), new ArrayList<>());
         }
 
         static Resolution logOnly(String logLine) {
             ArrayList<String> logLines = new ArrayList<>();
             logLines.add(logLine);
-            return new Resolution(logLines, new ArrayList<>(), null, false);
-        }
-
-        static Resolution awaitingDirection(String logLine) {
-            ArrayList<String> logLines = new ArrayList<>();
-            logLines.add(logLine);
-            return new Resolution(logLines, new ArrayList<>(), null, true);
+            return new Resolution(logLines, new ArrayList<>());
         }
 
         static Resolution withHighlights(String logLine, List<TileHighlight> highlights) {
             ArrayList<String> logLines = new ArrayList<>();
             logLines.add(logLine);
-            return new Resolution(logLines, new ArrayList<>(highlights), null, false);
-        }
-
-        static Resolution withFocusAndHighlight(String logLine, Hex focusHex, TileHighlight highlight) {
-            ArrayList<String> logLines = new ArrayList<>();
-            logLines.add(logLine);
-            ArrayList<TileHighlight> highlights = new ArrayList<>();
-            highlights.add(highlight);
-            return new Resolution(logLines, highlights, focusHex, false);
+            return new Resolution(logLines, new ArrayList<>(highlights));
         }
 
         List<String> logLines() {
@@ -180,14 +157,6 @@ public final class ItemEngine {
 
         List<TileHighlight> highlights() {
             return this.highlights;
-        }
-
-        Hex focusHex() {
-            return this.focusHex;
-        }
-
-        boolean awaitingSpyglassDirection() {
-            return this.awaitingSpyglassDirection;
         }
     }
 }

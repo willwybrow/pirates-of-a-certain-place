@@ -109,7 +109,7 @@ class GameHazardTest {
 
         assertThat(game.playerDetails().position()).isEqualTo(whirlpoolHex);
         assertThat(game.playerDetails().health()).isEqualTo(100);
-        assertThat(game.recentLog().get(0)).isEqualTo("A whirlpool churned past, but you had no treasure to lose.");
+        assertThat(game.recentLog().get(0)).isEqualTo("You daringly braved a terrifying whirlpool!");
         assertThat(game.whatsAt(whirlpoolHex).isCompleted()).isTrue();
     }
 }

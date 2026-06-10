@@ -1,5 +1,6 @@
 package dev.wycor.pirates.game.tile;
 
+import dev.wycor.pirates.game.Hazard;
 import dev.wycor.pirates.game.Item;
 import dev.wycor.pirates.game.Monster;
 import dev.wycor.pirates.game.Reward;
@@ -32,8 +33,14 @@ public final class ItemTile extends SeaTile {
         return new ItemTile(SeaEvent.SPYGLASS, Item.SPYGLASS);
     }
 
-    public Item item() {
+    @Override
+    protected Item item() {
         return this.item;
+    }
+
+    @Override
+    protected Hazard hazard() {
+        return null;
     }
 
     @Override
@@ -42,16 +49,24 @@ public final class ItemTile extends SeaTile {
     }
 
     @Override
+    protected void complete() {
+        this.claimed = true;
+    }
+
+    @Override
     protected Monster combatant() {
         return null;
     }
 
     @Override
-    protected Reward completionRewards() {
-        this.claimed = true;
+    protected Reward reward() {
+        if (this.claimed) {
+            return null;
+        }
+
         if (this.item == Item.TAR) {
             return new Reward(TAR_HEALTH_RESTORE, 0);
         }
-        return new Reward(0, 0);
+        return null;
     }
 }

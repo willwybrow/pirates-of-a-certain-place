@@ -1,5 +1,7 @@
 package dev.wycor.pirates.game.tile;
 
+import dev.wycor.pirates.game.Hazard;
+import dev.wycor.pirates.game.Item;
 import dev.wycor.pirates.game.Monster;
 import dev.wycor.pirates.game.Reward;
 import dev.wycor.pirates.game.SeaEvent;
@@ -15,8 +17,23 @@ public class EmptyTile extends SeaTile {
     }
 
     @Override
+    protected Item item() {
+        return null;
+    }
+
+    @Override
+    protected Hazard hazard() {
+        return null;
+    }
+
+    @Override
     public boolean isCompleted() {
         return true;
+    }
+
+    @Override
+    protected void complete() {
+
     }
 
     @Override
@@ -25,7 +42,7 @@ public class EmptyTile extends SeaTile {
     }
 
     @Override
-    protected Reward completionRewards() {
-        return new Reward(0, 0);
+    protected Reward reward() {
+        return null;
     }
 }

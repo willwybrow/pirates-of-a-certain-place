@@ -70,20 +70,24 @@ class GameItemTest {
 
         assertThat(game.playerDetails().position()).isEqualTo(origin);
         assertThat(game.getPlayerDestination()).contains(mapHex);
+        assertThat(game.whatsAt(mapHex).pendingEvent()).isEqualTo(SeaEvent.MAP);
+        assertThat(game.whatsAt(mapHex).isCompleted()).isFalse();
         assertThat(game.whatsAt(nearestTreasure).isSpied()).isTrue();
         assertThat(game.whatsAt(distantTreasure).isSpied()).isFalse();
-        assertThat(game.cameraFocusOverrideHex()).contains(nearestTreasure);
+        assertThat(game.transientFocusHex(1L)).contains(nearestTreasure);
         assertThat(game.activeTileHighlights())
             .extracting(TileHighlight::hex, TileHighlight::color)
             .containsExactly(org.assertj.core.groups.Tuple.tuple(nearestTreasure, TileHighlight.Color.GREEN));
 
         game.recalculateGameState(1_000L);
         assertThat(game.playerDetails().position()).isEqualTo(origin);
+        assertThat(game.whatsAt(mapHex).pendingEvent()).isEqualTo(SeaEvent.MAP);
 
         game.recalculateGameState(3_000L);
         assertThat(game.playerDetails().position()).isEqualTo(mapHex);
         assertThat(game.getPlayerDestination()).isEmpty();
-        assertThat(game.cameraFocusOverrideHex()).isEmpty();
+        assertThat(game.whatsAt(mapHex).isCompleted()).isTrue();
+        assertThat(game.transientFocusHex(3_000L)).isEmpty();
         assertThat(game.activeTileHighlights()).isEmpty();
     }
 
@@ -111,6 +115,8 @@ class GameItemTest {
 
         assertThat(game.playerDetails().position()).isEqualTo(origin);
         assertThat(game.getPlayerDestination()).contains(sextantHex);
+        assertThat(game.whatsAt(sextantHex).pendingEvent()).isEqualTo(SeaEvent.SEXTANT);
+        assertThat(game.whatsAt(sextantHex).isCompleted()).isFalse();
         assertThat(game.whatsAt(nearMonsterHex).isSpied()).isFalse();
         assertThat(game.whatsAt(nearHazardHex).isSpied()).isFalse();
         assertThat(game.activeTileHighlights()).isEmpty();
@@ -121,6 +127,7 @@ class GameItemTest {
         assertThat(game.whatsAt(nearHazardHex).isSpied()).isTrue();
         assertThat(game.whatsAt(farHazardHex).isSpied()).isFalse();
         assertThat(game.playerDetails().position()).isEqualTo(sextantHex);
+        assertThat(game.whatsAt(sextantHex).isCompleted()).isTrue();
         assertThat(game.activeTileHighlights())
             .extracting(TileHighlight::hex, TileHighlight::color)
             .contains(
@@ -151,6 +158,8 @@ class GameItemTest {
         assertThat(game.playerDetails().position()).isEqualTo(origin);
         assertThat(game.playerDetails().food()).isEqualTo(20);
         assertThat(game.getPlayerDestination()).contains(spyglassHex);
+        assertThat(game.whatsAt(spyglassHex).pendingEvent()).isEqualTo(SeaEvent.SPYGLASS);
+        assertThat(game.whatsAt(spyglassHex).isCompleted()).isFalse();
 
         game.attemptToTravel(Direction.EAST, 2L);
 
@@ -158,6 +167,7 @@ class GameItemTest {
         assertThat(game.playerDetails().position()).isEqualTo(spyglassHex);
         assertThat(game.playerDetails().food()).isEqualTo(19);
         assertThat(game.getPlayerDestination()).isEmpty();
+        assertThat(game.whatsAt(spyglassHex).isCompleted()).isTrue();
         assertThat(game.whatsAt(revealCentre).isSpied()).isTrue();
         assertThat(game.whatsAt(revealNeighbour).isSpied()).isTrue();
     }

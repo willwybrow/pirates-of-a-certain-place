@@ -1,5 +1,7 @@
 package dev.wycor.pirates.game.tile;
 
+import dev.wycor.pirates.game.Hazard;
+import dev.wycor.pirates.game.Item;
 import dev.wycor.pirates.game.Monster;
 import dev.wycor.pirates.game.Reward;
 import dev.wycor.pirates.game.SeaEvent;
@@ -11,7 +13,6 @@ import java.util.Random;
 public abstract class SeaTile {
     private final SeaEvent seaEvent;
     private boolean spied = false;
-    private boolean rewarded;
 
     protected SeaTile(SeaEvent seaEvent, boolean spied) {
         this.seaEvent = seaEvent;
@@ -43,29 +44,54 @@ public abstract class SeaTile {
         return this.isCompleted() ? this.seaEvent : SeaEvent.NOTHING;
     }
 
-    public abstract boolean isCompleted();
-
-    public final boolean isPlayerRewarded() {
-        return rewarded;
+    public final boolean hasReward() {
+        return this.reward() != null;
     }
 
     public final Reward applyRewards() {
-        Reward reward = this.completionRewards();
-        this.rewarded = true;
-        return reward;
+        return this.completeForReward();
     }
 
     public final Monster getCombatant() {
         return this.combatant();
     }
 
+    public final Item getItem() {
+        return this.item();
+    }
+
+    public final Hazard getHazard() {
+        return this.hazard();
+    }
+
+    public final Reward getReward() {
+        return this.reward();
+    }
+
     public final void onPlayerFled() {
         this.handlePlayerFled();
     }
 
+    public final Reward completeForReward() {
+        if (this.isCompleted()) {
+            return null;
+        }
+        Reward reward = this.reward();
+        this.complete();
+        return reward;
+    }
+
+    public abstract boolean isCompleted();
+
+    protected abstract void complete();
+
+    protected abstract Item item();
+
+    protected abstract Hazard hazard();
+
     protected abstract Monster combatant();
 
-    protected abstract Reward completionRewards();
+    protected abstract Reward reward();
 
     protected void handlePlayerFled() {
     }

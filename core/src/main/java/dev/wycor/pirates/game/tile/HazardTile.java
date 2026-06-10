@@ -1,5 +1,7 @@
 package dev.wycor.pirates.game.tile;
 
+import dev.wycor.pirates.game.Hazard;
+import dev.wycor.pirates.game.Item;
 import dev.wycor.pirates.game.Monster;
 import dev.wycor.pirates.game.Reward;
 import dev.wycor.pirates.game.SeaEvent;
@@ -12,11 +14,6 @@ import dev.wycor.pirates.game.SeaEvent;
  * hazard it is and whether it has already been triggered.
  */
 public final class HazardTile extends SeaTile {
-
-    public enum Hazard {
-        ICEBERG,
-        WHIRLPOOL
-    }
 
     private final Hazard hazard;
     private boolean triggered;
@@ -34,13 +31,14 @@ public final class HazardTile extends SeaTile {
         return new HazardTile(SeaEvent.WHIRLPOOL, Hazard.WHIRLPOOL);
     }
 
-    public Hazard hazard() {
-        return this.hazard;
+    @Override
+    protected Item item() {
+        return null;
     }
 
-    /** Marks the hazard as spent, after which it no longer occupies the tile. */
-    public void trigger() {
-        this.triggered = true;
+    @Override
+    protected Hazard hazard() {
+        return this.hazard;
     }
 
     @Override
@@ -54,7 +52,12 @@ public final class HazardTile extends SeaTile {
     }
 
     @Override
-    protected Reward completionRewards() {
-        return new Reward(0, 0);
+    protected void complete() {
+        this.triggered = true;
+    }
+
+    @Override
+    protected Reward reward() {
+        return null;
     }
 }

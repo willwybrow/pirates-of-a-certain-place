@@ -1,9 +1,7 @@
 package dev.wycor.pirates.game;
 
-import dev.wycor.pirates.game.tile.HazardTile;
 import dev.wycor.pirates.game.tile.ItemTile;
 import dev.wycor.pirates.game.tile.SeaTile;
-import dev.wycor.pirates.game.tile.TreasureTile;
 import dev.wycor.pirates.geometry.Direction;
 import dev.wycor.pirates.geometry.Hex;
 
@@ -22,7 +20,6 @@ public class Game {
     private static final int MAX_LOG_LINES = 60;
     private static final long TILE_TRAVEL_DELAY_MILLIS = 1_000L;
     private static final long TILE_HIGHLIGHT_DURATION_MILLIS = 1_500L;
-    private static final long CAMERA_FOCUS_DURATION_MILLIS = 1_500L;
 
     private final ArrayDeque<String> logLines = new ArrayDeque<>();
     private final TileFactory tileFactory;
@@ -36,8 +33,6 @@ public class Game {
     private World world;
     private Player player;
     private ActiveTravel activeTravel;
-    private TimedCameraFocus timedCameraFocus;
-    private boolean awaitingSpyglassDirection;
 
     public Game(TileFactory tileFactory,
                 AttackResolver attackResolver,
@@ -56,8 +51,6 @@ public class Game {
         this.player = new Player(Hex.ORIGIN);
         this.activeTravel = null;
         this.timedTileHighlights.clear();
-        this.timedCameraFocus = null;
-        this.awaitingSpyglassDirection = false;
         addLog("Set sail from home waters.");
         advance(timestamp);
         return this;
@@ -132,12 +125,37 @@ public class Game {
     }
 
     public boolean isAwaitingSpyglassDirection() {
-        return this.awaitingSpyglassDirection;
+        Optional<ActiveTravel> outstandingTravel = outstandingTravel();
+        if (outstandingTravel.isEmpty()) {
+            return false;
+        }
+
+        ActiveTravel travel = outstandingTravel.get();
+        SeaTile destinationTile = world.whatsAt(travel.destination());
+        return isUnresolvedSpyglassTile(destinationTile) && !travel.hasSpyglassRevealDirection();
     }
 
-    public Optional<Hex> cameraFocusOverrideHex() {
-        return Optional.ofNullable(this.timedCameraFocus)
-            .map(TimedCameraFocus::hex);
+    public Optional<Hex> transientFocusHex(long timestampMillis) {
+        TimedTileHighlight latestGreenHighlight = null;
+        for (TimedTileHighlight timedTileHighlight : this.timedTileHighlights) {
+            if (timestampMillis >= timedTileHighlight.expiresAtMillis()) {
+                continue;
+            }
+
+            TileHighlight highlight = timedTileHighlight.highlight();
+            if (highlight.color() != TileHighlight.Color.GREEN) {
+                continue;
+            }
+
+            if (latestGreenHighlight == null
+                || timedTileHighlight.expiresAtMillis() > latestGreenHighlight.expiresAtMillis()) {
+                latestGreenHighlight = timedTileHighlight;
+            }
+        }
+
+        return latestGreenHighlight == null
+            ? Optional.empty()
+            : Optional.of(latestGreenHighlight.highlight().hex());
     }
 
     public List<TileHighlight> activeTileHighlights() {
@@ -193,23 +211,33 @@ public class Game {
     }
 
     private void processTravelInput(GameInput.Travel travel) {
-        if (this.awaitingSpyglassDirection) {
-            this.awaitingSpyglassDirection = false;
-            ItemEngine.Resolution resolution = itemEngine.resolveSpyglassDirection(
-                player.position(),
-                travel.direction(),
-                world
-            );
-            applyItemResolution(resolution, travel.timestampMillis());
-            return;
-        }
-
-        if (outstandingTravel().isPresent()) {
+        Optional<ActiveTravel> outstandingTravel = outstandingTravel();
+        if (outstandingTravel.isPresent()) {
+            if (consumeSpyglassDirectionInput(outstandingTravel.get(), travel)) {
+                return;
+            }
             return;
         }
 
         Hex destination = travel.direction().move(player.position());
         beginTravel(destination, travel.timestampMillis());
+    }
+
+    private boolean consumeSpyglassDirectionInput(ActiveTravel travel, GameInput.Travel input) {
+        SeaTile destinationTile = world.whatsAt(travel.destination());
+        if (!isUnresolvedSpyglassTile(destinationTile) || travel.hasSpyglassRevealDirection()) {
+            return false;
+        }
+
+        travel.setSpyglassRevealDirection(input.direction());
+
+        ItemEngine.Resolution resolution = itemEngine.resolveSpyglassDirection(
+            player.position(),
+            input.direction(),
+            world
+        );
+        applyItemResolution(resolution, input.timestampMillis());
+        return true;
     }
 
     private void processAttackInput(GameInput.Attack attack, Monster opponent) {
@@ -263,34 +291,43 @@ public class Game {
             return;
         }
 
-        boolean isPendingHazard = isPendingHazard(destinationTile);
-        boolean isPendingTreasure = isPendingTreasure(destinationTile);
-        boolean isPendingDelayedItem = isPendingDelayedItem(destinationTile);
-        if (isPendingHazard || isPendingTreasure || isPendingDelayedItem) {
+        if (!destinationTile.isCompleted() && (destinationTile.getItem() != null || destinationTile.getHazard() != null || (destinationTile.getReward() != null && destinationTile.getReward().treasure() != null))) {
             long readyAtMillis = travel.timestampMillis() + TILE_TRAVEL_DELAY_MILLIS;
             if (timestampMillis < readyAtMillis) {
                 return;
             }
         }
 
-        if (isPendingHazard) {
-            this.hazardEngine.resolve((HazardTile) destinationTile, player, world).forEach(this::addLog);
-        }
+        Optional.ofNullable(this.hazardEngine.resolve(destinationTile, player, world)).ifPresent(this::addLog);
 
-        if (!destinationTile.isPlayerRewarded()) {
-            applyReward(destinationTile.applyRewards());
-            if (destinationTile instanceof ItemTile) {
-                ItemEngine.Resolution resolution = itemEngine.resolveEncounter(
-                    ((ItemTile) destinationTile).item(),
-                    destinationHex,
-                    world
-                );
+        if (isUnresolvedSpyglassTile(destinationTile)) {
+            if (!travel.spyglassPromptShown()) {
+                ItemEngine.Resolution resolution = itemEngine.resolveEncounter(Item.SPYGLASS, destinationHex, world);
                 applyItemResolution(resolution, timestampMillis);
+                travel.markSpyglassPromptShown();
+            }
+
+            if (!travel.hasSpyglassRevealDirection()) {
+                return;
             }
         }
 
-        if (isMovementBlockedByMapPan(destinationTile) || isMovementBlockedBySpyglassChoice(destinationTile)) {
+        if (isUnresolvedMapTile(destinationTile) && !travel.mapEffectApplied()) {
+            ItemEngine.Resolution resolution = itemEngine.resolveEncounter(Item.MAP, destinationHex, world);
+            applyItemResolution(resolution, timestampMillis);
+            travel.markMapEffectApplied();
+        }
+
+        if (isMovementBlockedByMapPan(destinationTile, timestampMillis)) {
             return;
+        }
+
+        if (!destinationTile.isCompleted()) {
+            applyReward(destinationTile.applyRewards());
+            if (destinationTile.getItem() == Item.SEXTANT) {
+                ItemEngine.Resolution resolution = itemEngine.resolveEncounter(Item.SEXTANT, destinationHex, world);
+                applyItemResolution(resolution, timestampMillis);
+            }
         }
 
         player.moveTo(destinationHex);
@@ -299,6 +336,9 @@ public class Game {
     }
 
     private void applyReward(Reward reward) {
+        if (reward == null) {
+            return;
+        }
         if (reward.health() != 0) {
             player.heal(reward.health());
         }
@@ -371,25 +411,10 @@ public class Game {
                 timestampMillis + TILE_HIGHLIGHT_DURATION_MILLIS
             ));
         }
-
-        Hex focusHex = resolution.focusHex();
-        if (focusHex != null) {
-            this.timedCameraFocus = new TimedCameraFocus(
-                focusHex,
-                timestampMillis + CAMERA_FOCUS_DURATION_MILLIS
-            );
-        }
-
-        if (resolution.awaitingSpyglassDirection()) {
-            this.awaitingSpyglassDirection = true;
-        }
     }
 
     private void expireTransientVisuals(long timestampMillis) {
         this.timedTileHighlights.removeIf(highlight -> timestampMillis >= highlight.expiresAtMillis());
-        if (this.timedCameraFocus != null && timestampMillis >= this.timedCameraFocus.expiresAtMillis()) {
-            this.timedCameraFocus = null;
-        }
     }
 
     private void beginTravel(Hex destination, long timestampMillis) {
@@ -397,9 +422,7 @@ public class Game {
     }
 
     private void cancelActiveTravel() {
-        if (activeTravel != null) {
-            activeTravel.cancelled = true;
-        }
+        this.activeTravel = null;
     }
 
     private void clearActiveTravel() {
@@ -407,7 +430,7 @@ public class Game {
     }
 
     private Optional<ActiveTravel> outstandingTravel() {
-        if (isGameOver() || activeTravel == null || activeTravel.cancelled) {
+        if (isGameOver() || activeTravel == null) {
             return Optional.empty();
         }
 
@@ -435,37 +458,16 @@ public class Game {
         return null;
     }
 
-    private static boolean isPendingHazard(SeaTile tile) {
-        return tile instanceof HazardTile && !tile.isCompleted();
+    private static boolean isUnresolvedMapTile(SeaTile tile) {
+        return tile.getItem() == Item.MAP && !tile.isCompleted();
     }
 
-    private static boolean isPendingTreasure(SeaTile tile) {
-        return tile instanceof TreasureTile && !tile.isPlayerRewarded();
+    private boolean isMovementBlockedByMapPan(SeaTile tile, long timestampMillis) {
+        return tile.getItem() == Item.MAP && transientFocusHex(timestampMillis).isPresent();
     }
 
-    private static boolean isPendingDelayedItem(SeaTile tile) {
-        if (!(tile instanceof ItemTile) || tile.isPlayerRewarded()) {
-            return false;
-        }
-
-        Item item = ((ItemTile) tile).item();
-        return item == Item.TAR || item == Item.SEXTANT;
-    }
-
-    private boolean isMovementBlockedByMapPan(SeaTile tile) {
-        if (!(tile instanceof ItemTile)) {
-            return false;
-        }
-        Item item = ((ItemTile) tile).item();
-        return item == Item.MAP && this.timedCameraFocus != null;
-    }
-
-    private boolean isMovementBlockedBySpyglassChoice(SeaTile tile) {
-        if (!(tile instanceof ItemTile)) {
-            return false;
-        }
-        Item item = ((ItemTile) tile).item();
-        return item == Item.SPYGLASS && this.awaitingSpyglassDirection;
+    private static boolean isUnresolvedSpyglassTile(SeaTile tile) {
+        return tile.getItem() == Item.SPYGLASS && !tile.isCompleted();
     }
 
     private enum GameEndStatus {
@@ -479,7 +481,9 @@ public class Game {
     private static final class ActiveTravel {
         private final Hex destination;
         private final long timestampMillis;
-        private boolean cancelled;
+        private Direction spyglassRevealDirection;
+        private boolean spyglassPromptShown;
+        private boolean mapEffectApplied;
 
         private ActiveTravel(Hex destination, long timestampMillis) {
             this.destination = destination;
@@ -492,6 +496,30 @@ public class Game {
 
         private long timestampMillis() {
             return this.timestampMillis;
+        }
+
+        private boolean hasSpyglassRevealDirection() {
+            return this.spyglassRevealDirection != null;
+        }
+
+        private void setSpyglassRevealDirection(Direction direction) {
+            this.spyglassRevealDirection = direction;
+        }
+
+        private boolean spyglassPromptShown() {
+            return this.spyglassPromptShown;
+        }
+
+        private void markSpyglassPromptShown() {
+            this.spyglassPromptShown = true;
+        }
+
+        private boolean mapEffectApplied() {
+            return this.mapEffectApplied;
+        }
+
+        private void markMapEffectApplied() {
+            this.mapEffectApplied = true;
         }
     }
 
@@ -506,24 +534,6 @@ public class Game {
 
         private TileHighlight highlight() {
             return this.highlight;
-        }
-
-        private long expiresAtMillis() {
-            return this.expiresAtMillis;
-        }
-    }
-
-    private static final class TimedCameraFocus {
-        private final Hex hex;
-        private final long expiresAtMillis;
-
-        private TimedCameraFocus(Hex hex, long expiresAtMillis) {
-            this.hex = hex;
-            this.expiresAtMillis = expiresAtMillis;
-        }
-
-        private Hex hex() {
-            return this.hex;
         }
 
         private long expiresAtMillis() {

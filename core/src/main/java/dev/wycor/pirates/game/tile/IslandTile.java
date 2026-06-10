@@ -1,5 +1,7 @@
 package dev.wycor.pirates.game.tile;
 
+import dev.wycor.pirates.game.Hazard;
+import dev.wycor.pirates.game.Item;
 import dev.wycor.pirates.game.Monster;
 import dev.wycor.pirates.game.Reward;
 import dev.wycor.pirates.game.SeaEvent;
@@ -23,18 +25,33 @@ public class IslandTile extends SeaTile {
     }
 
     @Override
+    protected void complete() {
+        this.suppliesAvailable = false;
+    }
+
+    @Override
+    protected Item item() {
+        return null;
+    }
+
+    @Override
+    protected Hazard hazard() {
+        return null;
+    }
+
+    @Override
     protected Monster combatant() {
         return null;
     }
 
     @Override
-    protected Reward completionRewards() {
+    protected Reward reward() {
         if (suppliesAvailable) {
-            suppliesAvailable = false;
             return new Reward(10, FOOD_AVAILABLE, 1);
         }
 
-        return new Reward(0, 0);
+        return null;
     }
+
 
 }
