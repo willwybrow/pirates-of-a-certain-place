@@ -155,7 +155,12 @@ public class DrawableStatus {
             return value;
         }
 
-        return " ".repeat(width - value.length()) + value;
+        StringBuilder builder = new StringBuilder(width);
+        for (int i = value.length(); i < width; i++) { // don't use String.repeat() because it's not gwt-friendly
+            builder.append(' ');
+        }
+        builder.append(value);
+        return builder.toString();
     }
 
     private boolean shouldRenderBlinkFrame() {
