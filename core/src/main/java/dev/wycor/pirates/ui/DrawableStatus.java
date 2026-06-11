@@ -16,6 +16,8 @@ import dev.wycor.pirates.geometry.Hex;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
@@ -155,12 +157,11 @@ public class DrawableStatus {
             return value;
         }
 
-        StringBuilder builder = new StringBuilder(width);
-        for (int i = value.length(); i < width; i++) { // don't use String.repeat() because it's not gwt-friendly
-            builder.append(' ');
-        }
-        builder.append(value);
-        return builder.toString();
+        // don't use String.repeat() because it's not gwt-friendly
+        return IntStream
+            .range(value.length(), width)
+            .mapToObj(i -> " ")
+            .collect(Collectors.joining("", "", value));
     }
 
     private boolean shouldRenderBlinkFrame() {
