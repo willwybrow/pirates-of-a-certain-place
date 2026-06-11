@@ -7,7 +7,7 @@ import dev.wycor.pirates.game.Reward;
 import dev.wycor.pirates.game.SeaEvent;
 
 public class IslandTile extends SeaTile {
-    private static final int FOOD_AVAILABLE = 10;
+    private static final int FOOD_AVAILABLE = 20;
 
     private boolean suppliesAvailable = true;
 

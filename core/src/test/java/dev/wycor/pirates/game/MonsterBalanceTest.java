@@ -124,20 +124,7 @@ class MonsterBalanceTest {
                                             Weapon openingWeapon) {
         Hex monsterHex = Direction.EAST.move(Hex.ORIGIN);
 
-        GameRandom gameRandom = new GameRandom(seed);
-        TileFactory tileFactory = new TileFactory(gameRandom.world(), gameRandom.monster()) {
-            @Override
-            public World generate() {
-                HashMap<Hex, SeaTile> generated = new HashMap<>();
-                generated.put(monsterHex, monsterTileFactory.apply(gameRandom.monster()));
-                return new World(generated);
-            }
-        };
-        AttackResolver attackResolver = new AttackResolver(gameRandom.monster());
-        HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
-        ItemEngine itemEngine = new ItemEngine();
-        Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);
-        game.startNewGame(0L);
+        Game game = oneVsOneMonsterGame(monsterTileFactory, seed, monsterHex);
 
         game.attemptToTravel(Direction.EAST, 1L);
 
@@ -152,5 +139,23 @@ class MonsterBalanceTest {
 
         // The player wins if the monster is gone and the player is still standing.
         return !game.isGameOver();
+    }
+
+    private static Game oneVsOneMonsterGame(Function<Random, MonsterTile> monsterTileFactory, long seed, Hex monsterHex) {
+        GameRandom gameRandom = new GameRandom(seed);
+        TileFactory tileFactory = new TileFactory(gameRandom.world(), gameRandom.monster()) {
+            @Override
+            public World generate() {
+                HashMap<Hex, SeaTile> generated = new HashMap<>();
+                generated.put(monsterHex, monsterTileFactory.apply(gameRandom.monster()));
+                return new World(generated);
+            }
+        };
+        AttackResolver attackResolver = new AttackResolver(gameRandom.monster());
+        HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
+        ItemEngine itemEngine = new ItemEngine();
+        Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);
+        game.startNewGame(0L);
+        return game;
     }
 }

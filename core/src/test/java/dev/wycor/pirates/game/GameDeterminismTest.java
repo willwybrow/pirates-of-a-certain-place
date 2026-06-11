@@ -50,15 +50,13 @@ class GameDeterminismTest {
 
     private static String snapshot(Game game) {
         PlayerDetails player = game.playerDetails();
-        StringBuilder builder = new StringBuilder();
-        builder.append("pos=").append(player.position().q()).append(',').append(player.position().r());
-        builder.append(";health=").append(player.health());
-        builder.append(";food=").append(player.food());
-        builder.append(";treasures=").append(player.capturedTreasures());
-        builder.append(";ammo=").append(player.ammunitionByWeapon());
-        builder.append(";gameOver=").append(game.isGameOver());
-        builder.append(";log=").append(game.recentLog());
-        return builder.toString();
+        return "pos=" + player.position().q() + ',' + player.position().r() +
+            ";health=" + player.health() +
+            ";food=" + player.food() +
+            ";treasures=" + player.capturedTreasures() +
+            ";ammo=" + player.ammunitionByWeapon() +
+            ";gameOver=" + game.isGameOver() +
+            ";log=" + game.recentLog();
     }
 
     private static String worldSnapshot(Game game) {

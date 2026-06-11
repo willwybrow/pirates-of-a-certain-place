@@ -61,7 +61,7 @@ class GameFoodTest {
     }
 
     @Test
-    void islandsResupplyTenFood() {
+    void islandsResupplyTwentyFood() {
         Hex islandHex = Direction.EAST.move(Hex.ORIGIN);
 
         Game game = new TestGameFactory() {
@@ -75,7 +75,7 @@ class GameFoodTest {
 
         game.attemptToTravel(Direction.EAST, 1L);
 
-        assertThat(game.playerDetails().food()).isEqualTo(29);
+        assertThat(game.playerDetails().food()).isEqualTo(39);
     }
 
     @Test
@@ -95,6 +95,6 @@ class GameFoodTest {
         game.attemptToTravel(Direction.WEST, 2L);
         game.attemptToTravel(Direction.EAST, 3L);
 
-        assertThat(game.playerDetails().food()).isEqualTo(27);
+        assertThat(game.playerDetails().food()).isEqualTo(37);
     }
 }

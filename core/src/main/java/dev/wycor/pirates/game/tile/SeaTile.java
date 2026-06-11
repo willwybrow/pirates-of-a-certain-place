@@ -12,7 +12,7 @@ import java.util.Random;
 
 public abstract class SeaTile {
     private final SeaEvent seaEvent;
-    private boolean spied = false;
+    private boolean spied;
 
     protected SeaTile(SeaEvent seaEvent, boolean spied) {
         this.seaEvent = seaEvent;

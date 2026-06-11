@@ -28,21 +28,18 @@ public class Main extends ApplicationAdapter {
     private static final float HEX_HEIGHT = BaseUI.THIRTY_TWO_PIXELS;
     private static final float TARGET_ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT;
 
-    private final Game game;
-    private final Random seedSource;
-
     private final DrawableWorld world;
     private final DrawableStatus status;
     private final DrawableUI ui;
 
     public Main() {
-        this.seedSource = new Random();
+        Random seedSource = new Random();
         GameRandom gameRandom = new GameRandom(seedSource.nextLong());
         TileFactory tileFactory = new TileFactory(gameRandom.world(), gameRandom.monster());
         AttackResolver attackResolver = new AttackResolver(gameRandom.monster());
         HazardEngine hazardEngine = new HazardEngine(gameRandom.hazard());
         ItemEngine itemEngine = new ItemEngine();
-        this.game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);
+        Game game = new Game(tileFactory, attackResolver, hazardEngine, itemEngine);
 
         world = new DrawableWorld(game, LEFT_WIDTH, TOP_LEFT_HEIGHT, HEX_WIDTH, HEX_HEIGHT);
         status = new DrawableStatus(game, LEFT_WIDTH, BOTTOM_LEFT_HEIGHT);
