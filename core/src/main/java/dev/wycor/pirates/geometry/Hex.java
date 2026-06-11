@@ -62,6 +62,18 @@ public class Hex {
         return direction.move(this);
     }
 
+    public int distanceTo(Hex otherHex) {
+        return distanceBetween(this, otherHex);
+    }
+
+    private static int distanceBetween(Hex from, Hex to) {
+        int qDistance = Math.abs(from.q() - to.q());
+        int rDistance = Math.abs(from.r() - to.r());
+        int sDistance = Math.abs(from.s() - to.s());
+        return (qDistance + rDistance + sDistance) / 2;
+    }
+
+
     /**
      *
      * @param n

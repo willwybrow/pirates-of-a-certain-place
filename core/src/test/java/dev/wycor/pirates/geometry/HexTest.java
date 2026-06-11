@@ -27,10 +27,10 @@ class HexTest {
     @Test
     void bigNeighbours() {
         // given
-        Hex origin = new Hex(113, 224);
+        Hex arbitraryHex = new Hex(113, 224);
 
         // then
-        assertThat(origin.neighbours()).containsExactly(
+        assertThat(arbitraryHex.neighbours()).containsExactly(
             new Hex(114, 223),
             new Hex(114, 224),
             new Hex(113, 225),
@@ -38,6 +38,15 @@ class HexTest {
             new Hex(112, 224),
             new Hex(113, 223)
         );
+    }
+
+    @Test
+    void neighbourDistance() {
+        Hex arbitraryHex = arbitraryHex();
+
+        assertThat(arbitraryHex.neighbours())
+            .map(arbitraryHex::distanceTo)
+            .containsExactly(1, 1, 1, 1, 1, 1);
     }
 
     @Test
@@ -89,5 +98,10 @@ class HexTest {
         Hex two = new Hex(9, -4);
 
         assertThat(one.hashCode()).isEqualTo(two.hashCode());
+    }
+
+    private static Hex arbitraryHex() {
+        Random random = new Random();
+        return new Hex(random.nextInt(), random.nextInt());
     }
 }

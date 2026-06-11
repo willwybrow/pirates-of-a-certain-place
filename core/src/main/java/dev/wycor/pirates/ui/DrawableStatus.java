@@ -7,11 +7,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import dev.wycor.pirates.game.PlayerDetails;
 import dev.wycor.pirates.game.Game;
+import dev.wycor.pirates.game.PlayerDetails;
+import dev.wycor.pirates.game.SeaEvent;
 import dev.wycor.pirates.game.Treasure;
+import dev.wycor.pirates.geometry.Hex;
 
+import java.util.Comparator;
 import java.util.Map;
+import java.util.Optional;
 
 import static dev.wycor.pirates.ui.DynamicDrawing.createSolidTexture;
 
@@ -19,6 +23,7 @@ public class DrawableStatus {
     private static final int HEALTH_FIELD_WIDTH = 3;
     private static final int FOOD_FIELD_WIDTH = 3;
     private static final int ENEMY_HEALTH_FIELD_WIDTH = 3;
+    private static final long ALERT_BLINK_PERIOD_MILLIS = 700L;
 
     private final Game game;
     private final float worldWidth;
@@ -63,18 +68,25 @@ public class DrawableStatus {
         batch.draw(backgroundTexture, 0f, 0f, worldWidth, worldHeight);
 
         PlayerDetails player = game.playerDetails();
+        boolean blinkVisible = shouldRenderBlinkFrame();
+        boolean healthIsCritical = isHealthCritical();
+        boolean foodNeedsAttention = shouldBlinkFood();
 
         String healthLabel = "Health: "
             + leftPad(Integer.toString(player.health()), HEALTH_FIELD_WIDTH)
             + "/"
             + leftPad(Integer.toString(player.maxHealth()), HEALTH_FIELD_WIDTH);
         batch.setColor(0.95f, 0.2f, 0.2f, 1f);
-        cursive.write(batch, 0f, worldHeight - LINE_HEIGHT, healthLabel);
+        if (!healthIsCritical || blinkVisible) {
+            cursive.write(batch, 0f, worldHeight - LINE_HEIGHT, healthLabel);
+        }
 
         String foodLabel = "Food: " + leftPad(Integer.toString(player.food()), FOOD_FIELD_WIDTH);
         float foodX = (worldWidth - (foodLabel.length() * CURSIVE_LETTER_WIDTH)) / 2f;
         batch.setColor(0.95f, 0.72f, 0.22f, 1f);
-        cursive.write(batch, Math.max(0f, foodX), worldHeight - LINE_HEIGHT, foodLabel);
+        if (!foodNeedsAttention || blinkVisible) {
+            cursive.write(batch, Math.max(0f, foodX), worldHeight - LINE_HEIGHT, foodLabel);
+        }
 
         game.currentOpponentDetails().ifPresent(opponent -> {
             String opponentLabel = opponent.name()
@@ -89,7 +101,7 @@ public class DrawableStatus {
 
         batch.setColor(Color.WHITE);
 
-        drawTreasureProgress(player.capturedTreasures());
+        drawTreasureProgress();
 
         String[] logLines = game.recentLog().toArray(new String[]{});
         int visibleLogLines = Math.max(0, numberOfLines - 3);
@@ -116,7 +128,8 @@ public class DrawableStatus {
         batch.dispose();
     }
 
-    private void drawTreasureProgress(Map<Treasure, Boolean> capturedTreasures) {
+    private void drawTreasureProgress() {
+        Map<Treasure, Boolean> capturedTreasures = game.playerDetails().capturedTreasures();
         Treasure[] treasures = Treasure.values();
         float iconsTotalWidth = (treasures.length * TREASURE_ICON_SIZE) + ((treasures.length - 1) * TREASURE_ICON_SPACING);
         float drawX = Math.max(0f, (worldWidth - iconsTotalWidth) / 2f);
@@ -142,11 +155,28 @@ public class DrawableStatus {
             return value;
         }
 
-        StringBuilder builder = new StringBuilder(width);
-        for (int i = value.length(); i < width; i++) {
-            builder.append(' ');
-        }
-        builder.append(value);
-        return builder.toString();
+        return " ".repeat(width - value.length()) + value;
+    }
+
+    private boolean shouldRenderBlinkFrame() {
+        return System.currentTimeMillis() % ALERT_BLINK_PERIOD_MILLIS < (ALERT_BLINK_PERIOD_MILLIS / 2L);
+    }
+
+    private boolean isHealthCritical() {
+        return game.playerDetails().maxHealth() > 0 && (long) game.playerDetails().health() * 5L < game.playerDetails().maxHealth();
+    }
+
+    private boolean shouldBlinkFood() {
+        return nearestStockedIsland()
+            .map(nearestHex -> game.playerDetails().position().distanceTo(nearestHex))
+            .map(distance -> 2 * distance > game.playerDetails().food()) // if distance to nearest is less than 2x food
+            .orElse(true); // if no food left, blink it!!
+    }
+
+    private Optional<Hex> nearestStockedIsland() {
+        return this.game.generatedHexes()
+            .stream()
+            .filter(hex -> game.whatsAt(hex).pendingEvent() == SeaEvent.ISLAND)
+            .min(Comparator.comparing(hex -> game.playerDetails().position().distanceTo(hex)));
     }
 }
