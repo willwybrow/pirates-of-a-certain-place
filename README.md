@@ -10,6 +10,10 @@ This project was generated with a template including simple application launcher
 - `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
 - `html`: Web platform using GWT and WebGL. Supports only Java projects.
 
+### Web
+
+It's on [GitHub Pages](https://willwybrow.github.io/pirates-of-a-certain-place).
+
 ## Gradle
 
 This project uses [Gradle](https://gradle.org/) to manage dependencies.
